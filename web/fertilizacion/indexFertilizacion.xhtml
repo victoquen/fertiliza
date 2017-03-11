@@ -1,0 +1,294 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>Index SuperAdministrador</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+
+        <script type="text/javascript">
+            PrimeFaces.locales['es'] = {
+                closeText: 'Cerrar',
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                dayNamesMin: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
+                weekHeader: 'Semana',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Sólo hora',
+                timeText: 'Tiempo',
+                hourText: 'Hora',
+                minuteText: 'Minuto',
+                secondText: 'Segundo',
+                currentText: 'Fecha actual',
+                ampm: false,
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                allDayText: 'Todo el día'
+            };
+        </script>
+
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() === "INICIO")
+                        {                           
+                            panelMenu.expandRootSubmenu(header);
+                            header.addClass("ui-state-active");
+                        }
+                });
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/> 
+
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmConsulta">
+
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+
+                    <p:toolbar>
+                        <f:facet name="left">
+                            <p:outputLabel  value="Fecha Inicio:" />
+                            <p:calendar id="fechInicio" value="#{indexController.fechaInicio}" locale="es" navigator="true" pattern="dd-MMM-yyyy" />
+                            <span class="ui-separator">
+                                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+                            </span>
+
+                            <p:outputLabel  value="Fecha Fin" />
+                            <p:calendar id="fechFin" value="#{indexController.fechaFin}" locale="es" navigator="true" pattern="dd-MMM-yyyy" />
+                            <span class="ui-separator">
+                                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+                            </span>
+
+                            <p:commandButton value="Buscar" icon="ui-icon-search" action="#{indexController.buscarByFechas}" update="frmConsulta:sTab"/>
+                        </f:facet>
+                    </p:toolbar>
+                    <br/>
+
+                    <p:tabView dynamic="true" cache="true" id="sTab">
+                        <p:tab title="AGRICOLA">
+                            <p:dataTable var="obj" value="#{indexController.modelAgricola}" style="width: 95%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{indexController.filterAgricola}" paginator="true" rows="10"
+                                         selection="#{indexController.selectedAgricola}" selectionMode="single" widgetVar="usuariosTable1">                                
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column colspan="7" headerText="SECCION AGRICOLA"/>
+                                    </p:row>
+
+                                    <p:row>   
+
+                                        <p:column headerText="CODIGO" filterBy="#{obj.codigo} #{obj.numeroCodigo}" filterMatchMode="contains"/>
+                                        <p:column headerText="FECHA CREACION" filterBy="#{obj.fechaFormatCreacion}" filterMatchMode="contains" />
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains"/>   
+                                        <p:column headerText="HACIENDA" filterBy="#{obj.leyendaHacienda}" filterMatchMode="contains"/> 
+                                        <p:column headerText="LOTES" />   
+                                        <p:column headerText="MONITOREO" />   
+                                        <p:column headerText="ESTADO" filterBy="#{obj.estadoMuestra}" filterMatchMode="contains" />  
+
+                                    </p:row>  
+                                </p:columnGroup>
+
+
+                                <p:column >
+                                    <h:outputText value="#{obj.codigo}/000#{obj.numeroCodigo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatCreacion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCliente}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaHacienda}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="CULTIVO: #{obj.leyendaCultivo} LOTES: #{obj.leyendaLote}"/>
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="EST.MONIT.: #{obj.estacionMonitoreo} # #{obj.numeroMonitoreo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.estadoMuestra}" />
+                                </p:column>
+
+                            </p:dataTable>
+                        </p:tab>
+                        <p:tab title="ALIMENTARIA">
+                            <h:panelGrid columns="2" cellpadding="10">
+
+                                <h:outputText value="ESPACION PARA SECCION ALIMENTARIA" />
+                            </h:panelGrid>
+                        </p:tab>
+                        <p:tab title="LABORATORIO">
+
+
+                            <p:dataTable var="obj" value="#{indexController.modelLaboratorio}" style="width: 95%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{indexController.filterLaboratorio}" paginator="true" rows="10"
+                                         selection="#{indexController.selectedLaboratorio}" selectionMode="single" widgetVar="usuariosTable">                                
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column colspan="7" headerText="SECCION LABORATORIO"/>
+                                    </p:row>
+
+                                    <p:row>   
+                                        <p:column headerText="MUESTRA" filterBy="#{obj.tipoMuestra}" filterMatchMode="contains"/>
+                                        <p:column headerText="CODIGO" filterBy="#{obj.codigo} #{obj.numeroCodigo}" filterMatchMode="contains"/>
+                                        <p:column headerText="FECHA CREACION" filterBy="#{obj.fechaFormatCreacion}" filterMatchMode="contains" />
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains"/>   
+                                        <p:column headerText="TRACKER" filterBy="#{obj.trackerNumber}" filterMatchMode="contains"/> 
+                                        <p:column headerText="DESCRIPCION" />   
+                                        <p:column headerText="ESTADO" filterBy="#{obj.estadoMuestra}" filterMatchMode="contains" />  
+
+                                    </p:row>  
+                                </p:columnGroup>
+
+                                <p:column >
+                                    <h:outputText value="#{obj.tipoMuestra}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.codigo}/000#{obj.numeroCodigo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatCreacion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCliente}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.trackerNumber}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCultivo} #{obj.leyendaMatriz} #{obj.leyendaLote} #{obj.observaciones}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.estadoMuestra}" />
+                                </p:column>
+
+                            </p:dataTable>
+
+                        </p:tab>
+                    </p:tabView>
+
+
+                </h:form>
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

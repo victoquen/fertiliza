@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>INTERPRETACION FIJA LABORATORIO</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+        
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                /*panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() == "INICIO")
+                        {
+                           
+                            header.css("display","block");
+                            header.addClass("ui-state-active");
+                        }
+                });*/
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+
+        <h:form id="frmMetodologia">
+            <p:dialog header="Info Metodología" widgetVar="dialogM"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="400px">
+
+                <p:menubar>                           
+                    <p:menuitem value="Guardar"  actionListener="#{interpretacionLaboratorioController.saveMetodologia}" icon="ui-icon-disk" update=":frmIngreso :frmMetodologia"/>
+                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmIngreso :frmMetodologia"/>
+                </p:menubar>
+                <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                    <h:outputLabel value="Código:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.codigo}" style="width: 200px; text-transform: uppercase"/>
+                    <h:outputLabel value="Nombre:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.nombre}" style="width: 200px; text-transform: uppercase"/>
+                    <h:outputLabel value="Literatura:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.literatura}" style="width: 200px; text-transform: uppercase"/>
+
+
+                </h:panelGrid>
+
+
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmMetodologiaSelected">
+            <p:dialog header="Info Metodología" widgetVar="dialogMSelected"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="400px">
+
+                <p:menubar>                           
+                    <p:menuitem value="Guardar"  actionListener="#{interpretacionLaboratorioController.saveMetodologiaSelected}" icon="ui-icon-disk" update=":frmUpdate:metodologia :frmMetodologiaSelected"/>
+                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmUpdate:metodologia :frmMetodologiaSelected"/>
+                </p:menubar>
+                <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                    <h:outputLabel value="Código:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.codigo}" style="width: 200px; text-transform: uppercase"/>
+                    <h:outputLabel value="Nombre:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.nombre}" style="width: 200px; text-transform: uppercase"/>
+                    <h:outputLabel value="Literatura:"/>
+                    <p:inputText value="#{interpretacionLaboratorioController.actualMetodologia.literatura}" style="width: 200px; text-transform: uppercase"/>
+
+
+                </h:panelGrid>
+
+
+            </p:dialog>
+        </h:form>
+
+
+        <h:form id="frmUpdate">
+
+            <p:dialog header="Info Interpretación Laboratorio" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="900px">
+
+                <h:panelGrid id="display" columns="1" cellpadding="4">
+
+                    <h:panelGrid columns="4" style="border: hidden;">                                
+
+                        <p:outputLabel value="Cultivo:"  />
+                        <p:selectOneMenu id="cultivo" value="#{interpretacionLaboratorioController.selected.cultivo}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <p:ajax listener="#{interpretacionLaboratorioController.onCultivoChangeSelected}" update=":frmUpdate:variedad :frmUpdate:edad" />
+                            <f:selectItems value="#{interpretacionLaboratorioController.listaCultivo}" var="cult" itemLabel="#{cult.nombre}" itemValue="#{cult.id}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Tipo Matriz:"  />
+                        <p:selectOneMenu id="matriz" value="#{interpretacionLaboratorioController.selected.matriz}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <f:selectItem itemLabel="Seleccionar tipo" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{interpretacionLaboratorioController.listaMatriz}" var="matr" itemLabel="#{matr}" itemValue="#{matr}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Variedad:"  />
+                        <p:selectOneMenu id="variedad" value="#{interpretacionLaboratorioController.selected.variedad}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{interpretacionLaboratorioController.listaVariedad}" var="varie" itemLabel="#{varie.nombre}" itemValue="#{varie.id}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Subanálisis::"  />
+                        <p:selectOneMenu id="compuesto" value="#{interpretacionLaboratorioController.selected.subanalisis}" style="width:200px" converter="GenericConverter" filter="true" filterMatchMode="contains">
+
+                            <f:selectItems value="#{interpretacionLaboratorioController.listaSubanalisis}" var="sub" itemLabel="#{sub.simbolo} (#{sub.nombre})" itemValue="#{sub.id}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Edad:"  />
+                        <p:selectOneMenu id="edad" value="#{interpretacionLaboratorioController.selected.edad}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <f:selectItem itemLabel="Seleccionar Edad" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{interpretacionLaboratorioController.listaEdad}" var="edad" itemLabel="#{edad.nombre}" itemValue="#{edad.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel value="Metodología:"/>
+                        <h:panelGrid columns="1">
+                            <p:commandButton value="Nueva Metodología" oncomplete="PF('dialogMSelected').show()" update=":frmMetodologiaSelected" actionListener="#{interpretacionLaboratorioController.nuevaMetodologia}"/>
+                            <p:selectOneMenu id="metodologia" value="#{interpretacionLaboratorioController.selected.metodologia}" style="width:200px" converter="GenericConverter" filter="true" >
+                                <f:selectItem itemLabel="Seleccionar Metodología" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{interpretacionLaboratorioController.listaMetodologia}" var="metod" itemLabel="#{metod.nombre} (#{metod.literatura})" itemValue="#{metod.id}" />
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+
+
+                        <h:outputLabel value="Valor Interpretación Mínimo:"/>
+                        <p:inputText value="#{interpretacionLaboratorioController.selected.inicioRangoInterpretacion}" style="width: 150px;"/>
+
+                        <h:outputLabel value="Valor Interpretación Máximo:"/>
+                        <p:inputText value="#{interpretacionLaboratorioController.selected.finRangoInterpretacion}" style="width: 150px;"/>
+
+
+                    </h:panelGrid>
+
+                    <h:panelGrid columns="2">
+                        <p:commandButton  id="Guardar" update=":frmUpdate, :frmIngreso"  value="Guardar" action="#{interpretacionLaboratorioController.update}"  />
+
+                        <p:commandButton id="Cancelar" update=":frmUpdate, :frmIngreso" value="Cancelar"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmIngreso">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+                    <p:panel header="Interpretación Laboratorio">
+                        <p:panel header="Nuevo Interpretación Laboratorio" >
+
+                            <p:menubar>      
+                                <p:menuitem value="Guardar"  actionListener="#{interpretacionLaboratorioController.save}" update=":frmIngreso" icon="ui-icon-disk"  style="background-color: #DDDDDD"/>
+                            </p:menubar>  
+                            <p:panelGrid columns="4" >                                                                
+
+                                <p:outputLabel value="Cultivo:"  />
+                                <p:selectOneMenu id="cultivo" value="#{interpretacionLaboratorioController.actual.cultivo}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <p:ajax listener="#{interpretacionLaboratorioController.onCultivoChange}" update=":frmIngreso:variedad :frmIngreso:edad" />
+                                    <f:selectItem itemLabel="Seleccionar Cultivo" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{interpretacionLaboratorioController.listaCultivo}" var="cult" itemLabel="#{cult.nombre}" itemValue="#{cult.id}" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel value="Tipo Matriz:"  />
+                                <p:selectOneMenu id="matriz" value="#{interpretacionLaboratorioController.actual.matriz}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <f:selectItem itemLabel="Seleccionar tipo" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{interpretacionLaboratorioController.listaMatriz}" var="matr" itemLabel="#{matr}" itemValue="#{matr}" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel value="Variedad:"  />
+                                <p:selectOneMenu id="variedad" value="#{interpretacionLaboratorioController.actual.variedad}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{interpretacionLaboratorioController.listaVariedad}" var="varie" itemLabel="#{varie.nombre}" itemValue="#{varie.id}" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel value="Subanálisis:"  />
+                                <p:selectOneMenu id="compuesto" value="#{interpretacionLaboratorioController.actual.subanalisis}" style="width:200px" converter="GenericConverter" filter="true" filterMatchMode="contains">
+                                    <f:selectItem itemLabel="Seleccionar Subanálisis:" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{interpretacionLaboratorioController.listaSubanalisis}" var="sub" itemLabel="#{sub.simbolo} (#{sub.nombre})" itemValue="#{sub.id}" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel value="Edad:"  />
+                                <p:selectOneMenu id="edad" value="#{interpretacionLaboratorioController.actual.edad}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <f:selectItem itemLabel="Seleccionar Edad" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{interpretacionLaboratorioController.listaEdad}" var="edad" itemLabel="#{edad.nombre}" itemValue="#{edad.id}" />
+                                </p:selectOneMenu>
+
+                                <h:outputLabel value="Metodología:"/>
+                                <h:panelGrid columns="1">
+                                    <p:commandButton value="Nueva Metodología" oncomplete="PF('dialogM').show()" update=":frmMetodologia" actionListener="#{interpretacionLaboratorioController.nuevaMetodologia}"/>
+                                    <p:selectOneMenu id="metodologia" value="#{interpretacionLaboratorioController.actual.metodologia}" style="width:200px" converter="GenericConverter" filter="true" >
+                                        <f:selectItem itemLabel="Seleccionar Metodología" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{interpretacionLaboratorioController.listaMetodologia}" var="metod" itemLabel="#{metod.nombre} (#{metod.literatura})" itemValue="#{metod.id}" />
+                                    </p:selectOneMenu>
+                                </h:panelGrid>
+
+
+                                <h:outputLabel value="Valor Interpretación Mínimo:"/>
+                                <p:inputText value="#{interpretacionLaboratorioController.actual.inicioRangoInterpretacion}" style="width: 150px;"/>
+
+                                <h:outputLabel value="Valor Interpretación Máximo:"/>
+                                <p:inputText value="#{interpretacionLaboratorioController.actual.finRangoInterpretacion}" style="width: 150px;"/>
+
+
+
+
+                            </p:panelGrid>
+
+
+                        </p:panel>
+
+                        <p:panel id="pnlUsuariosIngresados" header="Interpretaciones Existentes">
+                            <p:dataTable var="obj" value="#{interpretacionLaboratorioController.model}" style="width: 90%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{interpretacionLaboratorioController.filter}" paginator="true" rows="10"
+                                         selection="#{interpretacionLaboratorioController.selected}" selectionMode="single" widgetVar="usuariosTable">
+
+                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{interpretacionLaboratorioController.onSelectInterpretacion}" />
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column colspan="7" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                    </p:row>
+
+                                    <p:row>                                        
+                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/>   
+                                        <p:column headerText="VARIEDAD" filterBy="#{obj.leyendaVariedad}" filterMatchMode="contains"/>   
+                                        <p:column headerText="EDAD" filterBy="#{obj.leyendaEdad}" filterMatchMode="contains"/>   
+                                        <p:column headerText="MATRIZ" filterBy="#{obj.matriz}" filterMatchMode="contains"/> 
+                                        <p:column headerText="SUBANALISIS" filterBy="#{obj.leyendaSubanalisis}" filterMatchMode="contains"/>   
+                                        <p:column headerText="RANGO INTERPRETACION" /> 
+                                        <p:column headerText="METODOLOGIA - LITERATURA" /> 
+
+                                    </p:row>  
+
+                                </p:columnGroup>
+
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCultivo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaVariedad}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaEdad}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.matriz}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaSubanalisis}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.inicioRangoInterpretacion} - #{obj.finRangoInterpretacion}" />
+                                </p:column>
+
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaMetodologiaNombre} - #{obj.leyendaMetodologiaLiteratura}" />
+                                </p:column>
+
+                            </p:dataTable>
+                        </p:panel>
+                    </p:panel>
+                </h:form>
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

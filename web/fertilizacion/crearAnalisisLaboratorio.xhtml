@@ -1,0 +1,379 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>SISTEMA FERTILIZACION</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+
+
+                /*panelMenu.headers.each(function () {
+                 var header = $(this);
+                 if (header.text() == "INICIO")
+                 {
+                 
+                 header.css("display","block");
+                 header.addClass("ui-state-active");
+                 }
+                 });*/
+
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                 {
+                 var currHeader = $(this);
+                 PF('sidePanelMenu').headers.each(function ()
+                 {
+                 var header = $(this);
+                 if (header.text() !== currHeader.text())
+                 {
+                 PF('sidePanelMenu').collapseRootSubmenu(header);
+                 header.removeClass('ui-state-hover');
+                 PF('sidePanelMenu').saveState();
+                 }
+                 });
+                 });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+
+
+
+
+        <h:form id="frmElemento">
+            <p:dialog header="Info Metodología" widgetVar="dialogM"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="400px">
+
+                <p:menubar>                           
+                    <p:menuitem value="Guardar"  actionListener="#{analisisLaboratorioController.saveElemento}" icon="ui-icon-disk" update=":frmIngreso :frmElemento"/>
+                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmIngreso :frmElemento"/>
+                </p:menubar>
+                <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                    <h:outputLabel value="Símbolo:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.simbolo}" style="width: 250px;"/>
+                    <h:outputLabel value="Nombre:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.nombre}" style="width: 250px; text-transform: uppercase"/>
+                    <h:outputLabel value="Valor:"/>                                
+                    <p:inputText   value="#{analisisLaboratorioController.actualElemento.valor}" style="width: 250px;"/>
+                    <h:outputLabel value="Peso:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.peso}" style="width: 250px"/>
+
+
+                </h:panelGrid>
+
+
+            </p:dialog>
+        </h:form>
+
+
+        <h:form id="frmElementoSelected">
+            <p:dialog header="Info Elemento" widgetVar="dialogElementoSelected"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="400px">
+
+                <p:menubar>                           
+                    <p:menuitem value="Guardar"  actionListener="#{analisisLaboratorioController.saveElementoSelected}" icon="ui-icon-disk" update=":frmUpdate:pickListElementos :frmElementoSelected"/>
+                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmUpdate:pickListElementos :frmElementoSelected"/>
+                </p:menubar>
+                <h:panelGrid  columns="2"  columnClasses="label,value">
+
+                    <h:outputLabel value="Símbolo:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.simbolo}" style="width: 250px;"/>
+                    <h:outputLabel value="Nombre:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.nombre}" style="width: 250px; text-transform: uppercase"/>
+                    <h:outputLabel value="Valor:"/>                                
+                    <p:inputText   value="#{analisisLaboratorioController.actualElemento.valor}" style="width: 250px;"/>
+                    <h:outputLabel value="Peso:"/>
+                    <p:inputText value="#{analisisLaboratorioController.actualElemento.peso}" style="width: 250px"/>
+
+                </h:panelGrid>
+
+
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmUpdate">
+
+            <p:dialog header="Info Paquete de Análisis" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="800px">
+
+                <h:panelGrid id="display" columns="1" cellpadding="4" style="font-size: 12px">
+
+                    <p:panelGrid columns="4" >                                
+
+
+                        <h:outputLabel value="Código Secuencial:"/>
+                        <h3>#{analisisLaboratorioController.selected.codigo}</h3>
+
+                        <p:outputLabel value="Tipo Matriz:"  />
+                        <p:selectOneMenu  value="#{analisisLaboratorioController.selected.matriz}" style="width:150px" converter="GenericConverter" filter="true" >
+                            <f:selectItem itemLabel="Seleccionar Matriz" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{analisisLaboratorioController.listadoMatriz}" var="matr" itemLabel="#{matr.nombre}" itemValue="#{matr.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel value="T.A.T.:"/>
+                        <h:outputLabel  id="tatNum" value="#{analisisLaboratorioController.tat}" style="color: red; font-size: x-large; font:bolder"/>
+
+                        <p:outputLabel value="Laboratorio:"  />
+                        <p:selectOneMenu  value="#{analisisLaboratorioController.selected.laboratorio}" style="width:150px" converter="GenericConverter" filter="true" >
+                            <f:selectItem itemLabel="Seleccionar Laboratorio" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{analisisLaboratorioController.listadoLaboratorio}" var="lab" itemLabel="#{lab.nombre}" itemValue="#{lab.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel value="COSTO:"/>
+                        <p:inputText  id="costo" value="#{analisisLaboratorioController.costo}" style="color: green; font-size: x-large; font:bolder"/>
+
+                        <h:outputLabel value="Descripción:"/>
+                        <p:inputTextarea id="descripcion" cols="40" rows="5"  value="#{analisisLaboratorioController.descripcion}"/>
+                    </p:panelGrid>
+                    <p:panelGrid columns="2">
+
+                        <h3 style="margin-top: 0">Subanálisis</h3>
+                        <p:pickList id="pickListElementos" value="#{analisisLaboratorioController.listadoElementos}" var="elemento" itemLabel="#{elemento.nombre} (#{elemento.simbolo}) - TAT: #{elemento.tat}" itemValue="#{elemento}" 
+                                    showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="GenericConverter"  responsive="true">
+
+                            <p:ajax event="transfer" listener="#{analisisLaboratorioController.onTransfer}" update=":frmUpdate:tatNum :frmUpdate:costo :frmUpdate:descripcion" />
+                        </p:pickList>
+
+                    </p:panelGrid>
+
+                    <h:panelGrid columns="2">
+                        <p:commandButton  id="Guardar" update=":frmUpdate, :frmIngreso"  value="Guardar" action="#{analisisLaboratorioController.update}"  />
+
+                        <p:commandButton  id="Cancelar" update=":frmUpdate, :frmIngreso" value="Cancelar" action="#{analisisLaboratorioController.load}"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmIngreso">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+                    <p:panel header="Paquete de Análisis">
+                        <p:panel header="Nuevo Paquete de Análisis">
+
+                            <p:menubar>      
+                                <p:menuitem value="Guardar"  actionListener="#{analisisLaboratorioController.save}" icon="ui-icon-disk" update=":frmIngreso" style="background-color: #DDDDDD"/>
+                            </p:menubar>  
+
+                            <p:panelGrid columns="4">  
+
+
+                                <p:outputLabel value="Tipo Matriz:"  />
+                                <p:selectOneMenu  value="#{analisisLaboratorioController.actual.matriz}" style="width:150px" converter="GenericConverter" filter="true" >
+                                    <p:ajax listener="#{analisisLaboratorioController.onLaboratorioChange()}" update=":frmIngreso:suba"/>
+                                    <f:selectItem itemLabel="Seleccionar Matriz" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{analisisLaboratorioController.listadoMatriz}" var="matr" itemLabel="#{matr.nombre}" itemValue="#{matr.id}" />
+                                </p:selectOneMenu>
+
+                                <p:panelGrid columns="2">
+                                    <h:outputLabel value="Código Secuencial:"/>
+                                    <h3>#{analisisLaboratorioController.actual.codigo}</h3>
+                                </p:panelGrid>
+
+                                <h:outputLabel value=""/>
+
+                                <p:outputLabel value="Laboratorio:"  />
+                                <p:selectOneMenu  value="#{analisisLaboratorioController.actual.laboratorio}" style="width:150px" converter="GenericConverter" filter="true" >
+                                    <p:ajax listener="#{analisisLaboratorioController.onLaboratorioChange()}" update=":frmIngreso:suba"/>
+                                    <f:selectItem itemLabel="Seleccionar Laboratorio" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{analisisLaboratorioController.listadoLaboratorio}" var="lab" itemLabel="#{lab.nombre}" itemValue="#{lab.id}" />
+                                </p:selectOneMenu>
+
+                                <p:panelGrid columns="4">
+                                    <h:outputLabel value="T.A.T.:"/>
+                                    <h:outputLabel  id="tatNum" value="#{analisisLaboratorioController.tat}" style="color: red; font-size: x-large; font:bolder"/>                                   
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="4">                                   
+                                    <h:outputLabel value="COSTO:"/>
+                                    <p:inputText  id="costo" value="#{analisisLaboratorioController.costo}" style="color: green; font-size: x-large; font:bolder"/>
+                                </p:panelGrid>
+                                <h:outputLabel value="Descripción:"/>
+                                <p:inputTextarea id="descripcion" cols="40" rows="8"  value="#{analisisLaboratorioController.descripcion}" />
+
+                                <h3 style="margin-top: 0">Subanálisis:</h3>
+                                <h:panelGrid id="suba">
+                                    <p:pickList id="pickList" value="#{analisisLaboratorioController.listadoElementos}" var="elemento" itemLabel="#{elemento.nombre} (#{elemento.simbolo}) - TAT: #{elemento.tat}" itemValue="#{elemento}" 
+                                                showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="GenericConverter">
+
+
+                                        <p:ajax event="transfer" listener="#{analisisLaboratorioController.onTransfer}" update=":frmIngreso:tatNum :frmIngreso:costo :frmIngreso:descripcion" />
+                                    </p:pickList>
+                                </h:panelGrid>
+                            </p:panelGrid>
+
+
+                        </p:panel>
+
+                        <p:panel id="pnlUsuariosIngresados" header="Paquete Análisis Existentes">
+                            <p:dataTable var="obj" value="#{analisisLaboratorioController.model}" style="width: 80%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{analisisLaboratorioController.filter}" paginator="true" rows="10"
+                                         selection="#{analisisLaboratorioController.selected}" selectionMode="single" widgetVar="usuariosTable">
+
+                                <p:ajax  event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{analisisLaboratorioController.cargaListaElementosSelected}" />
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column headerText="" style="width: 16px" />
+                                        <p:column headerText="" style="width: 120px" />
+                                        <p:column colspan="4" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                    </p:row>
+
+                                    <p:row>   
+                                        <p:column />
+                                        <p:column headerText="CODIGO" filterBy="#{obj.codigo}" filterMatchMode="contains" />                                          
+                                        <p:column headerText="MATRIZ" filterBy="#{obj.tipoMatriz}" filterMatchMode="contains"/>   
+                                        <p:column headerText="DESCRIPCION" filterBy="#{obj.descripcion}" filterMatchMode="contains"/>
+                                        <p:column headerText="COSTO" filterBy="#{obj.costo}" filterMatchMode="contains"/>
+                                        <p:column headerText="LABORATORIO" filterBy="#{obj.laboratorio}" filterMatchMode="contains"/>
+                                    </p:row>  
+
+                                </p:columnGroup>
+
+                                <p:column >
+                                    <p:rowToggler />
+                                </p:column>
+
+                                <p:column style="text-align: center" >
+                                    <h:outputText value="#{obj.codigo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaMatriz}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.descripcion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.costo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaLaboratorio}" />
+                                </p:column>
+
+                                <p:rowExpansion>
+
+                                    <p:dataTable value="#{obj.listadoElementos}" var="elemento" style="width: 50%; margin: auto auto" >
+
+                                        <f:facet name="header">
+                                            #{obj.descripcion}
+                                        </f:facet>
+
+                                        <p:column headerText="Código" width="20%">
+                                            <h:outputText value="#{elemento.codigo}" />
+                                        </p:column>
+
+                                        <p:column headerText="Subanálisis" width="60%">
+                                            <h:outputText value="#{elemento.nombre} [#{elemento.simbolo}]" />
+                                        </p:column>
+
+                                        <p:column headerText="T.A.T" width="20%">
+                                            <h:outputText value="#{elemento.tat}" />
+                                        </p:column>
+
+
+                                    </p:dataTable>
+
+                                </p:rowExpansion>
+
+                            </p:dataTable>
+                        </p:panel>
+                    </p:panel>
+                </h:form>
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

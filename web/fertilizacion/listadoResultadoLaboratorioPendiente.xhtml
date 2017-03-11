@@ -1,0 +1,604 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>RESULTADOS LABORATORIO</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+
+        <script type="text/javascript">
+            PrimeFaces.locales['es'] = {
+                closeText: 'Cerrar',
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                dayNamesMin: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
+                weekHeader: 'Semana',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Sólo hora',
+                timeText: 'Tiempo',
+                hourText: 'Hora',
+                minuteText: 'Minuto',
+                secondText: 'Segundo',
+                currentText: 'Fecha actual',
+                ampm: false,
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                allDayText: 'Todo el día'
+            };
+        </script>
+        
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                /*panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() == "INICIO")
+                        {
+                           
+                            header.css("display","block");
+                            header.addClass("ui-state-active");
+                        }
+                });*/
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+
+
+
+
+
+
+        <h:form id="frmUpdate">
+
+            <p:dialog header="Info Resultado Laboratorio" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="1000px">
+                <p:menubar>      
+                    <p:menuitem value="Guardar"   actionListener="#{resultadoLaboratorioController.update}" icon="ui-icon-disk" update=":frmUpdate, :frmIngreso" style="background-color: #DDDDDD"/>
+                    <p:menuitem value="Cerrar"   icon="ui-icon-extlink" update=":frmUpdate, :frmIngreso" style="background-color: #DDDDDD"/>
+                </p:menubar>   
+
+                <h:panelGrid id="display" columns="1" cellpadding="4">
+
+                    <h:panelGrid columns="4" style="border: hidden">    
+
+                        <p:outputLabel value="Muestra:"  />
+                        <p:selectOneMenu id="muestra" value="#{resultadoLaboratorioController.selected.muestra}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <p:ajax listener="#{resultadoLaboratorioController.onMuestraChangeSelected}" update=":frmUpdate:fechRecep :frmUpdate:matriz :frmUpdate:fechEnvio :frmUpdate:cultivo :frmUpdate:res :frmUpdate:resp" />
+                            <f:selectItems value="#{resultadoLaboratorioController.listaMuestra}" var="muestra" itemLabel="#{muestra.codigo} (#{muestra.leyendaLote})" itemValue="#{muestra.id}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Cultivo:"  />
+                        <p:selectOneMenu id="cultivo" value="#{resultadoLaboratorioController.selected.cultivo}" style="width:200px" converter="GenericConverter" filter="true" >
+                            <f:selectItems value="#{resultadoLaboratorioController.listaCultivo}" var="cult" itemLabel="#{cult.nombre}" itemValue="#{cult.id}" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Tipo Matriz:"  />
+                        <p:inputText id="matriz" value="#{resultadoLaboratorioController.matriz}" readonly="true"/>
+
+                        <p:outputLabel  value="Fecha Muestreo:" />
+                        <p:calendar id="fechRecep" value="#{resultadoLaboratorioController.selected.fechaRecepcion}" locale="es" navigator="true" pattern="dd-MMM-yyyy" />
+
+                        <p:outputLabel  value="Fecha Envio:" />
+                        <p:calendar  id="fechEnvio" value="#{resultadoLaboratorioController.selected.fechaEnvio}" locale="es" navigator="true" pattern="dd-MMM-yyyy" />
+
+                        <p:outputLabel  value="Fecha Resultado:" />
+                        <p:calendar  value="#{resultadoLaboratorioController.selected.fechaResultado}" locale="es" navigator="true" pattern="dd-MMM-yyyy" />
+
+                        <h:outputLabel  value="Fecha Actual:" />
+                        <p:calendar id="fIngLab"  value="#{resultadoLaboratorioController.fechaActual}" locale="es" navigator="true" pattern="yyyy-MMM-dd" showOn="none" readonlyInput="true"  />
+
+                    </h:panelGrid>
+
+                    <p:panel header="Resultados">
+
+                        <h:panelGrid columns="2">
+                            <p:dataTable id="res" var="obj" style="width: 90%; margin: auto auto" value="#{resultadoLaboratorioController.listaAnalisisCompuesto}" editable="true" editMode="cell" >
+                                <f:facet name="header">
+                                    Ingreso Resultados
+                                </f:facet>
+
+                                <p:column headerText="ANALISIS" width="50%" >
+                                    #{obj.leyendaSubanalisis}
+                                </p:column>
+
+                                <p:column headerText="Resultado" width="20%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.resultado}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.resultado}" style="width: 80%"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Unidad" width="15%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputLabel value="#{obj.unidad}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu value="#{obj.unidad}" style="width:80%" >
+                                                <f:selectItem itemLabel="Seleccionar Unidad" itemValue=" "/>
+                                                <f:selectItem itemLabel="% s.m.s" itemValue="% s.m.s"/>
+                                                <f:selectItem itemLabel="mg/Kg s.m.s" itemValue="mg/Kg s.m.s"/>
+
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Dado de Baja" width="15%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputLabel value="#{obj.dadoBaja}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu value="#{obj.dadoBaja}" style="width:80%" >                                                        
+                                                <f:selectItem itemLabel="Si" itemValue="Si" />
+                                                <f:selectItem itemLabel="No" itemValue="No"/>
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                            </p:dataTable>
+
+                            <p:dataTable id="resp" var="obj" style="width: 90%; margin: auto auto" value="#{resultadoLaboratorioController.listaAnalisisPaquete}" editable="true" editMode="cell" >
+                                <f:facet name="header">
+                                    Ingreso Resultados
+                                </f:facet>
+
+                                <p:column headerText="ANALISIS" width="50%" >
+                                    #{obj.leyendaSubanalisis}
+
+                                </p:column>
+
+                                <p:column headerText="Resultado" width="20%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.resultado}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.resultado}" style="width: 80%"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Unidad" width="15%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputLabel value="#{obj.unidad}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu value="#{obj.unidad}" style="width:80%" >
+                                                <f:selectItem itemLabel="Seleccionar Unidad" itemValue=" "/>
+                                                <f:selectItem itemLabel="% s.m.s" itemValue="% s.m.s"/>
+                                                <f:selectItem itemLabel="mg/Kg s.m.s" itemValue="mg/Kg s.m.s"/>
+
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Dado de Baja" width="15%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputLabel value="#{obj.dadoBaja}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:selectOneMenu value="#{obj.dadoBaja}" style="width:80%" >                                                        
+                                                <f:selectItem itemLabel="Si" itemValue="Si" />
+                                                <f:selectItem itemLabel="No" itemValue="No"/>
+                                            </p:selectOneMenu>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGrid>
+                    </p:panel>
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmIngreso">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+
+
+                    <p:panel header="Resultado Laboratorio">
+
+                        <p:panel header="Nuevo Resultado Laboratorio">
+
+                            <p:menubar>      
+                                <p:menuitem value="Guardar"  actionListener="#{resultadoLaboratorioController.save}" icon="ui-icon-disk" update=":frmIngreso" style="background-color: #DDDDDD"/>
+                            </p:menubar>   
+                            <h:panelGrid columns="1">
+                                <p:panelGrid columns="4">  
+
+                                    <p:outputLabel value="Muestra:"  />
+                                    <p:selectOneMenu id="muestra" value="#{resultadoLaboratorioController.actual.muestra}" style="width:200px" converter="GenericConverter" filter="true" >
+                                        <p:ajax listener="#{resultadoLaboratorioController.onMuestraChange}" update=":frmIngreso:fechRecep :frmIngreso:fechEnvio :frmIngreso:matriz :frmIngreso:cultivo :frmIngreso:res :frmIngreso:resp" />
+                                        <f:selectItem itemLabel="Seleccionar Muestra" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{resultadoLaboratorioController.listaMuestra}" var="muestra" itemLabel="#{muestra.codigo} (#{muestra.leyendaLote})" itemValue="#{muestra.id}" />
+                                    </p:selectOneMenu>
+
+                                    <p:outputLabel value="Cultivo:"  />
+                                    <p:selectOneMenu id="cultivo" value="#{resultadoLaboratorioController.actual.cultivo}" style="width:200px" converter="GenericConverter" filter="true" >
+                                        <f:selectItem itemLabel="Seleccionar Cultivo" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{resultadoLaboratorioController.listaCultivo}" var="cult" itemLabel="#{cult.nombre}" itemValue="#{cult.id}" />
+                                    </p:selectOneMenu>
+
+
+                                    <p:outputLabel value="Tipo Matriz:"  />
+                                    <p:inputText id="matriz" value="#{resultadoLaboratorioController.matriz}" readonly="true" />
+
+                                    <p:outputLabel  value="Fecha Muestreo:" />
+                                    <p:calendar id="fechRecep" value="#{resultadoLaboratorioController.actual.fechaRecepcion}" locale="es" navigator="true" pattern="yyyy-MMM-dd" />
+
+                                    <p:outputLabel  value="Fecha Envio:" />
+                                    <p:calendar id="fechEnvio" value="#{resultadoLaboratorioController.actual.fechaEnvio}" locale="es" navigator="true" pattern="yyyy-MMM-dd" />
+
+                                    <p:outputLabel  value="Fecha Resultado:" />
+                                    <p:calendar  value="#{resultadoLaboratorioController.actual.fechaResultado}" locale="es" navigator="true" pattern="yyyy-MMM-dd" />
+
+                                    <h:outputLabel  value="Fecha Actual:" />
+                                    <p:calendar id="fIngLab"  value="#{resultadoLaboratorioController.fechaActual}" locale="es" navigator="true" pattern="yyyy-MMM-dd" showOn="none" readonlyInput="true"  />
+
+
+
+                                </p:panelGrid>
+
+                                <p:panel header="Resultados">
+
+                                    <h:panelGrid columns="2">
+                                        <p:dataTable id="res" var="obj" style="width: 90%; margin: auto auto" value="#{resultadoLaboratorioController.listaAnalisisCompuesto}" editable="true" editMode="cell" >
+                                            <f:facet name="header">
+                                                Ingreso Resultados
+                                            </f:facet>
+
+
+
+                                            <p:column headerText="ANALISIS" width="50%" >
+                                                #{obj.leyendaSubanalisis}
+
+                                            </p:column>
+
+                                            <p:column headerText="Resultado" width="20%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputText value="#{obj.resultado}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{obj.resultado}" style="width: 80%"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column headerText="Unidad" width="15%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputLabel value="#{obj.unidad}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:selectOneMenu value="#{obj.unidad}" style="width:80%" >
+                                                            <f:selectItem itemLabel="Seleccionar Unidad" itemValue=" "/>
+                                                            <f:selectItem itemLabel="% s.m.s" itemValue="% s.m.s"/>
+                                                            <f:selectItem itemLabel="mg/Kg s.m.s" itemValue="mg/Kg s.m.s"/>
+
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column headerText="Dado de Baja" width="15%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputLabel value="#{obj.dadoBaja}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:selectOneMenu value="#{obj.dadoBaja}" style="width:80%" >                                                        
+                                                            <f:selectItem itemLabel="Si" itemValue="Si" />
+                                                            <f:selectItem itemLabel="No" itemValue="No"/>
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+
+
+                                        </p:dataTable>
+
+                                        <p:dataTable id="resp" var="obj" style="width: 90%; margin: auto auto" value="#{resultadoLaboratorioController.listaAnalisisPaquete}" editable="true" editMode="cell" >
+                                            <f:facet name="header">
+                                                Ingreso Resultados
+                                            </f:facet>
+
+
+
+                                            <p:column headerText="ANALISIS" width="50%" >
+                                                #{obj.leyendaSubanalisis}
+
+                                            </p:column>
+
+                                            <p:column headerText="Resultado" width="20%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputText value="#{obj.resultado}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:inputText value="#{obj.resultado}" style="width: 80%"/>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column headerText="Unidad" width="15%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputLabel value="#{obj.unidad}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:selectOneMenu value="#{obj.unidad}" style="width:80%" >
+                                                            <f:selectItem itemLabel="Seleccionar Unidad" itemValue=" "/>
+                                                            <f:selectItem itemLabel="% s.m.s" itemValue="% s.m.s"/>
+                                                            <f:selectItem itemLabel="mg/Kg s.m.s" itemValue="mg/Kg s.m.s"/>
+
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+                                            <p:column headerText="Dado de Baja" width="15%">
+                                                <p:cellEditor>
+                                                    <f:facet name="output">
+                                                        <h:outputLabel value="#{obj.dadoBaja}"/>
+                                                    </f:facet>
+                                                    <f:facet name="input">
+                                                        <p:selectOneMenu value="#{obj.dadoBaja}" style="width:80%" >                                                        
+                                                            <f:selectItem itemLabel="Si" itemValue="Si" />
+                                                            <f:selectItem itemLabel="No" itemValue="No"/>
+                                                        </p:selectOneMenu>
+                                                    </f:facet>
+                                                </p:cellEditor>
+                                            </p:column>
+
+
+                                        </p:dataTable>
+
+                                    </h:panelGrid>
+                                </p:panel>
+                            </h:panelGrid>
+
+                        </p:panel>
+
+                        <p:panel id="pnlUsuariosIngresados" header="Resultados Existentes">
+                            <p:dataTable var="obj" value="#{resultadoLaboratorioController.model}" style="width: 85%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{resultadoLaboratorioController.filter}" paginator="true" rows="10"
+                                         selection="#{resultadoLaboratorioController.selected}" selectionMode="single" widgetVar="usuariosTable">
+
+                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()"  listener="#{resultadoLaboratorioController.fillSelected}" />
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column style="width: 16px"/>
+                                        <p:column colspan="6" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column headerText="" style="width: 60px"/>
+
+                                    </p:row>
+
+                                    <p:row>   
+                                        <p:column headerText="" style="width: 16px" />
+                                        <p:column headerText="MUESTRA" filterBy="#{obj.leyendaMuestra}" filterMatchMode="contains"/>
+                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/>   
+                                        <p:column headerText="MATRIZ" filterBy="#{obj.leyendaMatriz}" filterMatchMode="contains"/> 
+
+
+
+                                        <p:column headerText="FECHA MUESTREO" filterBy="#{obj.fechaFormatRecepcion}" filterMatchMode="contains" />
+                                        <p:column headerText="FECHA ENVIO" filterBy="#{obj.fechaFormatEnvio}" filterMatchMode="contains" />
+                                        <p:column headerText="FECHA RESULTADO" filterBy="#{obj.fechaFormatResultado}" filterMatchMode="contains" />
+                                        <p:column headerText="PDF" width="60px" />
+                                    </p:row>  
+
+                                </p:columnGroup>
+
+                                <p:column style="width:16px">
+                                    <p:rowToggler />
+                                </p:column>
+
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaMuestra}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCultivo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaMatriz}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatRecepcion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatEnvio}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatResultado}" />
+                                </p:column>
+
+                                <p:column style="width: 60px" >
+                                    <h:commandLink target="_blank" actionListener="#{resultadoLaboratorioController.pdfReporteLab}" value="" >
+                                        <p:graphicImage url="../images/pdf2.png" width="24"/>
+                                        <f:param name="idMuestra" value="#{obj.id}"/>
+                                    </h:commandLink>
+                                </p:column>
+
+                                <p:rowExpansion>
+
+                                    <p:panelGrid columns="2" >
+                                        <p:dataTable id="obj2" value="#{obj.listaResultado}" var="res" style="width: 80%; margin: auto auto" >
+
+
+
+                                            <f:facet name="header">
+                                                #{obj.leyendaMuestra}
+                                            </f:facet>
+
+                                            <p:column headerText="Compuesto" width="40%">
+                                                <h:outputText value="#{res.leyendaSubanalisis}" />
+                                            </p:column>
+
+                                            <p:column headerText="Resultado" width="20%">
+                                                <h:outputText value="#{res.resultado}" />
+                                            </p:column>
+                                            <p:column headerText="Unidad" width="20%">
+                                                <h:outputText value="#{res.unidad}" />
+                                            </p:column>
+                                            <p:column headerText="Dado de Baja" width="20%">
+                                                <h:outputText value="#{res.dadoBaja}" />
+                                            </p:column>
+
+                                        </p:dataTable>
+                                        <p:dataTable id="objp" value="#{obj.listaResultadoPaquetes}" var="paq" style="width: 80%; margin: auto auto" >
+
+
+
+                                            <f:facet name="header">
+                                                #{obj.leyendaMuestra}
+                                            </f:facet>
+
+                                            <p:column headerText="Compuesto" width="40%">
+                                                <h:outputText value="#{paq.leyendaSubanalisis}" />
+                                            </p:column>
+
+                                            <p:column headerText="Resultado" width="20%">
+                                                <h:outputText value="#{paq.resultado}" />
+                                            </p:column>
+                                            <p:column headerText="Unidad" width="20%">
+                                                <h:outputText value="#{paq.unidad}" />
+                                            </p:column>
+                                            <p:column headerText="Dado de Baja" width="20%">
+                                                <h:outputText value="#{paq.dadoBaja}" />
+                                            </p:column>
+
+                                        </p:dataTable>
+
+                                    </p:panelGrid>
+
+                                </p:rowExpansion>
+
+
+                            </p:dataTable>
+                        </p:panel>
+                    </p:panel>
+                </h:form>
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

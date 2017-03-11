@@ -1,0 +1,485 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>MUESTRA LABORATORIO</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+
+        <script type="text/javascript">
+            PrimeFaces.locales['es'] = {
+                closeText: 'Cerrar',
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                dayNamesMin: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
+                weekHeader: 'Semana',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Sólo hora',
+                timeText: 'Tiempo',
+                hourText: 'Hora',
+                minuteText: 'Minuto',
+                secondText: 'Segundo',
+                currentText: 'Fecha actual',
+                ampm: false,
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                allDayText: 'Todo el día'
+            };
+        </script>
+        
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                /*panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() == "INICIO")
+                        {
+                           
+                            header.css("display","block");
+                            header.addClass("ui-state-active");
+                        }
+                });*/
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+
+        <h:form id="frmLaboratorio">
+            <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+            <p:dialog header="Info MUESTRA - LABORATORIO" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="800px" closable="false">
+
+                <h:panelGrid id="display" columns="1" cellpadding="4">
+
+                    <h:panelGrid columns="1" style="border: hidden">    
+
+                        <p:dataTable id="labs" var="obj" value="#{muestraLaboratorioController.listadoAnalisisLaboratorioAuxP}" editable="true" editMode="cell" widgetVar="cellP">
+                            <f:facet name="header">
+                                Seleccionar Laboratorio para cada Paquete de Análisis Seleccionado
+                            </f:facet>
+
+
+                            <p:ajax event="cellEdit" listener="#{muestraLaboratorioController.onCellEditLaboratorioP}"  />
+                            <p:column headerText="PAQUETE ANALISIS">
+                                #{obj.descripcion}
+                            </p:column>
+
+                            <p:column headerText="LABORATORIO">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputLabel value="#{obj.leyendaLaboratorio}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:selectOneMenu value="#{obj.laboratorio}" style="width:80%" converter="GenericConverter">
+                                            <f:selectItem itemLabel="Seleccionar Laboratorio" itemValue=""/>
+                                            <f:selectItems value="#{muestraLaboratorioController.listaLaboratorio}" var="lab" itemLabel="#{lab.nombre} (#{lab.pais})" itemValue="#{lab.id}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+
+                        </p:dataTable>
+
+
+                        <p:dataTable id="labsE" var="objE" value="#{muestraLaboratorioController.listadoAnalisisLaboratorioAuxE}" editable="true" editMode="cell" widgetVar="cellE">
+                            <f:facet name="header">
+                                Seleccionar Laboratorio para cada Subanálisis Seleccionado
+                            </f:facet>
+
+
+                            <p:ajax event="cellEdit" listener="#{muestraLaboratorioController.onCellEditLaboratorio}"  />
+                            <p:column headerText="SUBANALISIS">
+                                #{objE.nombre}
+                            </p:column>
+
+                            <p:column headerText="LABORATORIO">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputLabel value="#{objE.leyendaLaboratorio}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:selectOneMenu value="#{objE.laboratorio}" style="width:80%" converter="GenericConverter">
+                                            <f:selectItem itemLabel="Seleccionar Laboratorio" itemValue=""/>
+                                            <f:selectItems value="#{muestraLaboratorioController.listaLaboratorio}" var="labE" itemLabel="#{labE.nombre} (#{labE.pais})" itemValue="#{labE.id}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+
+                        </p:dataTable>
+
+                    </h:panelGrid>
+
+                    <h:panelGrid columns="2">
+                        <p:commandButton  id="Actualizar"  actionListener="#{muestraLaboratorioController.update}" icon="ui-icon-disk" value="Actualizar" update=":frmUpdate, :frmIngreso :frmLaboratorio"  />
+
+                        <p:commandButton id="Regresar" update=":frmLaboratorio, :frmIngreso" value="Regresar"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
+        <h:form id="frmUpdate">
+
+            <p:dialog header="Info MUESTRA" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="1200px" > 
+
+                <p:menubar>      
+                    <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpMuestraLaboratorio}" icon="ui-icon-extlink" update=":frmUpdate, :frmIngreso"/>
+                    <p:menuitem  value="Actualizar"  actionListener="#{muestraLaboratorioController.loadListaLaboratorio(2)}" icon="ui-icon-disk" update=":frmUpdate, :frmIngreso" />
+                </p:menubar> 
+
+                <h:panelGrid id="display" columns="1" cellpadding="4" style="font-size: 12px">
+                    <h:panelGrid columns="2" >
+                        <p:panelGrid columns="2" id="cabeceraMuestra">
+                            <h:panelGroup><h3>Tipo Muestra:</h3></h:panelGroup>
+                            <h:panelGroup><h2 style="color: green">#{muestraLaboratorioController.selected.tipoMuestra}</h2></h:panelGroup>
+
+                            <h:outputLabel value="Cliente"/>
+                            <p:selectOneMenu id="muestra" value="#{muestraLaboratorioController.selected.cliente}" style="width:200px" converter="GenericConverter" filter="true" >
+                                <p:ajax listener="#{muestraLaboratorioController.onClienteChangeSelected}" update=":frmUpdate:datosCliente :frmUpdate:hacienda :frmUpdate:canton :frmUpdate:cabeceraMuestra" />
+                                <f:selectItem itemLabel="Seleccionar Cliente" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{muestraLaboratorioController.listaCliente}" var="cli" itemLabel="#{cli.nombre} (#{cli.rucCi})" itemValue="#{cli.id}" />
+                            </p:selectOneMenu>
+
+
+                        </p:panelGrid>
+                        <h:panelGrid columns="2">
+                            <p:panelGrid columns="2">
+
+                                <h:outputLabel value="Departamento:"/>
+                                <p:selectOneMenu id="depart" value="#{muestraLaboratorioController.selected.departamento}" style="width:200px" converter="GenericConverter" filter="true" >                                       
+                                    <p:ajax listener="#{muestraLaboratorioController.onDepartamentoChangeSelected}" update=":frmUpdate:datosCodigo" />                                    
+                                    <f:selectItems value="#{muestraLaboratorioController.listaDepartamento}" var="dep" itemLabel="#{dep.nombre}  #{dep.abreviatura}" itemValue="#{dep.id}" />
+                                </p:selectOneMenu>
+
+                                <h:outputLabel value="Código"/>
+                                <h:panelGrid columns="2" id="datosCodigo">
+                                    <p:inputText value="#{muestraLaboratorioController.selected.codigo}" style="width: 100px;" readonly="true" />
+                                    <p:inputText value="#{muestraLaboratorioController.selected.numeroCodigo}" style="width: 50px;" />
+                                </h:panelGrid>
+
+
+                                <h:outputLabel value="Fecha Creación:"/>
+                                <p:calendar id="fCreacion"  value="#{muestraLaboratorioController.selected.fechaCreacion}" locale="es" navigator="true" pattern="yyyy-MMM-dd" showOn="none" readonlyInput="true" />
+
+
+                            </p:panelGrid>
+                            <p:panelGrid columns="2">
+                                <h:outputLabel value="Observación:"/>
+                                <p:inputTextarea cols="40" rows="6" value="#{muestraLaboratorioController.selected.observaciones}"/>
+                            </p:panelGrid>
+                        </h:panelGrid>
+
+
+                    </h:panelGrid>
+
+
+                    <h:panelGrid columns="1"  id="datosCliente"  >
+
+                        <p:panelGrid columns="4" rendered="#{muestraLaboratorioController.renderDatosCliente}">  
+
+                            <h:outputLabel value="Hacienda"/>
+                            <p:selectOneMenu id="hacienda" value="#{muestraLaboratorioController.selected.hacienda}" style="width:200px" converter="GenericConverter" filter="true" >
+                                <p:ajax listener="#{muestraLaboratorioController.onHaciendaChangeSelected}" update=":frmUpdate:lote :frmUpdate:persona :frmUpdate:email" />
+                                <f:selectItem itemLabel="Seleccionar Hacienda" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{muestraLaboratorioController.listaHacienda}" var="hac" itemLabel="#{hac.nombre}" itemValue="#{hac.id}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="Persona Contacto:"/>
+                            <p:inputText id="persona" value="#{muestraLaboratorioController.selected.personaContacto}" style="width: 200px;" />
+
+                            <h:outputLabel value="Lote:"/>
+                            <p:selectOneMenu id="lote" value="#{muestraLaboratorioController.selected.lote}" style="width:200px" converter="GenericConverter" filter="true" >
+                                <p:ajax listener="#{muestraLaboratorioController.onLoteChangeSelected}" update=":frmUpdate:nombrecultivo :frmUpdate:estacion :frmIngreso:periodo" />
+                                <f:selectItem itemLabel="Seleccionar Lote" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{muestraLaboratorioController.listaLote}" var="lot" itemLabel="#{lot.idLotes}" itemValue="#{lot.idLotes}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="E-mail envio Informe:"/>
+                            <p:inputText id="email" value="#{muestraLaboratorioController.selected.emailInforme}" style="width: 200px;" />
+
+                            <h:outputLabel value="Cultivo:"/>                               
+                            <p:inputText id="nombrecultivo" value="#{muestraLaboratorioController.selected.leyendaCultivo}" readonly="true" style="width: 200px;" />
+
+                            <h:outputLabel value="Cantón:"/>
+                            <p:inputText id="canton" value="#{muestraLaboratorioController.selected.leyendaCanton}" style="width: 200px;" readonly="true" />
+
+                            <h:outputLabel value="Estación Monitoreo:"/>
+                            <p:inputText id="estacion" value="#{muestraLaboratorioController.selected.estacionMonitoreo}" style="width: 200px;" readonly="true"/>
+                            
+
+                            <h:outputLabel value="Muestreador:"/>
+                            <p:inputText value="#{muestraLaboratorioController.selected.muestreador}" style="width: 200px;" />
+
+                            <h:outputLabel value="Período Monitoreo:"/>
+                            <p:selectOneMenu id="periodo" value="#{muestraLaboratorioController.selected.numeroMonitoreo}" style="width:200px"  filter="true" >                                        
+                                <f:selectItem itemLabel="Seleccionar Periodo" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{muestraLaboratorioController.listaPeriodoMonitoreo}" var="per" itemLabel="#{per.numeroMonitoreo} (#{per.numeroDias} días)" itemValue="#{per.numeroMonitoreo}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="Dirección envio Informe:"/>
+                            <p:inputText value="#{muestraLaboratorioController.selected.direccionInforme}" style="width: 200px;" />
+
+                            <h:outputLabel value=""/>
+                            <h:outputLabel value=""/>
+
+                            <h:outputLabel value="Productor:"/>
+                            <p:inputText value="#{muestraLaboratorioController.selected.productor}" style="width: 200px;" />
+
+                        </p:panelGrid>
+
+
+
+                    </h:panelGrid>
+
+                    <p:panelGrid columns="4" >
+
+                        <h:outputLabel  value="Fecha Muestreo:" />
+                        <p:calendar  value="#{muestraLaboratorioController.selected.fechaMuestreo}" locale="es" navigator="true" pattern="yyyy-MMM-dd" />
+
+                        <h:outputLabel  value="Fecha Envio:" />
+                        <p:calendar  value="#{muestraLaboratorioController.selected.fechaEnvio}" locale="es" navigator="true" pattern="yyyy-MMM-dd" >
+                            <p:ajax event="dateSelect" listener="#{muestraLaboratorioController.onChangeFechaEnvio}"  update=":frmUpdate:fIngLab  :frmUpdate:fIngRecInf" />
+                        </p:calendar>   
+
+                        <h:outputLabel value="Courier"/>
+                        <p:selectOneMenu  value="#{muestraLaboratorioController.selected.courier}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                            <f:selectItem itemLabel="Seleccionar Courier" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{muestraLaboratorioController.listaCourier}" var="cour" itemLabel="#{cour.nombre}" itemValue="#{cour.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel  value="Fecha Ingreso Laboratorio:" />
+                        <p:calendar id="fIngLab"  value="#{muestraLaboratorioController.fechaIngresoLab}" locale="es" navigator="true" pattern="yyyy-MMM-dd" showOn="none" readonlyInput="true"  />
+
+                        <h:outputLabel value="Tracker Number:"/>
+                        <p:inputText value="#{muestraLaboratorioController.selected.trackerNumber}" style="width: 150px;" />
+
+                        <h:outputLabel  value="Fecha RecepcionInforme" />
+                        <p:calendar id="fIngRecInf"  value="#{muestraLaboratorioController.fechaRecepcionInf}" locale="es" navigator="true" pattern="yyyy-MMM-dd" showOn="none" readonlyInput="true" />
+
+                    </p:panelGrid>
+
+
+                    <p:panelGrid columns="4">
+                        <h:outputLabel value="Matriz"/>
+                        <p:selectOneMenu  value="#{muestraLaboratorioController.selected.matriz}" style="width:200px" converter="GenericConverter" filter="true" > 
+                            <p:ajax listener="#{muestraLaboratorioController.onMatrizChangeSelected}" update=":frmUpdate:pickListE :frmUpdate:pickListP" />
+                            <f:selectItem itemLabel="Seleccionar Matriz" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{muestraLaboratorioController.listaMatriz}" var="matr" itemLabel="#{matr.nombre}" itemValue="#{matr.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel value="T.A.T.:"/>
+                        <h:outputLabel  id="tatNum" value="#{muestraLaboratorioController.tat}" style="color: red; font-size: x-large; font:bolder"/>
+
+                        <h3 style="margin-top: 0">Subanálisis</h3>
+                        <p:pickList id="pickListE" value="#{muestraLaboratorioController.listadoElementos}" var="elemento" itemLabel="#{elemento.nombre} (#{elemento.simbolo}) - TAT: #{elemento.tat}" itemValue="#{elemento}" 
+                                    showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="GenericConverter">
+                            <p:ajax event="transfer" listener="#{muestraLaboratorioController.onTransferESelected}" update=":frmUpdate:tatNum :frmUpdate:pickListE :frmUpdate:pickListP :frmUpdate:fIngRecInf" />
+                        </p:pickList>
+
+                        <h3 style="margin-top: 0">Paquete Análisis</h3>
+                        <p:pickList id="pickListP" value="#{muestraLaboratorioController.listadoPaquetes}" var="paquete" itemLabel="#{paquete.descripcion}  - TAT: #{paquete.tat}" itemValue="#{paquete}" 
+                                    showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="GenericConverter">
+                            <p:ajax event="transfer" listener="#{muestraLaboratorioController.onTransferPSelected}" update=":frmUpdate:tatNum :frmUpdate:pickListE :frmUpdate:pickListP :frmUpdate:fIngRecInf" />
+                        </p:pickList>
+                    </p:panelGrid>
+
+
+
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/> 
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmIngreso">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+
+                    <p:menubar>
+                        <p:menuitem value="Nuevo" action="#{menuFertilizacionController.goToOpCrearMuestraLaboratorio}" icon="ui-icon-document" ajax="false" />
+                    </p:menubar>
+
+                    <p:panel header="Muestra">
+
+                        <p:panel id="pnlUsuariosIngresados" header="Muestras Existentes">
+                            <p:dataTable var="obj" value="#{muestraLaboratorioController.model}" style="width: 95%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{muestraLaboratorioController.filter}" paginator="true" rows="10"
+                                         selection="#{muestraLaboratorioController.selected}" selectionMode="single" widgetVar="usuariosTable">
+
+                                <p:ajax  event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{muestraLaboratorioController.loadListasSelected}" />
+
+                                <p:columnGroup type="header">
+                                    <p:row>
+                                        <p:column colspan="10" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                    </p:row>
+
+                                    <p:row> 
+                                        <p:column headerText="MUESTRA" filterBy="#{obj.tipoMuestra}" filterMatchMode="contains"/>
+                                        <p:column headerText="CODIGO" filterBy="#{obj.codigo} #{obj.numeroCodigo}" filterMatchMode="contains"/>
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains"/>   
+                                        <p:column headerText="HACIENDA" filterBy="#{obj.leyendaHacienda}" filterMatchMode="contains"/> 
+                                        <p:column headerText="LOTE" filterBy="#{obj.leyendaLote}" filterMatchMode="contains"/>   
+                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains" />  
+                                        <p:column headerText="EST. MONIT." filterBy="#{obj.estacionMonitoreo}" filterMatchMode="contains" />       
+                                        <p:column headerText="NUMERO MONIT." filterBy="#{obj.numeroMonitoreo}" filterMatchMode="contains" />       
+                                        <p:column headerText="FECHA MUESTREO." filterBy="#{obj.fechaFormatMuestreo}" filterMatchMode="contains" />
+                                        <p:column headerText="FECHA ENVIO" filterBy="#{obj.fechaFormatEnvio}" filterMatchMode="contains" />                                        
+                                    </p:row>  
+                                </p:columnGroup>
+
+                                <p:column >
+                                    <h:outputText value="#{obj.tipoMuestra}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.codigo}/000#{obj.numeroCodigo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCliente}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaHacienda}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaLote}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCultivo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.estacionMonitoreo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="# #{obj.numeroMonitoreo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatMuestreo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaFormatEnvio}" />
+                                </p:column>
+
+
+                            </p:dataTable>
+                        </p:panel>
+                    </p:panel>
+                </h:form>
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

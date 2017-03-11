@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>FUENTE</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+        </style>
+        
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                /*panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() == "INICIO")
+                        {
+                           
+                            header.css("display","block");
+                            header.addClass("ui-state-active");
+                        }
+                });*/
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+                <h:form id="frmIngreso">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+
+
+                    <p:panel header="HACIENDA">
+
+                        <p:menubar>
+                            <p:menuitem value="Regresar" action="#{menuFertilizacionController.goToOpHacienda}" icon="ui-icon-extlink" />
+                            <p:menuitem value="Guardar" action="#{menuFertilizacionController.goToOpHacienda}" actionListener="#{haciendaController.save}" icon="ui-icon-disk" update=":frmIngreso"/>
+                        </p:menubar>
+                        <p:panel header="Nueva Hacienda">
+                            <p:commandButton value="Guardar" actionListener="#{haciendaController.save}" icon="ui-icon-disk" update=":frmIngreso"/>
+                            <h:panelGrid columns="2">
+                                <p:panelGrid columns="2" style="margin: 0 0">
+
+                                    <h:outputLabel value="Cliente:"/>                               
+                                    <p:selectOneMenu  value="#{haciendaController.actual.idCliente}" effect="fold" converter="GenericConverter">
+                                        <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
+                                        <f:selectItems value="#{haciendaController.listadoCl}" var="cliente" itemLabel="#{cliente.nombre}" itemValue="#{cliente.id}" />
+                                        <p:column>
+                                            <h:outputText value="#{cliente.nombre}" />
+                                        </p:column>                                        
+                                    </p:selectOneMenu>
+
+                                    <h:outputLabel value="Nombre:"/>
+                                    <p:inputText value="#{haciendaController.actual.nombre}" style="width: 250px;"/>
+
+                                    <h:outputLabel value="Hectareas:"/>
+                                    <p:inputText value="#{haciendaController.actual.hectareas}" style="width: 250px;"/>
+
+                                    <h:outputLabel value="Lotes:"/>
+                                    <p:inputText value="#{haciendaController.actual.numLotes}" style="width: 250px;"/>
+
+
+                                </p:panelGrid>
+
+                                <h:panelGrid columns="3">
+                                    <p:panelGrid columns="2" >
+                                        <f:facet name="header">
+                                            #{haciendaController.listadoC.get(0).tipo}
+                                        </f:facet>                                                                             
+                                        <h:outputLabel value="Nombre:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(0).nombre}" style="width: 250px;"/>
+                                        <h:outputLabel value="Cargo:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(0).cargo}" style="width: 250px;"/>
+                                        <h:outputLabel value="Teléfono(s):"/>
+                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(0).telefono}"/>
+                                        <h:outputLabel value="Email(s):"/>
+                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(0).email}"/>
+                                    </p:panelGrid>
+                                    <p:panelGrid columns="2">
+                                        <f:facet name="header">
+                                            #{haciendaController.listadoC.get(1).tipo}
+                                        </f:facet>
+                                        <h:outputLabel value="Nombre:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(1).nombre}" style="width: 250px;"/>
+                                        <h:outputLabel value="Cargo:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(1).cargo}" style="width: 250px;"/>
+                                        <h:outputLabel value="Teléfono(s):"/>
+                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(1).telefono}"/>
+                                        <h:outputLabel value="Email(s):"/>
+                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(1).email}"/>
+                                    </p:panelGrid>
+                                    <p:panelGrid columns="2">
+                                        <f:facet name="header">
+                                            #{haciendaController.listadoC.get(2).tipo}
+                                        </f:facet>                                        
+                                        <h:outputLabel value="Nombre:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(2).nombre}" style="width: 250px;"/>
+                                        <h:outputLabel value="Cargo:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(2).cargo}" style="width: 250px;"/>
+                                        <h:outputLabel value="Teléfono(s):"/>
+                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(2).telefono}"/>
+                                        <h:outputLabel value="Email(s):"/>
+                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(2).email}"/>
+                                    </p:panelGrid>
+                                    <p:panelGrid columns="2">
+                                        <f:facet name="header">
+                                            #{haciendaController.listadoC.get(3).tipo}
+                                        </f:facet>                                       
+                                        <h:outputLabel value="Nombre:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(3).nombre}" style="width: 250px;"/>
+                                        <h:outputLabel value="Cargo:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(3).cargo}" style="width: 250px;"/>
+                                        <h:outputLabel value="Teléfono(s):"/>
+                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(3).telefono}"/>
+                                        <h:outputLabel value="Email(s):"/>
+                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(3).email}"/>
+                                    </p:panelGrid>
+                                    <p:panelGrid columns="2">
+                                        <f:facet name="header">
+                                            #{haciendaController.listadoC.get(4).tipo}
+                                        </f:facet>                                       
+                                        <h:outputLabel value="Nombre:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(4).nombre}" style="width: 250px;"/>
+                                        <h:outputLabel value="Cargo:"/>
+                                        <p:inputText value="#{haciendaController.listadoC.get(4).cargo}" style="width: 250px;"/>
+                                        <h:outputLabel value="Teléfono(s):"/>
+                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(4).telefono}"/>
+                                        <h:outputLabel value="Email(s):"/>
+                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(4).email}"/>
+                                    </p:panelGrid>
+                                </h:panelGrid>
+
+                            </h:panelGrid>
+                        </p:panel>
+                    </p:panel>
+
+                </h:form>
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+

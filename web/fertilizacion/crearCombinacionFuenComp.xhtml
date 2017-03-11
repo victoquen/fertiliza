@@ -1,0 +1,522 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+
+        <title>Index SuperAdministrador</title>
+        <style type="text/css">
+            .ui-widget,
+            .ui-widget .ui-widget
+            {
+                font-size: 90% !important;
+            }
+
+            .customTitleBar > .ui-panel-titlebar{
+                background: #04B404;
+            }
+
+            /* Header cells */
+            table.pretty thead th {
+                text-align: center;
+                background: #04B404;
+            }
+
+            .panelColumns td {
+                vertical-align: top;
+            }
+
+        </style>
+        
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+                //$(".ui-panelmenu-content").css("display", "block");
+                //$(".ui-panelmenu-header").addClass("ui-state-active");
+
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                // 1. On page loading collapses possible opened panels
+                //panelMenu.collapseRootSubmenu(panelMenu.headers);
+                
+                
+                /*panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() == "INICIO")
+                        {
+                           
+                            header.css("display","block");
+                            header.addClass("ui-state-active");
+                        }
+                });*/
+                
+                // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
+                clearSidePanelMenuPreferences();
+                // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
+                // We need to fork also on the first level links to be sure it works after user clicks there then exit from the page in another way
+                panelMenu.headers.children("a").click(function () {
+                    setTimeout(clearSidePanelMenuPreferences, 500)
+                }); // setTimeout is necessary because this event should be fired after preferences are written
+                panelMenu.headers.siblings().find("a").click(function () {
+                    clearSidePanelMenuPreferences();
+                });
+            });
+
+            function clearSidePanelMenuPreferences() {
+                var panelMenu = PrimeFaces.widgets.sidePanelMenu;
+                //panelMenu.expandedNodes = [];   // clear the opened panels lists
+                //panelMenu.saveState();          // store this information
+                panelMenu.headers.click(function () {
+                    var currHeader = $(this);
+                    panelMenu.headers.each(function () {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            panelMenu.collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                        }
+                    });
+                });
+                panelMenu.saveState();          // store this information
+
+
+                /*PF('sidePanelMenu').headers.click(function ()
+                {
+                    var currHeader = $(this);
+                    PF('sidePanelMenu').headers.each(function ()
+                    {
+                        var header = $(this);
+                        if (header.text() !== currHeader.text())
+                        {
+                            PF('sidePanelMenu').collapseRootSubmenu(header);
+                            header.removeClass('ui-state-hover');
+                            PF('sidePanelMenu').saveState();
+                        }
+                    });
+                });*/
+            }
+
+
+
+        </script>
+    </h:head>
+    <h:body onload="#{mainUserController.releaseSessions()}">
+        <h:form id="frmAux">
+            <p:dialog header="Info Compuesto" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" >
+                <p:outputPanel id="objDetail" style="text-align: justify;">
+                    <h:panelGrid  columns="2" rendered="#{not empty combinacionFuenCompController.selectedCI}" columnClasses="label,value">
+
+
+                        <h:outputText value="Compuesto:" />
+                        <h:outputText value="#{combinacionFuenCompController.selectedCI.simboloCompuesto}" />
+
+                        <h:outputText value="%Ingrediente Activo:" />
+                        <p:inputText value="#{combinacionFuenCompController.selectedCI.ingredienteActivo}" />
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{combinacionFuenCompController.cambiarCompuesto}"  update=":frmIngreso:sComponentes :frmAux"/>
+                                <p:commandButton value="Eliminar" actionListener="#{combinacionFuenCompController.eliminarCompuesto}" update=":frmIngreso:sComponentes :frmAux"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <p:layout fullPage="true">
+
+            <p:layoutUnit position="north" size="100">  
+                <div style=" border:0; width: 100%; height: 100%; background-image: url(../images/banner2.png); background-position:  center"  
+                     class="ui-widget-content ui-corner-all">  
+
+                    <h:panelGrid columns="2" width="100%">
+                        <h:panelGrid columns="1" style="margin-left: 25%; margin-top: 2%">
+                            <h:outputLabel  value="BIENVENID@: #{loginBean.loggedUsuarioNombre}"/>
+                        </h:panelGrid>
+                        <h:panelGrid columns="1" style="margin-left: 20%; margin-top: 2%">
+                            <h:form id="logoutFrm" style="margin-left: 80%; padding-top: 3% ">
+                                <p:commandButton   ajax="false" id="logout" value="Salir" actionListener="#{loginBean.doLogout}" oncomplete="logout(xhr, status, args)" icon="ui-icon-power"/>
+                            </h:form>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                </div>
+            </p:layoutUnit>
+
+
+
+            <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
+                <h:form id="frmMenu">
+                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                </h:form>
+            </p:layoutUnit>
+
+            <p:layoutUnit position="south" size="30">
+                <h:outputText value="OMBUGAMES CIA LTDA Copyrigth 2016" />
+            </p:layoutUnit>
+
+
+
+
+
+
+            <p:layoutUnit position="center">
+
+                <h:form id="frmIngreso">
+
+                    <p:menubar>
+                        <p:menuitem value="Regresar" action="#{menuFertilizacionController.goToOpCombinacionFuenteCompuesto}" icon="ui-icon-extlink" />
+                    </p:menubar>
+
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
+                    <p:panel header="Combinación">
+                        <h:panelGrid columns="2" styleClass="panelColumns">
+
+                            <p:panel header="FUENTES" id="pFuente" style="margin: 0 0 0 0">
+                                <h:panelGrid columns="2" >
+
+                                    <h:panelGroup>
+                                        <p:dataTable var="obj" value="#{combinacionFuenCompController.modelF}" style="width: 350px; margin: auto auto"
+                                                     emptyMessage="No existen registros" filteredValue="#{combinacionFuenCompController.filterF}" paginator="true" rows="10"
+                                                     selection="#{combinacionFuenCompController.selectedF}" selectionMode="single" widgetVar="usuariosTable">
+
+                                            <p:ajax event="rowSelect" update=":frmIngreso:fSelected :frmIngreso:fDatosFuente :frmIngreso:cSelected"  listener="#{combinacionFuenCompController.deactivateCompuesto}"  />
+
+                                            <p:columnGroup type="header">
+                                                <p:row>
+                                                    <p:column colspan="3" headerText="FUENTES"/>
+                                                </p:row>
+                                                <p:row>
+                                                    <p:column colspan="3" headerText="Dar clic en el Objeto para Seleccionarlo"/>
+                                                </p:row>
+
+                                                <p:row>
+                                                    <p:column headerText="SÍMBOLO" filterBy="#{obj.simbolo}" filterMatchMode="contains"/>
+                                                    <p:column headerText="NOMBRE" filterBy="#{obj.nombre}" filterMatchMode="contains"/>
+                                                    <p:column headerText="TIPO" filterBy="#{obj.tipo}" filterMatchMode="contains"/>
+
+                                                </p:row>  
+                                            </p:columnGroup>
+
+                                            <p:column >
+                                                <h:outputText value="#{obj.simbolo}" />
+                                            </p:column>
+                                            <p:column >
+                                                <h:outputText value="#{obj.nombre}" />
+                                            </p:column>
+
+                                            <p:column >
+                                                <h:outputText value="#{obj.tipo}" />
+                                            </p:column>
+                                        </p:dataTable>
+
+                                    </h:panelGroup>
+
+                                    <h:panelGrid columns="1">
+                                        
+
+                                        <p:panel header="Fuente Seleccionada" id="fSelected">
+                                            <h:panelGrid columns="2">
+                                                <h:outputLabel style="font: bolder" value="Fuente:"/>
+                                                <h:outputText value="#{combinacionFuenCompController.selectedF.simbolo}" style="font-weight: bolder; font-size: x-large; color: green"/>
+                                            </h:panelGrid>
+
+
+                                        </p:panel>
+                                        <p:panel header="DATOS FUENTE" id="fDatosFuente">
+                                            <h:panelGrid columns="2">
+                                                <h:outputLabel value="Humedad:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.humedadF}"/>
+                                                <h:outputLabel value="Presentación:"/>
+                                                <h:panelGrid columns="2">
+                                                    <p:inputText value="#{combinacionFuenCompController.presentacionKgF}"/>
+                                                    <p:selectOneMenu  value="#{combinacionFuenCompController.actualFC.unidadesPresentacion}" >                                                        
+                                                        <f:selectItem itemLabel="Kg" itemValue="Kg"  />
+                                                        <f:selectItem itemLabel="Lt" itemValue="Lt"  />                                                           
+                                                    </p:selectOneMenu>
+                                                </h:panelGrid>
+
+
+                                                <h:outputLabel value="Precio [$]:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.precioDoleSacoF}"/>
+                                                <h:outputLabel value="Aminoácidos:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.aminoacidos}"/>
+                                                <h:outputLabel value="Ácidos Húmicos"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.acidosHumicos}"/>
+                                                <h:outputLabel value="Ácidos Fúlvicos"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.acidosfulvicos}"/>
+                                                <h:outputLabel value="Auxinas"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.auxinas}"/>
+                                                <h:outputLabel value="Giberilinas"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.giberilinas}"/>
+                                                <h:outputLabel value="Citocininas"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.citocininas}"/>
+                                                <h:outputLabel value="Materia Orgánica"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualFC.materiaorganica}"/>
+
+                                            </h:panelGrid>
+                                        </p:panel>
+
+
+                                    </h:panelGrid>
+
+                                </h:panelGrid>
+                            </p:panel>
+
+
+                            <p:panel header="COMPUESTO QUÍMICO" id="pCompuesto" styleClass="customTitleBar" >
+
+                                <h:panelGrid columns="3">
+
+                                    <h:panelGrid columns="1">
+                                        <p:panel header="Nuevo Compuesto" styleClass="customTitleBar">
+                                            <h:panelGrid columns="2" id="display">
+
+                                                <h:outputLabel value="Símbolo:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualC.simbolo}" style="width: 150px;"/>
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualC.nombre}" style="width: 150px;"/>
+                                                <h:outputLabel value="Valor:"/>                                
+                                                <p:inputText   value="#{combinacionFuenCompController.actualC.valor}" style="width: 150px;"/>
+                                                <h:outputLabel value="Peso:"/>
+                                                <p:inputText value="#{combinacionFuenCompController.actualC.peso}" style="width: 150px"/>
+                                                <p:commandButton value="Guardar" actionListener="#{combinacionFuenCompController.saveCompuesto}"
+                                                                 update=":frmIngreso:pCompuesto"/>
+                                            </h:panelGrid>
+                                        </p:panel>
+
+
+
+                                        <p:dataTable  var="obj" value="#{combinacionFuenCompController.modelC}" style="width: 300px; margin: auto auto;"
+                                                      emptyMessage="No existen registros" filteredValue="#{combinacionFuenCompController.filterC}" paginator="true" rows="5" rowsPerPageTemplate="10,20,50,100"
+                                                      selection="#{combinacionFuenCompController.selectedC}" selectionMode="single" widgetVar="obj">
+
+                                            <p:ajax event="rowSelect" update=":frmIngreso:cSelected"  />
+
+                                            <p:columnGroup type="header">
+                                                <p:row >
+                                                    <p:column colspan="2" headerText="COMPUESTOS QUÍMICOS" />
+                                                </p:row>
+                                                <p:row>
+                                                    <p:column colspan="2" headerText="Dar clic en el Objeto para Seleccionarlo"/>
+                                                </p:row>
+
+                                                <p:row>
+                                                    <p:column headerText="SÍMBOLO" filterBy="#{obj.simbolo}" filterMatchMode="contains"/>
+                                                    <p:column headerText="NOMBRE" filterBy="#{obj.nombre}" filterMatchMode="contains"/>
+
+                                                </p:row>  
+                                            </p:columnGroup>
+
+                                            <p:column >
+                                                <h:outputText value="#{obj.simbolo}" />
+                                            </p:column>
+                                            <p:column >
+                                                <h:outputText value="#{obj.nombre}" />
+                                            </p:column>                               
+
+                                        </p:dataTable>
+
+
+                                    </h:panelGrid>
+
+                                    <h:panelGrid columns="1">
+
+                                        <p:panel header="Compuesto Seleccionado" id="cSelected" styleClass="customTitleBar">
+                                            <h:panelGrid columns="2" >
+                                                <h:outputLabel style="font: bolder" value="Compuesto:"/>
+                                                <h:outputText value="#{combinacionFuenCompController.selectedC.simbolo}" style="font-weight: bolder; font-size: x-large; color: red"/>
+
+                                            </h:panelGrid>
+
+                                        </p:panel>
+
+                                        <p:panel header="Datos Compuesto" styleClass="customTitleBar">
+                                            <h:outputLabel value="%Ingrediente Activo (decimal)"/>
+                                            <p:inputText value="#{combinacionFuenCompController.porcentajeIngredienteActivo}"/>
+
+                                            <f:facet id="footer" name="footer">
+                                                <p:commandButton value="Seleccionar" actionListener="#{combinacionFuenCompController.addCompuestos}" update=":frmIngreso:pCompuesto :frmIngreso:sComponentes :frmIngreso " style="margin-left: 25%"/>
+                                            </f:facet>
+
+                                        </p:panel>
+
+                                    </h:panelGrid>
+
+                                    <h:panelGrid columns="1" id="sComponentes">
+
+                                        <p:dataList  value="#{combinacionFuenCompController.compuestosIngrediente}" var="obj" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                            <f:facet name="header">
+                                                Compuestos Seleccionados
+                                            </f:facet>
+
+                                            <h:panelGrid columns="2">
+                                                <p:commandLink update=":frmAux:objDetail" oncomplete="PF('objDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" style="">
+                                                    <f:setPropertyActionListener value="#{obj}" target="#{combinacionFuenCompController.selectedCI}" />
+                                                </p:commandLink>
+                                                <h:outputText value="#{obj.simboloCompuesto}, (#{obj.ingredienteActivo})" style="display:compact "/>
+
+
+                                            </h:panelGrid>
+                                        </p:dataList>
+
+
+
+
+
+                                    </h:panelGrid>
+
+                                </h:panelGrid>
+
+                            </p:panel>
+
+
+
+                        </h:panelGrid>
+
+                        <f:facet name="footer" >
+                            <h:panelGrid columns="1" width="100%"  style="text-align: center" >
+                                <p:commandButton value="Ingreso Temporal" actionListener="#{combinacionFuenCompController.guardarFuentesCompuestosCombinados}" update=":frmIngreso :frmResultados"/>
+                            </h:panelGrid>
+                        </f:facet>
+                    </p:panel>
+
+
+
+
+
+                </h:form>
+
+
+                <h:form id="frmResultados">
+
+
+                    <p:menubar>
+                        <p:menuitem value="Actualizar"  icon="ui-icon-refresh" update=":frmResultados"/>
+                        <p:menuitem value="Guardar" icon="ui-icon-disk" actionListener="#{combinacionFuenCompController.save}" action="#{menuFertilizacionController.goToOpCombinacionFuenteCompuesto}" />
+                    </p:menubar>
+
+
+
+                    <h:panelGrid columns="1" id="hResultados">
+
+
+                        <p:dataTable id="obj1" value="#{combinacionFuenCompController.fuentesCompuestos}" var="obj" editable="true" editMode="cell"
+
+                                     rowKey="#{obj.fuente}" >
+
+
+                            <p:ajax event="cellEdit"   listener="#{combinacionFuenCompController.editDatosFuente(0)}" />
+
+                            <f:facet name="header">
+                                Expandir las filas para ver más detalles de los Compuestos Químicos
+                            </f:facet>
+
+
+                            <p:column style="width:16px" >
+                                <p:rowToggler />
+                            </p:column>                            
+
+                            <p:column headerText="Fuente">
+                                <h:outputText value="#{obj.fuenteSimbolo}" />
+                            </p:column>
+
+                            <p:column headerText="Humedad">
+
+                                <p:cellEditor >
+                                    <f:facet name="output"><h:outputText value="#{obj.humedadF}"   /></f:facet>
+                                    <f:facet name="input"><p:inputText id="aa1" value="#{obj.humedadF}" style="width:96%"  /></f:facet>
+                                </p:cellEditor>
+
+                            </p:column>
+                            <p:column headerText="Presentación Kg.">
+
+                                <p:cellEditor>
+                                    <f:facet name="output"><h:outputText value="#{obj.presentacionKgF}" /></f:facet>
+                                    <f:facet name="input"><p:inputText id="aa2" value="#{obj.presentacionKgF}" style="width:96%" /></f:facet>
+                                </p:cellEditor>
+
+                            </p:column>
+                            <p:column headerText="Precio DOLE Saco">
+                                <p:cellEditor>
+                                    <f:facet name="output"><h:outputText value="#{obj.precioDoleSacoF}" /></f:facet>
+                                    <f:facet name="input"><p:inputText id="aa3" value="#{obj.precioDoleSacoF}" style="width:96%" /></f:facet>
+                                </p:cellEditor>
+
+                            </p:column>
+
+                            <p:column headerText="Eliminar">
+                                <p:commandButton id="iconOnly"  icon="ui-icon-circle-close" title="Icon Only" actionListener="#{combinacionFuenCompController.quitarFuente(obj.fuente)}" update=":frmResultados" />
+                            </p:column>
+
+                            <p:rowExpansion >
+
+                                <p:dataTable id="obj2" value="#{obj.compuestos}" var="comp" style="width: 50%; margin: auto auto" sortBy="#{obj.fuenteSimbolo}" 
+                                             editable="true" editMode="cell" rowKey="#{comp.idCompuesto}" >
+
+                                    <p:ajax event="cellEdit"   listener="#{combinacionFuenCompController.editDatosFuente(1)}"  update=":frmResultados" />
+
+                                    <f:facet name="header">
+                                        #{obj.fuenteSimbolo}
+                                    </f:facet>
+                                    <p:column headerText="Compuesto">
+                                        <h:outputText value="#{comp.simboloCompuesto}" />
+                                    </p:column>
+                                    <p:column headerText="Porcentaje Ingrediente Activo">
+
+                                        <p:cellEditor >
+                                            <f:facet name="output"><h:outputText value="#{comp.ingredienteActivo}"   /></f:facet>
+                                            <f:facet name="input"><p:inputText  value="#{comp.ingredienteActivo}" style="width:96%"  /></f:facet>
+                                        </p:cellEditor>
+
+
+                                    </p:column>
+                                    <p:column headerText="% Peso Total">
+                                        <h:outputText value="#{comp.porcentajePesoTotalIA}" />
+                                    </p:column>
+                                    <p:column headerText="Precio Kg [$]">
+                                        <h:outputText value="$ #{comp.precioKgIA}" />
+                                    </p:column>
+                                    <p:column headerText="Kg IngAct/Concen PC">
+                                        <h:outputText value="#{comp.kgIAconcentracionPC}" />
+                                    </p:column>
+                                    <p:column headerText="Kg IA [$]">
+                                        <h:outputText value="$ #{comp.unoKgIA}" />
+                                    </p:column>
+                                    <p:column headerText="Eliminar">
+                                        <p:commandButton id="iconOnly"  icon="ui-icon-circle-close" title="Icon Only" actionListener="#{combinacionFuenCompController.quitarCompuesto(obj.fuente, comp.idCompuesto)}" update=":frmResultados" />
+                                    </p:column>
+
+
+                                    <p:columnGroup type="footer">
+                                        <p:row>
+                                            <p:column footerText="Totals: " style="text-align:right"/>
+                                            <p:column footerText="#{obj.totalF}" />
+                                            <p:column footerText="1" />
+                                        </p:row>
+                                    </p:columnGroup>
+
+                                </p:dataTable>
+
+
+                            </p:rowExpansion>
+
+                        </p:dataTable>
+                    </h:panelGrid>
+
+                </h:form>
+
+
+
+            </p:layoutUnit>
+
+        </p:layout>
+    </h:body>
+</html>
+
