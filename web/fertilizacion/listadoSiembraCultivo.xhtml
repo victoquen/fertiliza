@@ -1,12 +1,16 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:p="http://primefaces.org/ui"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
-
-        <title>FUENTE</title>
+        <title>SIEMBRA CULTIVO</title>
         <style type="text/css">
             .ui-widget,
             .ui-widget .ui-widget
@@ -14,6 +18,7 @@
                 font-size: 90% !important;
             }
         </style>
+
 
         <script type="text/javascript">
 
@@ -88,6 +93,24 @@
         </script>
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
+
+        <h:form id="frmUpdate">
+
+            <p:dialog header="Info MUESTRA" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="1200px" > 
+
+                <p:menubar>      
+                    <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpSiembraCultivo}" icon="ui-icon-extlink" update=":frmUpdate, :frmListado"/>
+                    <p:menuitem  value="Actualizar"  actionListener="#{siembraCultivoController.update}" icon="ui-icon-disk" update=":frmUpdate, :frmListado" />
+                </p:menubar> 
+
+                <h:panelGrid id="display" columns="1" cellpadding="4" style="font-size: 12px">
+
+
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+
         <p:layout fullPage="true">
 
             <p:layoutUnit position="north" size="100">  
@@ -113,7 +136,7 @@
 
             <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
                 <h:form id="frmMenu">
-                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/> 
                 </h:form>
             </p:layoutUnit>
 
@@ -123,61 +146,47 @@
 
 
 
-
-
-
             <p:layoutUnit position="center">
-                <h:form id="frmIngreso">
+                <h:form id="frmListado">
                     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
-                    <p:panel header="EDAD">
-                        <p:panel header="Nueva Edad">
-                            <p:panelGrid columns="2">
 
+                    <p:menubar>
+                        <p:menuitem value="Nuevo" action="#{menuFertilizacionController.goToOpNuevoSiembraCultivo}" icon="ui-icon-document" ajax="false" />
+                    </p:menubar>
 
-                                <h:outputLabel value="Nombre:"/>
-                                <p:inputText value="#{edadController.actual.nombre}" style="width: 250px; text-transform: uppercase"/>
+                    <p:panel header="Muestra">
 
-                                <h:outputLabel value="Cultivo:"/>
-                                <p:selectOneMenu id="depar" value="#{edadController.idCultivo}" style="width:150px" converter="GenericConverter" filter="true" > 
-                                    <p:ajax listener="#{edadController.onChangeCultivo}" update=":frmIngreso:var"/>
-                                    <f:selectItem itemLabel="Seleccionar Cultivo" itemValue="" noSelectionOption="true" />
-                                    <f:selectItems value="#{edadController.listadoCultivo}" var="cul" itemLabel="#{cul.nombre}" itemValue="#{cul.id}" />
-                                </p:selectOneMenu>
+                        <p:panel id="pnlUsuariosIngresados" header="Muestras Existentes">
+                            <p:dataTable var="obj" value="#{siembraCultivoController.model}" style="width: 95%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{siembraCultivoController.filter}" paginator="true" rows="10"
+                                         selection="#{siembraCultivoController.selected}" selectionMode="single" widgetVar="usuariosTable">
 
-                                <h:outputLabel value="Variedad:"/>
-                                <p:selectOneMenu id="var" value="#{edadController.actual.variedad}" style="width:150px" converter="GenericConverter" filter="true" >                                        
-                                    <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
-                                    <f:selectItems value="#{edadController.listadoVariedad}" var="var" itemLabel="#{var.nombre}" itemValue="#{var.id}" />
-                                </p:selectOneMenu>
-
-                                <p:commandButton value="Guardar" actionListener="#{edadController.save}"
-                                                 update=":frmIngreso"/>
-                            </p:panelGrid>
-
-
-                        </p:panel>
-
-                        <p:panel id="pnlUsuariosIngresados" header="Edades Existentes">
-                            <p:dataTable var="obj" value="#{edadController.model}" style="width: 20%; margin: auto auto"
-                                         emptyMessage="No existen registros" filteredValue="#{edadController.filter}" paginator="true" rows="10"
-                                         selection="#{edadController.selected}" selectionMode="single" widgetVar="usuariosTable">
-
-                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{edadController.loadListSelected}" />
+                                <p:ajax  event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{siembraCultivoController.loadListasSelected}" />
 
                                 <p:columnGroup type="header">
                                     <p:row>
-                                        <p:column colspan="3" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column colspan="6" headerText="Dar clic en el Objeto para Modificarlo"/>
                                     </p:row>
 
-                                    <p:row>                                        
-                                        <p:column headerText="NOMBRE" filterBy="#{obj.nombre}" filterMatchMode="contains"/>  
-                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/> 
-                                        <p:column headerText="VARIEDAD" filterBy="#{obj.leyendaVariedad}" filterMatchMode="contains"/>
+                                    <p:row> 
+                                        <p:column headerText="CODIGO" filterBy="#{obj.codigo} " filterMatchMode="contains"/>
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains"/>
+                                        <p:column headerText="HACIENDA" filterBy="#{obj.leyendaHacienda} " filterMatchMode="contains"/>
+                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/>   
+                                        <p:column headerText="VARIEDAD" filterBy="#{obj.leyendaVariedad}" filterMatchMode="contains"/> 
+                                        <p:column headerText="FECHA SIEMBRA" filterBy="#{obj.fechaSiembraFormat}" filterMatchMode="contains"/>   
+
                                     </p:row>  
                                 </p:columnGroup>
 
                                 <p:column >
-                                    <h:outputText value="#{obj.nombre}" />
+                                    <h:outputText value="#{obj.codigo}" />
+                                </p:column>                                
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaCliente}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaHacienda}" />
                                 </p:column>
                                 <p:column >
                                     <h:outputText value="#{obj.leyendaCultivo}" />
@@ -185,46 +194,20 @@
                                 <p:column >
                                     <h:outputText value="#{obj.leyendaVariedad}" />
                                 </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.fechaSiembraFormat}" />
+                                </p:column>
+
+
 
                             </p:dataTable>
                         </p:panel>
                     </p:panel>
                 </h:form>
-
-                <h:form id="frmUpdate">
-                    <p:dialog id="objDialog" header="Edad" widgetVar="objDialog" resizable="false" 
-                              width="400" showEffect="clip" hideEffect="hold" closable="false" >                
-
-                        <h:panelGrid id="display" columns="1" cellpadding="4">
-
-                            <h:panelGrid columns="2" style="border: hidden">                                
-                                <h:outputLabel value="Nombre:"/>
-                                <p:inputText value="#{edadController.selected.nombre}" style="width: 250px; text-transform: uppercase"/>   
-
-                                <h:outputLabel value="Cultivo:"/>
-                                <p:selectOneMenu id="depar" value="#{edadController.idCultivo}" style="width:150px" converter="GenericConverter" filter="true" >   
-                                    <p:ajax listener="#{edadController.onChangeCultivo}" update=":frmUpdate:var"/>
-                                    <f:selectItems value="#{edadController.listadoCultivo}" var="cul" itemLabel="#{cul.nombre}" itemValue="#{cul.id}" />
-                                </p:selectOneMenu>
-
-                                <h:outputLabel value="Variedad:"/>
-                                <p:selectOneMenu id="var" value="#{edadController.selected.variedad}" style="width:150px" converter="GenericConverter" filter="true" >                                        
-                                    <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
-                                    <f:selectItems value="#{edadController.listadoVariedad}" var="var" itemLabel="#{var.nombre}" itemValue="#{var.id}" />
-                                </p:selectOneMenu>
-                            </h:panelGrid>
-
-                            <h:panelGrid columns="2">
-                                <p:commandButton ajax="false" id="Guardar" update=":frmUpdate, :frmIngreso"  value="Guardar" action="#{edadController.update}"  />
-
-                                <p:commandButton id="Cancelar" update=":frmUpdate, :frmIngreso" value="Cancelar"/>
-                            </h:panelGrid>
-                        </h:panelGrid>
-                    </p:dialog>
-                </h:form>
             </p:layoutUnit>
 
         </p:layout>
+
+
     </h:body>
 </html>
-

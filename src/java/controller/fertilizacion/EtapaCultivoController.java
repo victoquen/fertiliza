@@ -6,7 +6,7 @@
 package controller.fertilizacion;
 
 import entities.fertilizacion.Cultivo;
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.Variedad;
 import java.io.Serializable;
 import java.util.List;
@@ -14,32 +14,32 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
-import models.EdadModel;
+import models.EtapaCultivoModel;
 import org.bson.types.ObjectId;
 
 /**
  *
- * @author pablo
+ * @author VICTOR OQUENDO
  */
 @Named
 @ViewScoped
-public class EdadController implements Serializable {
+public class EtapaCultivoController implements Serializable {
 
-    Edad actual;
-    Edad selected;
-    List<Edad> listado;
-    List<Edad> filter;
-    EdadModel model;
+    EtapaCultivo actual;
+    EtapaCultivo selected;
+    List<EtapaCultivo> listado;
+    List<EtapaCultivo> filter;
+    EtapaCultivoModel model;
 
     ObjectId idCultivo;
 
     List<Cultivo> listadoCultivo;
     List<Variedad> listadoVariedad;
 
-    public EdadController() {
-        actual = new Edad();
-        listado = Edad.getAllEdad();
-        model = new EdadModel(listado);
+    public EtapaCultivoController() {
+        actual = new EtapaCultivo();
+        listado = EtapaCultivo.getAll();
+        model = new EtapaCultivoModel(listado);
 
         listadoCultivo = Cultivo.getAllCultivos();
 
@@ -61,43 +61,43 @@ public class EdadController implements Serializable {
         this.listadoCultivo = listadoCultivo;
     }
 
-    public Edad getActual() {
+    public EtapaCultivo getActual() {
         return actual;
     }
 
-    public void setActual(Edad actual) {
+    public void setActual(EtapaCultivo actual) {
         this.actual = actual;
     }
 
-    public Edad getSelected() {
+    public EtapaCultivo getSelected() {
         return selected;
     }
 
-    public void setSelected(Edad selected) {
+    public void setSelected(EtapaCultivo selected) {
         this.selected = selected;
     }
 
-    public List<Edad> getListado() {
+    public List<EtapaCultivo> getListado() {
         return listado;
     }
 
-    public void setListado(List<Edad> listado) {
+    public void setListado(List<EtapaCultivo> listado) {
         this.listado = listado;
     }
 
-    public List<Edad> getFilter() {
+    public List<EtapaCultivo> getFilter() {
         return filter;
     }
 
-    public void setFilter(List<Edad> filter) {
+    public void setFilter(List<EtapaCultivo> filter) {
         this.filter = filter;
     }
 
-    public EdadModel getModel() {
+    public EtapaCultivoModel getModel() {
         return model;
     }
 
-    public void setModel(EdadModel model) {
+    public void setModel(EtapaCultivoModel model) {
         this.model = model;
     }
 
@@ -133,9 +133,9 @@ public class EdadController implements Serializable {
     }
 
     public void load() {
-        actual = new Edad();
-        listado = Edad.getAllEdad();
-        model = new EdadModel(listado);
+        actual = new EtapaCultivo();
+        listado = EtapaCultivo.getAll();
+        model = new EtapaCultivoModel(listado);
         
         listadoCultivo = Cultivo.getAllCultivos();
     }
@@ -146,7 +146,7 @@ public class EdadController implements Serializable {
         listadoVariedad = Variedad.getAllVariedadByCultivo(this.idCultivo);
     }
 
-    Boolean controlDatos(Edad u) {
+    Boolean controlDatos(EtapaCultivo u) {
         Boolean res = true;
 
         if ((u.getNombre().equals("")) || (u.getVariedad() == null)) {

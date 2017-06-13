@@ -6,7 +6,7 @@
 package controller.fertilizacion;
 
 import entities.fertilizacion.Cultivo;
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.Variedad;
 import java.io.Serializable;
 import java.util.List;
@@ -15,7 +15,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import models.CultivoModel;
-import models.EdadModel;
+import models.EtapaCultivoModel;
 import models.VariedadModel;
 
 /**

@@ -316,12 +316,6 @@ public class Cliente implements Serializable {
 
         MongoManager mongo = MongoManager.getInstance();
 
-        Document obj = new Document("$set", new Document("codigo", this.codigo).append("nombre", this.nombre).append("tipo", this.tipo).append("rucci", this.rucCi).append("mercado", this.mercado)
-                .append("afacturar", this.afacturar).append("vendedor", this.vendedor).append("direccion", this.direccion)
-                .append("pais", this.pais).append("provincia", this.provincia).append("canton", this.canton)
-                .append("sector", this.sector).append("atencionfactura", this.atencionFactura).append("tipoCliente", this.tipoCliente)
-                .append("departamento", this.departamento).append("observacionGenerico", this.observacionGenerico));
-
         List<String> ltelf = this.telefono;
         StringBuilder auxtelf = new StringBuilder(75);
         for (int i = 0; i < ltelf.size(); i++) {
@@ -333,8 +327,29 @@ public class Cliente implements Serializable {
         for (int j = 0; j < lmail.size(); j++) {
             auxmail.append(lmail.get(j)).append(";");
         }
+        
+        Document obj = new Document("$set", new Document("codigo", this.codigo)
+                .append("nombre", this.nombre)
+                .append("tipo", this.tipo)
+                .append("rucci", this.rucCi)
+                .append("mercado", this.mercado)
+                .append("afacturar", this.afacturar)
+                .append("vendedor", this.vendedor)
+                .append("direccion", this.direccion)
+                .append("pais", this.pais)
+                .append("provincia", this.provincia)
+                .append("canton", this.canton)
+                .append("sector", this.sector)
+                .append("atencionfactura", this.atencionFactura)
+                .append("tipoCliente", this.tipoCliente)
+                .append("departamento", this.departamento)
+                .append("observacionGenerico", this.observacionGenerico)
+                .append("telefono", auxtelf.toString())
+                .append("email", auxmail.toString()));
 
-        mongo.db.getCollection("cliente").updateOne(new Document("_id", this.id), obj.append("telefono", auxtelf.toString()).append("email", auxmail.toString()));
+        
+
+        mongo.db.getCollection("cliente").updateOne(new Document("_id", this.id), obj);
 
     }
 
@@ -377,7 +392,7 @@ public class Cliente implements Serializable {
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.observacionGenerico = document.getString("observacionGenerico");
 
-                obj.haciendas = Hacienda.getAllHaciendaByClienteId(obj.id);
+                //obj.haciendas = Hacienda.getAllHaciendaByClienteId(obj.id);
 
             }
 
@@ -423,7 +438,7 @@ public class Cliente implements Serializable {
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.observacionGenerico = document.getString("observacionGenerico");
 
-                obj.haciendas = Hacienda.getAllHaciendaByClienteId(obj.id);
+                //obj.haciendas = Hacienda.getAllHaciendaByClienteId(obj.id);
             }
 
         });

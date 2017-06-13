@@ -8,7 +8,7 @@ package controller.fertilizacion;
 import entities.fertilizacion.Cliente;
 import entities.fertilizacion.Contacto;
 import entities.fertilizacion.Cultivo;
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.EstacionMonitoreo;
 import entities.fertilizacion.Hacienda;
 import entities.fertilizacion.HaciendaLoteCultivoAux;
@@ -21,6 +21,7 @@ import entities.fertilizacion.Variedad;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ import org.primefaces.model.map.Marker;
 
 /**
  *
- * @author pablo
+ * @author VICTOR OQUENDO
  */
 @Named
 @ViewScoped
@@ -66,6 +67,7 @@ public class HaciendaController implements Serializable {
     String actualFonoG;
     String selectedFonoG;
     List<String> fonosG;
+    List<String> fonosGG;
 
     String actualMailF;
     String selectedMailF;
@@ -106,19 +108,29 @@ public class HaciendaController implements Serializable {
     private String centerGeoMap = "-2.207019, -79.913864";
     private String centerRevGeoMap = "-2.207019, -79.913864";
 
+    @PostConstruct
+    public void init() {
+        geoModel = new DefaultMapModel();
+        revGeoModel = new DefaultMapModel();
+
+    }
+
+    
+    
     String latitud;
     String longitud;
 
+    /* INICIO  por borrar**************************************************************************************/
     List<HaciendaLoteCultivoAux> listadoLotes;
     HaciendaLoteCultivoAux auxLote;
     HaciendaLoteCultivoAux auxLoteSelected;
     List<Cultivo> listadoCultivo;
     List<Variedad> listadoVariedad;
-    List<Edad> listadoEdad;
+    List<EtapaCultivo> listadoEdad;
 
     HaciendaLoteCultivoAux auxLoteSelectedAuxiliar;
 
-    Edad edad;
+    EtapaCultivo edad;
     Variedad variedad;
     Cultivo cultivo;
 
@@ -128,7 +140,7 @@ public class HaciendaController implements Serializable {
 
     String actualSonda;
     String selectedSonda;
-    //List<String> sondas;
+
 
     List<SondaTipo> listadoSondaTipo;
     String actualSondaTipo;
@@ -146,17 +158,15 @@ public class HaciendaController implements Serializable {
     int hectareasHacienda;
     int hectareasLote;
     int hectareasAcumulador;
-
-    @PostConstruct
-    public void init() {
-        geoModel = new DefaultMapModel();
-        revGeoModel = new DefaultMapModel();
-    }
+    /* FIN  por borrar**************************************************************************************/
+    
+    
+    
 
     public HaciendaController() {
         actual = new Hacienda();
-        //listado = Hacienda.getAllHacienda();
-        //model = new HaciendaModel(listado);
+        listado = Hacienda.getAllHacienda();
+        model = new HaciendaModel(listado);
 
         actualCl = new Cliente();
         listadoCl = Cliente.getAllClientes();
@@ -201,6 +211,8 @@ public class HaciendaController implements Serializable {
         actualFonoC = "";
         fonosC = new ArrayList<>();
 
+        
+        /* INICIO  por borrar**************************************************************************************/
         listadoLotes = new ArrayList<>();
         listadoCultivo = Cultivo.getAllCultivos();
         listadoVariedad = new ArrayList<>();
@@ -227,8 +239,12 @@ public class HaciendaController implements Serializable {
         hectareasHacienda = 0;
         hectareasLote = 0;
         hectareasAcumulador = 0;
+        /* FIN  por borrar**************************************************************************************/
     }
 
+    
+    /* INICIO  por borrar**************************************************************************************/
+    
     public int getHectareasHacienda() {
         return hectareasHacienda;
     }
@@ -357,11 +373,11 @@ public class HaciendaController implements Serializable {
         this.selectedSondaAux = selectedSondaAux;
     }
 
-    public Edad getEdad() {
+    public EtapaCultivo getEdad() {
         return edad;
     }
 
-    public void setEdad(Edad edad) {
+    public void setEdad(EtapaCultivo edad) {
         this.edad = edad;
     }
 
@@ -413,11 +429,11 @@ public class HaciendaController implements Serializable {
         this.listadoVariedad = listadoVariedad;
     }
 
-    public List<Edad> getListadoEdad() {
+    public List<EtapaCultivo> getListadoEdad() {
         return listadoEdad;
     }
 
-    public void setListadoEdad(List<Edad> listadoEdad) {
+    public void setListadoEdad(List<EtapaCultivo> listadoEdad) {
         this.listadoEdad = listadoEdad;
     }
 
@@ -429,6 +445,9 @@ public class HaciendaController implements Serializable {
         this.listadoLotes = listadoLotes;
     }
 
+    /* FIN  por borrar**************************************************************************************/
+    
+    
     public String getLatitud() {
         return latitud;
     }
@@ -803,7 +822,7 @@ public class HaciendaController implements Serializable {
             listadoC.get(4).setTelefono(fonosC);
             listadoC.get(4).setEmail(mailsC);
 
-            actual.setListadoLotes(listadoLotes);
+            //actual.setListadoLotes(listadoLotes);
 
             actual.setContactos(listadoC);
             res = actual.save();
@@ -814,7 +833,20 @@ public class HaciendaController implements Serializable {
     }
 
     public void update() {
+        selected = actual;
         if (controlDatos(selected)) {
+            listadoC.get(0).setTelefono(fonosG);
+            listadoC.get(0).setEmail(mailsG);
+            listadoC.get(1).setTelefono(fonosF);
+            listadoC.get(1).setEmail(mailsF);
+            listadoC.get(2).setTelefono(fonosH);
+            listadoC.get(2).setEmail(mailsH);
+            listadoC.get(3).setTelefono(fonosA);
+            listadoC.get(3).setEmail(mailsA);
+            listadoC.get(4).setTelefono(fonosC);
+            listadoC.get(4).setEmail(mailsC);
+            
+            selected.setContactos(listadoC);            
             selected.update();
             load();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Hacienda Modificada"));
@@ -832,10 +864,36 @@ public class HaciendaController implements Serializable {
         haciendaLoteCultivo = new HaciendaLoteCultivoAux();*/
     }
 
+    
+    public void loadDataUpdate(){
+       
+        if(actual.getLatitud().compareTo("")==0){
+            actual.setLatitud("-2.207019");       
+        }
+        if(actual.getLongitud().compareTo("")==0){
+            actual.setLongitud("-79.913864");       
+        }
+        
+        listadoC = actual.getContactos();
+        fonosG = new ArrayList<String>(listadoC.get(0).getTelefono());
+        mailsG = new ArrayList<String>(listadoC.get(0).getEmail());
+        fonosF = new ArrayList<String>(listadoC.get(1).getTelefono());
+        mailsF = new ArrayList<String>(listadoC.get(1).getEmail());
+        fonosH = new ArrayList<String>(listadoC.get(2).getTelefono());
+        mailsH = new ArrayList<String>(listadoC.get(2).getEmail());
+        fonosA = new ArrayList<String>(listadoC.get(3).getTelefono());
+        mailsA = new ArrayList<String>(listadoC.get(3).getEmail());
+        fonosC = new ArrayList<String>(listadoC.get(4).getTelefono());
+        mailsC = new ArrayList<String>(listadoC.get(4).getEmail());
+        
+        
+           
+        
+    }
     Boolean controlDatos(Hacienda u) {
         Boolean res = true;
 
-        if ((u.getNombre().equals("")) || listadoLotes.isEmpty()) {
+        if ((u.getNombre().equals(""))) {
             res = false;
         }
         return res;
@@ -925,8 +983,8 @@ public class HaciendaController implements Serializable {
     }
 
     public void addFonoG() {
-        if (!actualFonoG.equals("")) {
-            fonosG.add(actualFonoG);
+        if (!actualFonoG.equals("")) {                      
+            fonosG.add(actualFonoG);                       
         }
         actualFonoG = "";
     }
@@ -1298,7 +1356,7 @@ public class HaciendaController implements Serializable {
 
     public void onVariedadChange() {
         if (this.auxLote.getVariedad() != null) {
-            listadoEdad = Edad.getAllEdadByVariedad(this.auxLote.getVariedad());
+            listadoEdad = EtapaCultivo.getAllByVariedad(this.auxLote.getVariedad());
         } else {
             listadoEdad = new ArrayList<>();
         }
@@ -1307,7 +1365,7 @@ public class HaciendaController implements Serializable {
 
     public void onVariedadChangeSelected() {
         if (this.auxLoteSelected.getVariedad() != null) {
-            listadoEdad = Edad.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
+            listadoEdad = EtapaCultivo.getAllByVariedad(this.auxLoteSelected.getVariedad());
             this.auxLoteSelected.setLeyendaVariedad(Variedad.getVariedadById(auxLoteSelected.getVariedad()).getNombre());
 
         } else {
@@ -1318,8 +1376,8 @@ public class HaciendaController implements Serializable {
     public void onCultivoChangeSelected() {
         if (this.auxLoteSelected.getCultivo() != null) {
             listadoVariedad = Variedad.getAllVariedadByCultivo(this.auxLoteSelected.getCultivo());
-            //listadoEdad = Edad.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
-            //listadoEdad = Edad.getAllEdadByCultivo(this.auxLoteSelected.getCultivo());
+            //listadoEdad = EtapaCultivo.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
+            //listadoEdad = EtapaCultivo.getAllEdadByCultivo(this.auxLoteSelected.getCultivo());
             this.auxLoteSelected.setLeyendaCultivo(Cultivo.getCultivoById(auxLoteSelected.getCultivo()).getNombre());
 
             listadoEdad = new ArrayList<>();
@@ -1333,7 +1391,7 @@ public class HaciendaController implements Serializable {
 
     public void onVariedadChangeSelectedIni() {
         if (this.auxLoteSelected.getVariedad() != null) {
-            listadoEdad = Edad.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
+            listadoEdad = EtapaCultivo.getAllByVariedad(this.auxLoteSelected.getVariedad());
             this.auxLoteSelected.setLeyendaVariedad(Variedad.getVariedadById(auxLoteSelected.getVariedad()).getNombre());
 
         } else {
@@ -1346,8 +1404,8 @@ public class HaciendaController implements Serializable {
 
         if (this.auxLoteSelected.getCultivo() != null) {
             listadoVariedad = Variedad.getAllVariedadByCultivo(this.auxLoteSelected.getCultivo());
-            //listadoEdad = Edad.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
-            //listadoEdad = Edad.getAllEdadByCultivo(this.auxLoteSelected.getCultivo());
+            //listadoEdad = EtapaCultivo.getAllEdadByVariedad(this.auxLoteSelected.getVariedad());
+            //listadoEdad = EtapaCultivo.getAllEdadByCultivo(this.auxLoteSelected.getCultivo());
             this.auxLoteSelected.setLeyendaCultivo(Cultivo.getCultivoById(auxLoteSelected.getCultivo()).getNombre());
 
             listadoEdad = new ArrayList<>();
@@ -1373,7 +1431,7 @@ public class HaciendaController implements Serializable {
 
             this.auxLote.setLeyendaCultivo(Cultivo.getCultivoById(auxLote.getCultivo()).getNombre());
             this.auxLote.setLeyendaVariedad(Variedad.getVariedadById(auxLote.getVariedad()).getNombre());
-            this.auxLote.setLeyendaEdad(Edad.getEdadById(auxLote.getEdad()).getNombre());
+            this.auxLote.setLeyendaEdad(EtapaCultivo.getById(auxLote.getEdad()).getNombre());
 
             this.auxLote.setListaEstacionMonitoreo(listadoM);
             this.auxLote.setListaPeriodosMonitoreos(listadoMonitoreos);
@@ -1419,7 +1477,7 @@ public class HaciendaController implements Serializable {
 
             this.auxLoteSelected.setLeyendaCultivo(Cultivo.getCultivoById(auxLoteSelected.getCultivo()).getNombre());
             this.auxLoteSelected.setLeyendaVariedad(Variedad.getVariedadById(auxLoteSelected.getVariedad()).getNombre());
-            this.auxLoteSelected.setLeyendaEdad(Edad.getEdadById(auxLoteSelected.getEdad()).getNombre());
+            this.auxLoteSelected.setLeyendaEdad(EtapaCultivo.getById(auxLoteSelected.getEdad()).getNombre());
 
             this.auxLoteSelected.setListaEstacionMonitoreo(listadoM);
             this.auxLoteSelected.setListaPeriodosMonitoreos(listadoMonitoreos);
@@ -1446,7 +1504,7 @@ public class HaciendaController implements Serializable {
     //*********************************************************************************************************************
     //metodos CULTIVO EDAD VARIEDAD****************************************************************************************
     public void newEdad() {
-        this.edad = new Edad();
+        this.edad = new EtapaCultivo();
         this.edad.setVariedad(auxLote.getVariedad());
         this.edad.setLeyendaVariedad(Variedad.getVariedadById(auxLote.getVariedad()).getNombre());
         this.edad.setLeyendaCultivo(Variedad.getVariedadById(auxLote.getVariedad()).getLeyendaCultivo());
@@ -1463,7 +1521,7 @@ public class HaciendaController implements Serializable {
         this.cultivo = new Cultivo();
     }
 
-    boolean controlEdad(Edad e) {
+    boolean controlEdad(EtapaCultivo e) {
         boolean res = true;
 
         if (e.getNombre().equals("") || e.getVariedad() == null) {
@@ -1496,7 +1554,7 @@ public class HaciendaController implements Serializable {
     public void saveNewEdad() {
         if (controlEdad(this.edad)) {
             this.auxLote.setEdad(this.edad.save());
-            this.listadoEdad = Edad.getAllEdadByVariedad(this.auxLote.getVariedad());
+            this.listadoEdad = EtapaCultivo.getAllByVariedad(this.auxLote.getVariedad());
         }
     }
 
@@ -1701,4 +1759,18 @@ public class HaciendaController implements Serializable {
         return res;
     }
 
+    public List<String> getFonosGG() {
+        return fonosGG;
+    }
+
+    public void setFonosGG(List<String> fonosGG) {
+        this.fonosGG = fonosGG;
+    }
+
+    public void loadUpdateMap() {
+        geoModel = new DefaultMapModel();
+        revGeoModel = new DefaultMapModel();
+       
+
+    }
 }

@@ -6,15 +6,77 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
 
-        <title>FUENTE</title>
+        <title>HACIENDA</title>
         <style type="text/css">
             .ui-widget,
             .ui-widget .ui-widget
             {
-                font-size: 90% !important;
+                font-size: 95% !important;
+            }
+
+            .panelColumns td {
+                vertical-align: top;
+            }
+            .panelGridCenter {
+                margin: 0 auto;
+            }
+
+            .panelGridCenter td,.panelGridCenter tr {
+                text-align: center;
             }
         </style>
-        
+
+
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyDBXe08AQa5hT5UW17v7tJajANyD96FLvw"></script>
+
+        <script type="text/javascript">
+            function reverseGeocode() {
+                var lat = document.getElementById('lat').value;
+                var lng = document.getElementById('lng').value;
+                PF('revGeoMap').reverseGeocode(lat, lng);
+            }
+        </script>
+
+        <script type="text/javascript">
+            function reverseGeocodeSelected() {
+                var lat = document.getElementById('latSelected').value;
+                var lng = document.getElementById('lngSelected').value;
+                PF('revGeoMapSelected').reverseGeocode(lat, lng);
+            }
+
+
+        </script>
+
+
+        <script type="text/javascript">
+            PrimeFaces.locales['es'] = {
+                closeText: 'Cerrar',
+                prevText: 'Anterior',
+                nextText: 'Siguiente',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                dayNamesMin: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
+                weekHeader: 'Semana',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Sólo hora',
+                timeText: 'Tiempo',
+                hourText: 'Hora',
+                minuteText: 'Minuto',
+                secondText: 'Segundo',
+                currentText: 'Fecha actual',
+                ampm: false,
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                allDayText: 'Todo el día'
+            };
+        </script>
+
         <script type="text/javascript">
 
 
@@ -25,18 +87,18 @@
                 var panelMenu = PrimeFaces.widgets.sidePanelMenu;
                 // 1. On page loading collapses possible opened panels
                 //panelMenu.collapseRootSubmenu(panelMenu.headers);
-                
-                
+
+
                 /*panelMenu.headers.each(function () {
-                        var header = $(this);
-                        if (header.text() == "INICIO")
-                        {
-                           
-                            header.css("display","block");
-                            header.addClass("ui-state-active");
-                        }
-                });*/
-                
+                 var header = $(this);
+                 if (header.text() == "INICIO")
+                 {
+                 
+                 header.css("display","block");
+                 header.addClass("ui-state-active");
+                 }
+                 });*/
+
                 // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
                 clearSidePanelMenuPreferences();
                 // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
@@ -68,26 +130,333 @@
 
 
                 /*PF('sidePanelMenu').headers.click(function ()
-                {
-                    var currHeader = $(this);
-                    PF('sidePanelMenu').headers.each(function ()
-                    {
-                        var header = $(this);
-                        if (header.text() !== currHeader.text())
-                        {
-                            PF('sidePanelMenu').collapseRootSubmenu(header);
-                            header.removeClass('ui-state-hover');
-                            PF('sidePanelMenu').saveState();
-                        }
-                    });
-                });*/
+                 {
+                 var currHeader = $(this);
+                 PF('sidePanelMenu').headers.each(function ()
+                 {
+                 var header = $(this);
+                 if (header.text() !== currHeader.text())
+                 {
+                 PF('sidePanelMenu').collapseRootSubmenu(header);
+                 header.removeClass('ui-state-hover');
+                 PF('sidePanelMenu').saveState();
+                 }
+                 });
+                 });*/
             }
 
 
 
         </script>
+
+
+
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
+
+
+        <h:form prependId="false" id="frmMap">
+            <p:dialog id="gmapDialog" widgetVar="dlg" width="700" height="600" modal="true" closable="false">
+
+                <h:panelGrid columnClasses="1" width="100%" id="map" >
+                    <h3>Ubicación Hacienda</h3>
+                    <h:panelGrid columns="5" style="margin-bottom:10px" cellpadding="5">
+                        <p:outputLabel  value="Lat:" />
+                        <p:inputText id="lat" value="#{haciendaController.actual.latitud}"/>
+                        <p:outputLabel  value="Lng:" />
+                        <p:inputText id="lng" value="#{haciendaController.actual.longitud}"/>
+                        <p:commandButton value="Geocode" icon="ui-icon-search"  onclick="reverseGeocode()" type="button" />
+                    </h:panelGrid>
+
+                    <p:gmap id="revGeoGmap" widgetVar="revGeoMap" center="#{haciendaController.centerRevGeoMap}" zoom="10" type="ROADMAP" model="#{haciendaController.revGeoModel}" style="width:100%;height:400px">
+                        <p:ajax event="reverseGeocode" listener="#{haciendaController.onReverseGeocode}" update="@this" />
+                    </p:gmap>
+
+                    <br/>
+                    <br/>
+                    <p:commandButton id="Aceptar" update=":frmMap" value="Aceptar"/>
+                </h:panelGrid>
+
+            </p:dialog>
+        </h:form> 
+
+
+        <!--******************************************************************************************************************************************************************************************-->
+        <!--******************************************************************************************************************************************************************************************-->
+        <!-- INICIO updates contactos hacienda *******************************************************************************************************************************************************-->
+
+
+
+
+        <h:form id="frmAuxFonoH">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialogH"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetailH" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{haciendaController.selectedFonoH}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualFonoH}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateFonoH}"  update=":frmIngreso:sContacto:sTelefonosH :frmAuxFonoH"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeFonoH}" update=":frmIngreso:sContacto:sTelefonosH :frmAuxFonoH"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMailH">
+            <p:dialog header="Info Email" widgetVar="mailDialogH"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetailH" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{haciendaController.selectedMailH}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualMailH}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateMailH}"  update=":frmIngreso:sContacto:sMailsH :frmAuxMailH"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeMailH}" update=":frmIngreso:sContacto:sMailsH :frmAuxMailH"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+
+
+        <h:form id="frmAuxFonoG">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialogG"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetailG" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{haciendaController.selectedFonoG}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualFonoG}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateFonoG}"  update=":frmIngreso:sContacto:sTelefonosG :frmAuxFonoG"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeFonoG}" update=":frmIngreso:sContacto:sTelefonosG :frmAuxFonoG"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMailG">
+            <p:dialog header="Info Email" widgetVar="mailDialogG"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetailG" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{haciendaController.selectedMailG}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualMailG}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateMailG}"  update=":frmIngreso:sContacto:sMailsG :frmAuxMailG"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeMailG}" update=":frmIngreso:sContacto:sMailsG :frmAuxMailG"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxFonoF">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialogF"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetailF" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{haciendaController.selectedFonoF}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualFonoF}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateFonoF}"  update=":frmIngreso:sContacto:sTelefonosF :frmAuxFonoF"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeFonoF}" update=":frmIngreso:sContacto:sTelefonosF :frmAuxFonoF"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMailF">
+            <p:dialog header="Info Email" widgetVar="mailDialogF"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetailF" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{haciendaController.selectedMailF}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualMailF}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateMailF}"  update=":frmIngreso:sContacto:sMailsF :frmAuxMailF"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeMailF}" update=":frmIngreso:sContacto:sMailsF :frmAuxMailF"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxFonoA">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialogA"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetailA" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{haciendaController.selectedFonoA}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualFonoA}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateFonoA}"  update=":frmIngreso:sContacto:sTelefonosA :frmAuxFonoA"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeFonoA}" update=":frmIngreso:sContacto:sTelefonosA :frmAuxFonoA"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMailA">
+            <p:dialog header="Info Email" widgetVar="mailDialogA"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetailA" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{haciendaController.selectedMailA}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualMailA}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateMailA}"  update=":frmIngreso:sContacto:sMailsA :frmAuxMailA"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeMailA}" update=":frmIngreso:sContacto:sMailsA :frmAuxMailA"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxFonoC">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialogC"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetailC" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{haciendaController.selectedFonoC}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualFonoC}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateFonoC}"  update=":frmIngreso:sContacto:sTelefonosC :frmAuxFonoC"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeFonoC}" update=":frmIngreso:sContacto:sTelefonosC :frmAuxFonoC"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMailC">
+            <p:dialog header="Info Email" widgetVar="mailDialogC"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetailC" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{haciendaController.selectedMailC}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{haciendaController.actualMailC}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{haciendaController.updateMailC}"  update=":frmIngreso:sContacto:sMailsC :frmAuxMailC"/>
+                                <p:commandButton value="Eliminar" actionListener="#{haciendaController.removeMailC}" update=":frmIngreso:sContacto:sMailsC :frmAuxMailC"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!-- FIN updates contactos hacienda *******************************************************************************************************************************************************-->
+        <!--******************************************************************************************************************************************************************************************-->
+        <!--******************************************************************************************************************************************************************************************-->
+
+
+
+
         <p:layout fullPage="true">
 
             <p:layoutUnit position="north" size="100">  
@@ -113,7 +482,7 @@
 
             <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
                 <h:form id="frmMenu">
-                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
                 </h:form>
             </p:layoutUnit>
 
@@ -138,100 +507,345 @@
                             <p:menuitem value="Guardar" action="#{menuFertilizacionController.goToOpHacienda}" actionListener="#{haciendaController.save}" icon="ui-icon-disk" update=":frmIngreso"/>
                         </p:menubar>
                         <p:panel header="Nueva Hacienda">
-                            <p:commandButton value="Guardar" actionListener="#{haciendaController.save}" icon="ui-icon-disk" update=":frmIngreso"/>
-                            <h:panelGrid columns="2">
-                                <p:panelGrid columns="2" style="margin: 0 0">
+
+
+
+
+                            <h:panelGrid columns="2" id="dHacienda" styleClass="panelColumns">
+                                <p:panelGrid columns="2" styleClass="panelColumns">
+
 
                                     <h:outputLabel value="Cliente:"/>                               
-                                    <p:selectOneMenu  value="#{haciendaController.actual.idCliente}" effect="fold" converter="GenericConverter">
-                                        <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
+                                    <p:selectOneMenu  value="#{haciendaController.actual.idCliente}" effect="fold" converter="GenericConverter" style="width: 250px;" required="true" requiredMessage="Cliente. Campo Obligatorio">
+                                        <f:selectItem itemLabel="Seleccionar Cliente" itemValue=""  />
                                         <f:selectItems value="#{haciendaController.listadoCl}" var="cliente" itemLabel="#{cliente.nombre}" itemValue="#{cliente.id}" />
                                         <p:column>
                                             <h:outputText value="#{cliente.nombre}" />
                                         </p:column>                                        
                                     </p:selectOneMenu>
 
+
+
                                     <h:outputLabel value="Nombre:"/>
-                                    <p:inputText value="#{haciendaController.actual.nombre}" style="width: 250px;"/>
+                                    <p:inputText value="#{haciendaController.actual.nombre}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Nombre. Campo Obligatorio"/>
 
-                                    <h:outputLabel value="Hectareas:"/>
-                                    <p:inputText value="#{haciendaController.actual.hectareas}" style="width: 250px;"/>
+                                    <h:outputLabel value="Coordenadas:"/>
+                                    <p:commandButton id="btn" type="button" icon="ui-icon-pin-s" value="Mostrar Mapa" onclick="PF('dlg').show();" />
 
-                                    <h:outputLabel value="Lotes:"/>
-                                    <p:inputText value="#{haciendaController.actual.numLotes}" style="width: 250px;"/>
+
 
 
                                 </p:panelGrid>
 
-                                <h:panelGrid columns="3">
-                                    <p:panelGrid columns="2" >
-                                        <f:facet name="header">
-                                            #{haciendaController.listadoC.get(0).tipo}
-                                        </f:facet>                                                                             
-                                        <h:outputLabel value="Nombre:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(0).nombre}" style="width: 250px;"/>
-                                        <h:outputLabel value="Cargo:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(0).cargo}" style="width: 250px;"/>
-                                        <h:outputLabel value="Teléfono(s):"/>
-                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(0).telefono}"/>
-                                        <h:outputLabel value="Email(s):"/>
-                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(0).email}"/>
-                                    </p:panelGrid>
-                                    <p:panelGrid columns="2">
-                                        <f:facet name="header">
-                                            #{haciendaController.listadoC.get(1).tipo}
-                                        </f:facet>
-                                        <h:outputLabel value="Nombre:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(1).nombre}" style="width: 250px;"/>
-                                        <h:outputLabel value="Cargo:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(1).cargo}" style="width: 250px;"/>
-                                        <h:outputLabel value="Teléfono(s):"/>
-                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(1).telefono}"/>
-                                        <h:outputLabel value="Email(s):"/>
-                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(1).email}"/>
-                                    </p:panelGrid>
-                                    <p:panelGrid columns="2">
-                                        <f:facet name="header">
-                                            #{haciendaController.listadoC.get(2).tipo}
-                                        </f:facet>                                        
-                                        <h:outputLabel value="Nombre:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(2).nombre}" style="width: 250px;"/>
-                                        <h:outputLabel value="Cargo:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(2).cargo}" style="width: 250px;"/>
-                                        <h:outputLabel value="Teléfono(s):"/>
-                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(2).telefono}"/>
-                                        <h:outputLabel value="Email(s):"/>
-                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(2).email}"/>
-                                    </p:panelGrid>
-                                    <p:panelGrid columns="2">
-                                        <f:facet name="header">
-                                            #{haciendaController.listadoC.get(3).tipo}
-                                        </f:facet>                                       
-                                        <h:outputLabel value="Nombre:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(3).nombre}" style="width: 250px;"/>
-                                        <h:outputLabel value="Cargo:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(3).cargo}" style="width: 250px;"/>
-                                        <h:outputLabel value="Teléfono(s):"/>
-                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(3).telefono}"/>
-                                        <h:outputLabel value="Email(s):"/>
-                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(3).email}"/>
-                                    </p:panelGrid>
-                                    <p:panelGrid columns="2">
-                                        <f:facet name="header">
-                                            #{haciendaController.listadoC.get(4).tipo}
-                                        </f:facet>                                       
-                                        <h:outputLabel value="Nombre:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(4).nombre}" style="width: 250px;"/>
-                                        <h:outputLabel value="Cargo:"/>
-                                        <p:inputText value="#{haciendaController.listadoC.get(4).cargo}" style="width: 250px;"/>
-                                        <h:outputLabel value="Teléfono(s):"/>
-                                        <p:inputTextarea rows="6" cols="10" value="#{haciendaController.listadoC.get(4).telefono}"/>
-                                        <h:outputLabel value="Email(s):"/>
-                                        <p:inputTextarea rows="6" cols="40" value="#{haciendaController.listadoC.get(4).email}"/>
-                                    </p:panelGrid>
-                                </h:panelGrid>
+
+                                <p:tabView orientation="left" id="sContacto">
+                                    <p:tab title="Gerencia">
+
+                                        <p:panelGrid columns="2" >
+                                            <f:facet name="header">
+                                                #{haciendaController.listadoC.get(0).tipo}
+                                            </f:facet>  
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(0).nombre}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Cargo:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(0).cargo}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+
+                                            <h:panelGrid id="sTelefonosG" columns="1" >
+                                                <h:outputLabel value="Teléfono:"/>
+                                                <p:inputText value="#{haciendaController.actualFonoG}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addFonoG}" update=":frmIngreso:sContacto:sTelefonosG"/>
+
+                                                <p:dataList  value="#{haciendaController.fonosG}" var="objFonoG" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Teléfono(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxFonoG:fonoDetailG"  oncomplete="PF('fonoDialogG').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objFonoG}" target="#{haciendaController.selectedFonoG}" />
+                                                            <f:setPropertyActionListener value="#{objFonoG}" target="#{haciendaController.actualFonoG}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objFonoG}" style="display:compact "/>
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+                                            <h:panelGrid id="sMailsG" columns="1" >
+                                                <h:outputLabel value="Email:"/>
+                                                <p:inputText value="#{haciendaController.actualMailG}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addMailG}" update=":frmIngreso:sContacto:sMailsG"/>
+
+                                                <p:dataList  value="#{haciendaController.mailsG}" var="objMailG" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Email(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxMailG:mailDetailG"  oncomplete="PF('mailDialogG').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objMailG}" target="#{haciendaController.selectedMailG}" />
+                                                            <f:setPropertyActionListener value="#{objMailG}" target="#{haciendaController.actualMailG}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objMailG}" style="display:compact "/>
+
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+
+
+                                        </p:panelGrid>
+                                    </p:tab>   
+                                    <p:tab title="Facturación">
+                                        <p:panelGrid columns="2">
+                                            <f:facet name="header">
+                                                #{haciendaController.listadoC.get(1).tipo}
+                                            </f:facet>
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(1).nombre}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Cargo:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(1).cargo}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>                                        
+
+                                            <h:panelGrid id="sTelefonosF" columns="1" >
+                                                <h:outputLabel value="Teléfono:"/>
+                                                <p:inputText value="#{haciendaController.actualFonoF}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addFonoF}" update=":frmIngreso:sContacto:sTelefonosF"/>
+
+                                                <p:dataList  value="#{haciendaController.fonosF}" var="objFonoF" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Teléfono(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxFonoF:fonoDetailF"  oncomplete="PF('fonoDialogF').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objFonoF}" target="#{haciendaController.selectedFonoF}" />
+                                                            <f:setPropertyActionListener value="#{objFonoF}" target="#{haciendaController.actualFonoF}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objFonoF}" style="display:compact "/>
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+
+                                            <h:panelGrid id="sMailsF" columns="1" >
+                                                <h:outputLabel value="Email:"/>
+                                                <p:inputText value="#{haciendaController.actualMailF}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addMailF}" update=":frmIngreso:sContacto:sMailsF"/>
+
+                                                <p:dataList  value="#{haciendaController.mailsF}" var="objMailF" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Email(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxMailF:mailDetailF"  oncomplete="PF('mailDialogF').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objMailF}" target="#{haciendaController.selectedMailF}" />
+                                                            <f:setPropertyActionListener value="#{objMailF}" target="#{haciendaController.actualMailF}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objMailF}" style="display:compact "/>
+
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+                                        </p:panelGrid>
+                                    </p:tab>
+
+                                    <p:tab title="Oficina en Hacienda">
+                                        <p:panelGrid columns="2">
+                                            <f:facet name="header">
+                                                #{haciendaController.listadoC.get(2).tipo}
+                                            </f:facet>  
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(2).nombre}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Cargo:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(2).cargo}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>                                        
+
+                                            <h:panelGrid id="sTelefonosH" columns="1" >
+                                                <h:outputLabel value="Teléfono:"/>
+                                                <p:inputText value="#{haciendaController.actualFonoH}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addFonoH}" update=":frmIngreso:sContacto:sTelefonosH"/>
+
+                                                <p:dataList  value="#{haciendaController.fonosH}" var="objFonoH" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Teléfono(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxFonoH:fonoDetailH"  oncomplete="PF('fonoDialogH').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objFonoH}" target="#{haciendaController.selectedFonoH}" />
+                                                            <f:setPropertyActionListener value="#{objFonoH}" target="#{haciendaController.actualFonoH}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objFonoH}" style="display:compact "/>
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+
+                                            <h:panelGrid id="sMailsH" columns="1" >
+                                                <h:outputLabel value="Email:"/>
+                                                <p:inputText value="#{haciendaController.actualMailH}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addMailH}" update=":frmIngreso:sContacto:sMailsH"/>
+
+                                                <p:dataList  value="#{haciendaController.mailsH}" var="objMailH" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Email(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxMailH:mailDetailH"  oncomplete="PF('mailDialogH').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objMailH}" target="#{haciendaController.selectedMailH}" />
+                                                            <f:setPropertyActionListener value="#{objMailH}" target="#{haciendaController.actualMailH}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objMailH}" style="display:compact "/>
+
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid> 
+
+                                        </p:panelGrid>
+
+                                    </p:tab>
+                                    <p:tab title="Administrador de Campo">
+                                        <p:panelGrid columns="2">
+                                            <f:facet name="header">
+                                                #{haciendaController.listadoC.get(3).tipo}
+                                            </f:facet>    
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(3).nombre}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Cargo:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(3).cargo}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+
+
+                                            <h:panelGrid id="sTelefonosA" columns="1" >
+                                                <h:outputLabel value="Teléfono:"/>
+                                                <p:inputText value="#{haciendaController.actualFonoA}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addFonoA}" update=":frmIngreso:sContacto:sTelefonosA"/>
+
+                                                <p:dataList  value="#{haciendaController.fonosA}" var="objFonoA" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Teléfono(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxFonoA:fonoDetailA"  oncomplete="PF('fonoDialogA').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objFonoA}" target="#{haciendaController.selectedFonoA}" />
+                                                            <f:setPropertyActionListener value="#{objFonoA}" target="#{haciendaController.actualFonoA}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objFonoA}" style="display:compact "/>
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+
+                                            <h:panelGrid id="sMailsA" columns="1" >
+                                                <h:outputLabel value="Email:"/>
+                                                <p:inputText value="#{haciendaController.actualMailA}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addMailA}" update=":frmIngreso:sContacto:sMailsA"/>
+
+                                                <p:dataList  value="#{haciendaController.mailsA}" var="objMailA" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Email(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxMailA:mailDetailA"  oncomplete="PF('mailDialogA').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objMailA}" target="#{haciendaController.selectedMailA}" />
+                                                            <f:setPropertyActionListener value="#{objMailA}" target="#{haciendaController.actualMailA}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objMailA}" style="display:compact "/>
+
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>                                                                               
+
+                                        </p:panelGrid>
+                                    </p:tab>
+                                    <p:tab title="Capataz o Mayordomo">
+                                        <p:panelGrid columns="2">
+                                            <f:facet name="header">
+                                                #{haciendaController.listadoC.get(4).tipo}
+                                            </f:facet>  
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Nombre:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(4).nombre}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+                                            <h:panelGrid columns="1">
+                                                <h:outputLabel value="Cargo:"/>
+                                                <p:inputText value="#{haciendaController.listadoC.get(4).cargo}" style="width: 200px; text-transform: uppercase"/>
+                                            </h:panelGrid>
+
+                                            <h:panelGrid id="sTelefonosC" columns="1" >
+                                                <h:outputLabel value="Teléfono:"/>
+                                                <p:inputText value="#{haciendaController.actualFonoC}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addFonoC}" update=":frmIngreso:sContacto:sTelefonosC"/>
+
+                                                <p:dataList  value="#{haciendaController.fonosC}" var="objFonoC" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Teléfono(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxFonoC:fonoDetailC"  oncomplete="PF('fonoDialogC').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objFonoC}" target="#{haciendaController.selectedFonoC}" />
+                                                            <f:setPropertyActionListener value="#{objFonoC}" target="#{haciendaController.actualFonoC}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objFonoC}" style="display:compact "/>
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+
+
+                                            <h:panelGrid id="sMailsC" columns="1" >
+                                                <h:outputLabel value="Email:"/>
+                                                <p:inputText value="#{haciendaController.actualMailC}" style="width: 150px;"/>
+                                                <p:commandButton value="Agregar" actionListener="#{haciendaController.addMailC}" update=":frmIngreso:sContacto:sMailsC"/>
+
+                                                <p:dataList  value="#{haciendaController.mailsC}" var="objMailC" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                                    <f:facet name="header">
+                                                        Email(s)
+                                                    </f:facet>
+
+                                                    <h:panelGrid columns="2">
+                                                        <p:commandLink update=":frmAuxMailC:mailDetailC"  oncomplete="PF('mailDialogC').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                                            <f:setPropertyActionListener value="#{objMailC}" target="#{haciendaController.selectedMailC}" />
+                                                            <f:setPropertyActionListener value="#{objMailC}" target="#{haciendaController.actualMailC}" />
+                                                        </p:commandLink>
+                                                        <h:outputText value="#{objMailC}" style="display:compact "/>
+
+                                                    </h:panelGrid>
+                                                </p:dataList>
+                                            </h:panelGrid>
+                                        </p:panelGrid>
+                                    </p:tab>
+                                </p:tabView>
 
                             </h:panelGrid>
+
+
+
+
+
+
+
+
+
                         </p:panel>
                     </p:panel>
 

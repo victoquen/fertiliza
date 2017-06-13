@@ -7,7 +7,7 @@ package controller.fertilizacion;
 
 import entities.fertilizacion.CompuestoQuimico;
 import entities.fertilizacion.Cultivo;
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.InterpretacionLaboratorio;
 import entities.fertilizacion.Metodologia;
 import entities.fertilizacion.Subanalisis;
@@ -39,7 +39,7 @@ public class InterpretacionLaboratorioController implements Serializable {
     List<Subanalisis> listaSubanalisis;
     List<String> listaMatriz;
     List<Variedad> listaVariedad;
-    List<Edad> listaEdad;
+    List<EtapaCultivo> listaEdad;
     List<Metodologia> listaMetodologia;
 
     Metodologia actualMetodologia;
@@ -72,11 +72,11 @@ public class InterpretacionLaboratorioController implements Serializable {
         this.listaVariedad = listaVariedad;
     }
 
-    public List<Edad> getListaEdad() {
+    public List<EtapaCultivo> getListaEdad() {
         return listaEdad;
     }
 
-    public void setListaEdad(List<Edad> listaEdad) {
+    public void setListaEdad(List<EtapaCultivo> listaEdad) {
         this.listaEdad = listaEdad;
     }
 
@@ -228,19 +228,19 @@ public class InterpretacionLaboratorioController implements Serializable {
     public void onCultivoChange() {
         if (this.actual.getCultivo() != null) {
             listaVariedad = Variedad.getAllVariedadByCultivo(this.actual.getCultivo());
-            listaEdad = Edad.getAllEdadByVariedad(this.actual.getVariedad());
+            listaEdad = EtapaCultivo.getAllByVariedad(this.actual.getVariedad());
         }
     }
 
     public void onCultivoChangeSelected() {
         if (this.selected.getCultivo() != null) {
             listaVariedad = Variedad.getAllVariedadByCultivo(this.selected.getCultivo());
-            listaEdad = Edad.getAllEdadByVariedad(this.selected.getVariedad());
+            listaEdad = EtapaCultivo.getAllByVariedad(this.selected.getVariedad());
         }
     }
 
     public void onSelectInterpretacion() {
         listaVariedad = Variedad.getAllVariedadByCultivo(this.selected.getCultivo());
-        listaEdad = Edad.getAllEdadByVariedad(this.selected.getVariedad());
+        listaEdad = EtapaCultivo.getAllByVariedad(this.selected.getVariedad());
     }
 }

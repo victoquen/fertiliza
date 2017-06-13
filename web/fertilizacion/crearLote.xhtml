@@ -14,11 +14,8 @@
                 font-size: 90% !important;
             }
         </style>
-        <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
 
-
-
-<script type="text/javascript">
+        <script type="text/javascript">
 
 
             $(document).ready(function () {
@@ -28,18 +25,18 @@
                 var panelMenu = PrimeFaces.widgets.sidePanelMenu;
                 // 1. On page loading collapses possible opened panels
                 //panelMenu.collapseRootSubmenu(panelMenu.headers);
-                
-                
+
+
                 /*panelMenu.headers.each(function () {
-                        var header = $(this);
-                        if (header.text() == "INICIO")
-                        {
-                           
-                            header.css("display","block");
-                            header.addClass("ui-state-active");
-                        }
-                });*/
-                
+                 var header = $(this);
+                 if (header.text() == "INICIO")
+                 {
+                 
+                 header.css("display","block");
+                 header.addClass("ui-state-active");
+                 }
+                 });*/
+
                 // following line is commented because it never should be necessary is not necessary (unless unexpected situation I never verified)
                 clearSidePanelMenuPreferences();
                 // 2. Call the "clear preferences" actions on click on two tpe of links: first level are the panel link (used to open/close the menu) and second level are the destination links
@@ -71,19 +68,19 @@
 
 
                 /*PF('sidePanelMenu').headers.click(function ()
-                {
-                    var currHeader = $(this);
-                    PF('sidePanelMenu').headers.each(function ()
-                    {
-                        var header = $(this);
-                        if (header.text() !== currHeader.text())
-                        {
-                            PF('sidePanelMenu').collapseRootSubmenu(header);
-                            header.removeClass('ui-state-hover');
-                            PF('sidePanelMenu').saveState();
-                        }
-                    });
-                });*/
+                 {
+                 var currHeader = $(this);
+                 PF('sidePanelMenu').headers.each(function ()
+                 {
+                 var header = $(this);
+                 if (header.text() !== currHeader.text())
+                 {
+                 PF('sidePanelMenu').collapseRootSubmenu(header);
+                 header.removeClass('ui-state-hover');
+                 PF('sidePanelMenu').saveState();
+                 }
+                 });
+                 });*/
             }
 
 
@@ -92,63 +89,48 @@
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
 
-        <h:form id="frmEdad">
+        <h:form id="frmUpdate">
+            <p:dialog id="objDialog" header="Lote" widgetVar="objDialog" resizable="false" modal="true" 
+                      width="400" showEffect="clip" hideEffect="hold" closable="false" >                
 
+                <h:panelGrid id="display" columns="1" cellpadding="4">
 
+                    <h:panelGrid columns="2" style="border: hidden">                                
+                        <h:outputLabel value="Identificador: *" />
+                                    <p:inputText  value="#{loteController.selected.codigo}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Identificador. Campo Obligatorio"/>                                
+                                    <h:outputLabel value="Hectáreas: *"/>
+                                    <p:inputText value="#{loteController.selected.hectareas}" style="width: 250px;" required="true" requiredMessage="Hectáreas:. Campo Obligatorio"/>                                    
+                                    <h:outputLabel value="Tipo Suelo:"/>
+                                    <p:inputText value="#{loteController.selected.tipoSuelo}" style="width: 250px;" />
 
-            <p:dialog id="dialogE" header="Edad" widgetVar="dialogE" resizable="false" closable="false"
-                      width="400" showEffect="clip" hideEffect="hold" modal="true" > 
+                                    <h:outputLabel value="Cliente: *"/>                               
+                                    <p:selectOneMenu  value="#{loteController.selectedC.id}" effect="fold" converter="GenericConverter" style="width: 250px">
+                                        <p:ajax listener="#{loteController.onChangeClienteSelected}" update=":frmUpdate:hac"/>
+                                        <f:selectItem itemLabel="Seleccionar Cliente" itemValue=""  />
+                                        <f:selectItems value="#{loteController.listadoC}" var="cliente" itemLabel="#{cliente.nombre}" itemValue="#{cliente.id}" />
+                                        <p:column>
+                                            <h:outputText value="#{cliente.nombre}" />
+                                        </p:column>                                        
+                                    </p:selectOneMenu>
 
-                <p:menubar>                           
-                    <p:menuitem value="Guardar"  actionListener="#{loteController.saveE}" icon="ui-icon-disk" update=":frmIngreso :frmEdad"/>
-                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmIngreso :frmEdad"/>
-                </p:menubar>
+                                    <h:outputLabel value="Hacienda: *"/>                               
+                                    <p:selectOneMenu  id="hac" value="#{loteController.selected.idHacienda}" effect="fold" converter="GenericConverter"  style="width: 250px" required="true" requiredMessage="Hacienda. Campo Obligatorio">
+                                        <f:selectItem itemLabel="Seleccionar Hacienda" itemValue=""  noSelectionOption="true" />
+                                        <f:selectItems value="#{loteController.listadoH}" var="hacienda" itemLabel="#{hacienda.nombre}" itemValue="#{hacienda.id}" />
+                                        <p:column>
+                                            <h:outputText value="#{hacienda.nombre}" />
+                                        </p:column>                                        
+                                    </p:selectOneMenu>                            
+                    </h:panelGrid>
 
-                <p:panelGrid columns="2">
-                    <h:outputLabel value="Nombre:"/>
-                    <p:inputText value="#{loteController.actualE.nombre}" style="width: 200px;"/>
+                    <h:panelGrid columns="2">
+                        <p:commandButton ajax="false" id="Guardar" update=":frmUpdate, :frmIngreso"  value="Guardar" action="#{loteController.update}"  />
 
-                    
-                </p:panelGrid>
+                        <p:commandButton id="Cancelar" update=":frmUpdate, :frmIngreso" value="Cancelar"/>
+                    </h:panelGrid>
+                </h:panelGrid>
             </p:dialog>
-        </h:form>
-
-
-        <h:form id="frmCultivo">
-            <p:dialog id="dialogC" header="Cultivo" widgetVar="dialogC" resizable="false" closable="false"
-                      width="400" showEffect="clip" hideEffect="hold" modal="true" > 
-
-                <p:menubar>                           
-                    <p:menuitem value="Guardar"  actionListener="#{loteController.saveC}" icon="ui-icon-disk" update=":frmIngreso :frmCultivo"/>
-                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmIngreso :frmCultivo"/>
-                </p:menubar>
-                
-                <p:panelGrid columns="2">
-                    <h:outputLabel value="Nombre:"/>
-                    <p:inputText value="#{loteController.actualC.nombre}" style="width: 200px;"/>
-                   
-                </p:panelGrid>
-
-            </p:dialog>
-        </h:form>
-
-        <h:form id="frmVariedad">
-            <p:dialog id="dialogV" header="Variedad" widgetVar="dialogV" resizable="false" closable="false"
-                      width="400" showEffect="clip" hideEffect="hold" modal="true" > 
-
-                <p:menubar>                           
-                    <p:menuitem value="Guardar"  actionListener="#{loteController.saveV}" icon="ui-icon-disk" update=":frmIngreso :frmVariedad"/>
-                    <p:menuitem value="Cerrar"   icon="ui-icon-close" update=":frmIngreso :frmVariedad"/>
-                </p:menubar>
-                <p:panelGrid columns="2">
-                    <h:outputLabel value="Nombre:"/>
-                    <p:inputText value="#{loteController.actualV.nombre}" style="width: 200px;"/>
-                   
-                </p:panelGrid>
-
-
-            </p:dialog>
-        </h:form>
+        </h:form>        
 
 
         <p:layout fullPage="true">
@@ -178,7 +160,7 @@
 
             <p:layoutUnit position="west" size="200" header="Menú Principal" resizable="true" collapsible="true">
                 <h:form id="frmMenu">
-                     <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
+                    <p:panelMenu id="sidePanelMenu"  style="width:200px" widgetVar="sidePanelMenu" model="#{menuFertilizacionController.modelMenu}"/>
                 </h:form>
             </p:layoutUnit>
 
@@ -192,16 +174,7 @@
 
 
             <p:layoutUnit position="center">
-                <script type="text/javascript">
 
-
-                    function reverseGeocode() {
-                        var lat = document.getElementById('lat').value,
-                                lng = document.getElementById('lng').value;
-
-                        PF('revGeoMap').reverseGeocode(lat, lng);
-                    }
-                </script>
 
                 <h:form id="frmIngreso" prependId="false">
                     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
@@ -214,159 +187,76 @@
                             <h:panelGrid columns="2">
 
                                 <p:panelGrid columns="2">
-                                    <h:outputLabel value="Identificador:"/>
-                                    <p:inputText value="#{loteController.actual.codigo}" style="width: 150px;"/>                                
-                                    <h:outputLabel value="Hectáreas:"/>
-                                    <p:inputText value="#{loteController.actual.hectareas}" style="width: 150px;"/>
-                                    <h:outputLabel value="Estación:"/>
-                                    <p:inputText value="#{loteController.actual.estacion}" style="width: 150px;"/>
+                                    <h:outputLabel value="Identificador: *" />
+                                    <p:inputText  value="#{loteController.actual.codigo}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Identificador. Campo Obligatorio"/>                                
+                                    <h:outputLabel value="Hectáreas: *"/>
+                                    <p:inputText value="#{loteController.actual.hectareas}" style="width: 250px;" required="true" requiredMessage="Hectáreas:. Campo Obligatorio"/>                                    
                                     <h:outputLabel value="Tipo Suelo:"/>
-                                    <p:inputText value="#{loteController.actual.tipoSuelo}" style="width: 150px;"/>
-                                </p:panelGrid>
-                                <p:panelGrid columns="2">
+                                    <p:inputText value="#{loteController.actual.tipoSuelo}" style="width: 250px;" />
 
+                                    <h:outputLabel value="Cliente: *"/>                               
+                                    <p:selectOneMenu  value="#{loteController.actualC.id}" effect="fold" converter="GenericConverter" style="width: 250px">
+                                        <p:ajax listener="#{loteController.onChangeCliente}" update=":frmIngreso:hac"/>
+                                        <f:selectItem itemLabel="Seleccionar Cliente" itemValue=""  />
+                                        <f:selectItems value="#{loteController.listadoC}" var="cliente" itemLabel="#{cliente.nombre}" itemValue="#{cliente.id}" />
+                                        <p:column>
+                                            <h:outputText value="#{cliente.nombre}" />
+                                        </p:column>                                        
+                                    </p:selectOneMenu>
 
-                                    <h:panelGrid columns="1">
-                                        <h:outputLabel value="Hacienda"/>                               
-                                        <p:selectOneMenu  value="#{loteController.actual.idHacienda}" effect="fold" converter="GenericConverter">
-                                            <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
-                                            <f:selectItems value="#{loteController.listadoH}" var="hacienda" itemLabel="#{hacienda.nombre}" itemValue="#{hacienda.id}" />
-                                            <p:column>
-                                                <h:outputText value="#{hacienda.nombre}" />
-                                            </p:column>                                        
-                                        </p:selectOneMenu>
-                                    </h:panelGrid>
-                                    
-                                        <h:panelGrid columns="1">
-                                            <p:commandButton value="Nuevo Cultivo" oncomplete="PF('dialogC').show()" update=":frmCultivo"/>
-                                            <h:outputLabel value="Cultivo"/>                               
-                                            <p:selectOneMenu  value="#{loteController.actual.idCultivo}" effect="fold" converter="GenericConverter">
-                                                <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
-                                                <f:selectItems value="#{loteController.listadoC}" var="cultivo" itemLabel="#{cultivo.nombre}" itemValue="#{cultivo.id}" />
-                                                <p:column>
-                                                    <h:outputText value="#{cultivo.nombre}" />
-                                                </p:column>                                        
-                                            </p:selectOneMenu>
-                                        </h:panelGrid>
+                                    <h:outputLabel value="Hacienda: *"/>                               
+                                    <p:selectOneMenu  id="hac" value="#{loteController.actual.idHacienda}" effect="fold" converter="GenericConverter"  style="width: 250px" required="true" requiredMessage="Hacienda. Campo Obligatorio">
+                                        <f:selectItem itemLabel="Seleccionar Hacienda" itemValue=""  noSelectionOption="true" />
+                                        <f:selectItems value="#{loteController.listadoH}" var="hacienda" itemLabel="#{hacienda.nombre}" itemValue="#{hacienda.id}" />
+                                        <p:column>
+                                            <h:outputText value="#{hacienda.nombre}" />
+                                        </p:column>                                        
+                                    </p:selectOneMenu>
 
-
-                                   
-                                   
-                                        <h:panelGrid columns="1">
-                                            <p:commandButton value="Nueva Variedad" oncomplete="PF('dialogV').show()" update=":frmVariedad"/>
-                                            <h:outputLabel value="Variedad"/>                               
-                                            <p:selectOneMenu  value="#{loteController.actual.idVariedad}" effect="fold" converter="GenericConverter">
-                                                <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
-                                                <f:selectItems value="#{loteController.listadoV}" var="variedad" itemLabel="#{variedad.nombre}" itemValue="#{variedad.id}" />
-                                                <p:column>
-                                                    <h:outputText value="#{variedad.nombre}" />
-                                                </p:column>                                        
-                                            </p:selectOneMenu>
-                                        </h:panelGrid>
-
-
-                                   
-                                    
-                                        <h:panelGrid columns="1">
-                                            <p:commandButton value="Nueva Edad" oncomplete="PF('dialogE').show()" update=":frmEdad"/>
-                                            <h:outputLabel value="Edad"/>                               
-                                            <p:selectOneMenu  value="#{loteController.actual.idEdad}" effect="fold" converter="GenericConverter">
-                                                <f:selectItem itemLabel="Seleccionar uno" itemValue=""  />
-                                                <f:selectItems value="#{loteController.listadoE}" var="edad" itemLabel="#{edad.nombre}" itemValue="#{edad.id}" />
-                                                <p:column>
-                                                    <h:outputText value="#{edad.nombre}" />
-                                                </p:column>                                        
-                                            </p:selectOneMenu>
-                                        </h:panelGrid>
-                                        
-
-
-                                   
 
                                 </p:panelGrid>
-
-                            </h:panelGrid>
-
-                            <h:panelGrid columnClasses="1" width="100%" id="map">
-                                <h3>Reverse Geocode</h3>
-                                <h:panelGrid columns="5" style="margin-bottom:10px" cellpadding="5">
-                                    <p:outputLabel  value="Lat:" />
-                                    <p:inputText id="lat" value="#{loteController.actual.latitud}"/>
-                                    <p:outputLabel  value="Lng:" />
-                                    <p:inputText id="lng" value="#{loteController.actual.longitud}" />
-                                    <p:commandButton value="Geocode" icon="ui-icon-search"  onclick="reverseGeocode()" type="button" update=":frmIngreso:map"/>
-                                </h:panelGrid>
-
-                                <p:gmap id="revGeoGmap" widgetVar="revGeoMap" center="#{loteController.centerRevGeoMap}" zoom="10" type="ROADMAP" model="#{loteController.revGeoModel}" style="width:80%;height:400px">
-                                    <p:ajax event="reverseGeocode" listener="#{loteController.onReverseGeocode}" update="@this" />
-                                </p:gmap>
-
-                            </h:panelGrid>
+                            </h:panelGrid>                          
                         </p:panel>
 
 
 
-                        <p:panel id="pnlUsuariosIngresados" header="lotes Existentes">
+                        <p:panel id="pnlUsuariosIngresados" header="Lotes Existentes">
                             <p:dataTable var="obj" value="#{loteController.model}" style="width: 100%; margin: auto auto"
                                          emptyMessage="No existen registros" filteredValue="#{loteController.filter}" paginator="true" rows="10"
                                          selection="#{loteController.selected}" selectionMode="single" widgetVar="usuariosTable">
 
-                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" />
+                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{loteController.loadUpdate}" />
 
                                 <p:columnGroup type="header">
                                     <p:row>
-                                        <p:column colspan="7" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column colspan="5" headerText="Dar clic en el Objeto para Modificarlo"/>
                                     </p:row>
 
-                                    <p:row>                                        
-                                        <p:column headerText="Hacienda" filterBy="#{obj.leyendaHacienda}" filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="LOTE" filterBy="#{obj.codigo}" filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Variedad" filterBy="#{obj.leyendaVariedad}" filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Cultivo" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Edad" filterBy="#{obj.leyendaEdad}" filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Latitud"  filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="longitud"  filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Hects"  filterMatchMode="contains"/>                                        
-
-                                        <p:column headerText="Estación"  filterMatchMode="contains"/>                                        
+                                    <p:row>                                       
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains" sortBy="#{obj.leyendaCliente}" />   
+                                        <p:column headerText="HACIENDA" filterBy="#{obj.leyendaHacienda}" filterMatchMode="contains" sortBy="#{obj.leyendaHacienda}"/>                                        
+                                        <p:column headerText="LOTE" filterBy="#{obj.codigo}" filterMatchMode="contains"/>                                                                                                                                                     
+                                        <p:column headerText="HECTs"  filterMatchMode="contains"/>                                        
+                                        <p:column headerText="SUELO"  filterMatchMode="contains"/>                                        
                                     </p:row> 
 
                                 </p:columnGroup>
 
 
                                 <p:column >
+                                    <h:outputText value="#{obj.leyendaCliente}" />
+                                </p:column>
+                                <p:column >
                                     <h:outputText value="#{obj.leyendaHacienda}" />
                                 </p:column>
                                 <p:column >
                                     <h:outputText value="#{obj.codigo}" />
-                                </p:column>
-                                <p:column >
-                                    <h:outputText value="#{obj.leyendaVariedad}" />
-                                </p:column>
-                                <p:column >
-                                    <h:outputText value="#{obj.leyendaCultivo}" />
-                                </p:column>
-                                <p:column >
-                                    <h:outputText value="#{obj.leyendaEdad}" />
-                                </p:column>
-                                <p:column >
-                                    <h:outputText value="#{obj.latitud}" />
-                                </p:column>
-                                <p:column >
-                                    <h:outputText value="#{obj.longitud}" />
-                                </p:column>
+                                </p:column>                                
                                 <p:column >
                                     <h:outputText value="#{obj.hectareas}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.estacion}" />
+                                    <h:outputText value="#{obj.tipoSuelo}" />
                                 </p:column>
 
 
@@ -375,25 +265,7 @@
                     </p:panel>
                 </h:form>
 
-                <h:form id="frmUpdate">
-                    <p:dialog id="objDialog" header="Lote" widgetVar="objDialog" resizable="false" 
-                              width="400" showEffect="clip" hideEffect="hold" closable="false" >                
 
-                        <h:panelGrid id="display" columns="1" cellpadding="4">
-
-                            <h:panelGrid columns="2" style="border: hidden">                                
-                                <h:outputLabel value="Nombre:"/>
-                                <p:inputText value="#{loteController.selected.codigo}" style="width: 150px;"/>                               
-                            </h:panelGrid>
-
-                            <h:panelGrid columns="2">
-                                <p:commandButton ajax="false" id="Guardar" update=":frmUpdate, :frmIngreso"  value="Guardar" action="#{loteController.update}"  />
-
-                                <p:commandButton id="Cancelar" update=":frmUpdate, :frmIngreso" value="Cancelar"/>
-                            </h:panelGrid>
-                        </h:panelGrid>
-                    </p:dialog>
-                </h:form>
             </p:layoutUnit>
 
         </p:layout>

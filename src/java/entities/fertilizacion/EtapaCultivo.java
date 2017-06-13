@@ -19,21 +19,26 @@ import org.bson.types.ObjectId;
  *
  * @author pablo
  */
-public class Edad implements Serializable{
+public class EtapaCultivo implements Serializable{
     
     ObjectId id;
     ObjectId variedad;
     String nombre;
+    Integer diasInicio;
+    Integer diasFin;
     
     String leyendaCultivo;
     String leyendaVariedad;
+    
 
-    public Edad() {
+    public EtapaCultivo() {
         this.nombre = "";
         this.leyendaCultivo = "";
+        this.leyendaVariedad = "";
+       
     }
     
-    public Edad(String nombre) {
+    public EtapaCultivo(String nombre) {
         this.nombre = nombre;
     }
 
@@ -77,6 +82,23 @@ public class Edad implements Serializable{
         this.leyendaCultivo = leyendaCultivo;
     }
 
+    public Integer getDiasInicio() {
+        return diasInicio;
+    }
+
+    public void setDiasInicio(Integer diasInicio) {
+        this.diasInicio = diasInicio;
+    }
+
+    public Integer getDiasFin() {
+        return diasFin;
+    }
+
+    public void setDiasFin(Integer diasFin) {
+        this.diasFin = diasFin;
+    }
+
+    
     
     public ObjectId save() {
         MongoManager mongo = MongoManager.getInstance();
@@ -85,7 +107,10 @@ public class Edad implements Serializable{
 
         
         
-        Document obj = new Document("nombre", this.nombre.toUpperCase()).append("variedad", this.variedad);
+        Document obj = new Document("nombre", this.nombre.toUpperCase())
+                .append("variedad", this.variedad)
+                .append("diasInicio", this.diasInicio)
+                .append("diasFin", this.diasFin);
         table.insertOne(obj);
         
         return (ObjectId) obj.get("_id");
@@ -94,18 +119,21 @@ public class Edad implements Serializable{
     public void update() {
 
         
-        Edad before = getEdadById(this.id);
+        EtapaCultivo before = getById(this.id);
 
     
         MongoManager mongo = MongoManager.getInstance(); 
-        mongo.db.getCollection("edad").updateOne(new Document("_id", this.id), new Document("$set", new Document("nombre", this.nombre.toUpperCase()).append("variedad", this.variedad)));
+        mongo.db.getCollection("edad").updateOne(new Document("_id", this.id), new Document("$set", new Document("nombre", this.nombre.toUpperCase())
+                .append("variedad", this.variedad)
+                .append("diasInicio", this.diasInicio)
+                .append("diasFin", this.diasFin)));
 
     }
     
     
     
-    public static Edad getEdadByName(String name) {
-        Edad obj = new Edad();
+    public static EtapaCultivo getByName(String name) {
+        EtapaCultivo obj = new EtapaCultivo();
 
         MongoManager mongo = MongoManager.getInstance();
 
@@ -116,8 +144,10 @@ public class Edad implements Serializable{
             public void apply(final Document document) {
 
                 obj.id = (ObjectId) document.get("_id");               
-                obj.nombre = document.get("nombre").toString();                   
-                obj.variedad = document.getObjectId("variedad");
+                obj.nombre = document.get("nombre").toString(); 
+                obj.diasInicio = document.getInteger("diasInicio");
+                obj.diasFin = document.getInteger("diasFin");
+                obj.variedad = document.getObjectId("diasFin");
                 obj.leyendaVariedad= Variedad.getVariedadById(obj.variedad).nombre;
                 obj.leyendaCultivo = Variedad.getVariedadById(obj.variedad).leyendaCultivo;
             }
@@ -128,8 +158,8 @@ public class Edad implements Serializable{
     }
     
 
-    public static Edad getEdadById(ObjectId id) {
-        Edad obj = new Edad();
+    public static EtapaCultivo getById(ObjectId id) {
+        EtapaCultivo obj = new EtapaCultivo();
 
         MongoManager mongo = MongoManager.getInstance();
 
@@ -140,7 +170,9 @@ public class Edad implements Serializable{
             public void apply(final Document document) {
 
                 obj.id = (ObjectId) document.get("_id");               
-                obj.nombre = document.get("nombre").toString();                    
+                obj.nombre = document.get("nombre").toString();  
+                obj.diasInicio = document.getInteger("diasInicio");
+                obj.diasFin = document.getInteger("diasFin");
                 obj.variedad = document.getObjectId("variedad");
                 obj.leyendaVariedad= Variedad.getVariedadById(obj.variedad).nombre;
                 obj.leyendaCultivo = Variedad.getVariedadById(obj.variedad).leyendaCultivo;
@@ -151,17 +183,19 @@ public class Edad implements Serializable{
         return obj;
     }
     
-    public static List<Edad> getAllEdadByVariedad(ObjectId id) {
-        List<Edad> res = new ArrayList<>();
+    public static List<EtapaCultivo> getAllByVariedad(ObjectId id) {
+        List<EtapaCultivo> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
         FindIterable<Document> iterable = mongo.db.getCollection("edad").find(new Document("variedad", id)).sort(new Document("_id", -1));       
         iterable.forEach(new Block<Document>() {
             @Override
             public void apply(final Document document) {
-                Edad obj = new Edad();
+                EtapaCultivo obj = new EtapaCultivo();
                 obj.id = (ObjectId) document.get("_id");               
-                obj.nombre = document.get("nombre").toString();        
+                obj.nombre = document.get("nombre").toString(); 
+                obj.diasInicio = document.getInteger("diasInicio");
+                obj.diasFin = document.getInteger("diasFin");
                 obj.variedad = document.getObjectId("variedad");
                 obj.leyendaVariedad= Variedad.getVariedadById(obj.variedad).nombre;
                 obj.leyendaCultivo = Variedad.getVariedadById(obj.variedad).leyendaCultivo;
@@ -174,17 +208,19 @@ public class Edad implements Serializable{
         return res;
     }
 
-    public static List<Edad> getAllEdad() {
-        List<Edad> res = new ArrayList<>();
+    public static List<EtapaCultivo> getAll() {
+        List<EtapaCultivo> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
         FindIterable<Document> iterable = mongo.db.getCollection("edad").find().sort(new Document("_id", -1));       
         iterable.forEach(new Block<Document>() {
             @Override
             public void apply(final Document document) {
-                Edad obj = new Edad();
+                EtapaCultivo obj = new EtapaCultivo();
                 obj.id = (ObjectId) document.get("_id");               
-                obj.nombre = document.get("nombre").toString();        
+                obj.nombre = document.get("nombre").toString();
+                obj.diasInicio = document.getInteger("diasInicio");
+                obj.diasFin = document.getInteger("diasFin");
                 obj.variedad = document.getObjectId("variedad");
                 obj.leyendaVariedad= Variedad.getVariedadById(obj.variedad).nombre;
                 obj.leyendaCultivo = Variedad.getVariedadById(obj.variedad).leyendaCultivo;

@@ -100,22 +100,182 @@
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
 
+        <h:form id="frmAuxFono">
+            <p:dialog header="Info Teléfono" widgetVar="fonoDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
+                <p:outputPanel id="fonoDetail" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Teléfono:" />
+                        <h:outputText value="#{clienteController.selectedFono}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{clienteController.actualFono}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateFono}"  update=":frmUpdate:sTelefonos :frmAuxFono"/>
+                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeFono}" update=":frmUpdate:sTelefonos :frmAuxFono"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="frmAuxMail">
+            <p:dialog header="Info Email" widgetVar="mailDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
+                <p:outputPanel id="mailDetail" style="text-align: justify;">
+                    <h:panelGrid  columns="2"  columnClasses="label,value">
+
+
+                        <h:outputText value="Email:" />
+                        <h:outputText value="#{clienteController.selectedMail}" />
+
+                        <h:outputText value="Nuevo:" />
+                        <p:inputText value="#{clienteController.actualMail}" style="width: 200px"/>
+
+
+                        <f:facet name="footer">
+                            <h:panelGrid columns="2">
+                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateMail}"  update=":frmUpdate:sMails :frmAuxMail"/>
+                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeMail}" update=":frmUpdate:sMails :frmAuxMail"/>
+                            </h:panelGrid>
+                        </f:facet>
+
+                    </h:panelGrid>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+
 
 
         <h:form id="frmUpdate">
-            <p:dialog id="objDialog" widgetVar="objDialog" width="625" height="600" modal="true" closable="false">
+            <p:dialog id="objDialog" widgetVar="objDialog" width="60%" height="600" modal="true" closable="false">
                 <h:panelGrid id="display" columns="1">
 
+                    <h:panelGrid columns="2">
+
+                        <p:commandButton  value="Actualizar"  action="#{clienteController.update}"  update=":frmUpdate :frmListado" />
+
+                        <p:commandButton value="Cerrar"  update=":frmUpdate :frmListado "/>
+                    </h:panelGrid>
+
+                    <p:panelGrid columns="4" style="font-size: xx-large" >
+                        <h:outputLabel value="Cliente: *"/>
+                        <p:selectOneRadio id="cli" value="#{clienteController.actual.tipoCliente}"  layout="grid" columns="2" required="true" requiredMessage="Tipo Cliente. Campo Obligatorio">
+                            <f:selectItem itemLabel="GENERICO" itemValue="GENERICO" />
+                            <f:selectItem itemLabel="PLANTECH" itemValue="PLANTECH" />
+                        </p:selectOneRadio>
+
+                        <h:outputLabel value="Departamento: *"/>
+                        <p:selectOneMenu id="depar" value="#{clienteController.actual.departamento}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Departamento. Campo Obligatorio">                                        
+                            <f:selectItem itemLabel="Seleccionar Departamento" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{clienteController.listadoDepartamento}" var="dep" itemLabel="#{dep.nombre}" itemValue="#{dep.id}" />
+                        </p:selectOneMenu>
+
+                        <h:outputLabel value="Código: *"/>
+                        <p:inputText value="#{clienteController.actual.codigo}" style="width: 250px;" required="true" requiredMessage="Código. Campo Obligatorio"/>
+                        <h:outputLabel value="Nombre: *"/>
+                        <p:inputText value="#{clienteController.actual.nombre}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Nombre. Campo Obligatorio"/>
+                        <h:outputLabel value="Tipo:"/>
+                        <p:inputText value="#{clienteController.actual.tipo}" style="width: 250px;"/>
+                        <h:outputLabel value="Ruc: *"/>                                   
+                        <p:inputMask id="ruc" value="#{clienteController.actual.rucCi}" mask="9999999999 999" required="true" requiredMessage="Ruc. Campo Obligatorio"/>
 
 
-                    <f:facet name="footer">
-                        <h:panelGrid columns="2">
+                        <h:outputLabel value="Mercado:"/>
+                        <p:inputText value="#{clienteController.actual.mercado}" style="width: 250px; "/>
+                        <h:outputLabel value="A Facturar:"/>
+                        <p:inputText value="#{clienteController.actual.afacturar}" style="width: 250px;"/>
+                        <h:outputLabel value="Vendedor:"/>
+                        <p:inputText value="#{clienteController.actual.vendedor}" style="width: 250px; text-transform: uppercase"/>
+                        <h:outputLabel value="Atención Factura:"/>
+                        <p:inputText value="#{clienteController.actual.atencionFactura}" style="width: 250px;"/>
 
-                            <p:commandButton  value="Actualizar"    update=":frmUpdate"/>
 
-                            <p:commandButton value="Cerrar"  update=":frmUpdate "/>
+                        <p:outputLabel value="País: *"  />
+                        <p:selectOneMenu id="country" value="#{clienteController.actual.pais}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="País. Campo Obligatorio">
+                            <p:ajax listener="#{clienteController.onCountryChange}" update=":frmUpdate:prov" />
+                            <f:selectItem itemLabel="Seleccionar País" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{clienteController.listadoPs}" var="pais" itemLabel="#{pais.nombre}" itemValue="#{pais.id}" />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="Sector"/>
+                        <p:inputText value="#{clienteController.actual.sector}" style="width: 250px;"/>
+                        <p:outputLabel value="Provincia: *"  />                                
+                        <p:selectOneMenu id="prov" value="#{clienteController.actual.provincia}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Provincia. Campo Obligatorio">
+                            <p:ajax listener="#{clienteController.onProvinciaChange}" update=":frmUpdate:cant" />
+                            <f:selectItem itemLabel="Seleccionar Provincia" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{clienteController.listadoPr}" var="prov" itemLabel="#{prov.nombre}" itemValue="#{prov.id}" />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="Dirección: "/>
+                        <p:inputText value="#{clienteController.actual.direccion}" style="width: 250px; text-transform: uppercase"/>
+                        <h:outputLabel value="Cantón: *"/>
+                        <p:selectOneMenu id="cant" value="#{clienteController.actual.canton}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Cantón. Campo Obligatorio" >                                       
+                            <f:selectItem itemLabel="Seleccionar Cantón" itemValue="" noSelectionOption="true" />
+                            <f:selectItems value="#{clienteController.listadoCan}" var="cant" itemLabel="#{cant.nombre}" itemValue="#{cant.id}" />
+                        </p:selectOneMenu>
+
+
+                        <h:outputLabel value=""/>
+                        <h:outputLabel value=""/>
+
+
+                        <h:outputLabel value="OBSERVACION"/>
+                        <p:inputTextarea rows="6" cols="33" value="#{clienteController.actual.observacionGenerico}" />
+
+
+                        <h:panelGrid id="sTelefonos" columns="1" >
+                            <h:outputLabel value="Teléfono:"/>
+                            <p:inputText value="#{clienteController.actualFono}" style="width: 150px;"/>
+                            <p:commandButton value="Agregar" actionListener="#{clienteController.addFono}" update=":frmUpdate:sTelefonos"/>
+
+                            <p:dataList  value="#{clienteController.fonos}" var="objFono" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                <f:facet name="header">
+                                    Teléfono(s)
+                                </f:facet>
+
+                                <h:panelGrid columns="2">
+                                    <p:commandLink update=":frmAuxFono:fonoDetail"  oncomplete="PF('fonoDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                        <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.selectedFono}" />
+                                        <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.actualFono}" />
+                                    </p:commandLink>
+                                    <h:outputText value="#{objFono}" style="display:compact "/>
+
+
+                                </h:panelGrid>
+                            </p:dataList>
                         </h:panelGrid>
-                    </f:facet>
+
+
+
+                        <h:panelGrid id="sMails" columns="1" >
+                            <h:outputLabel value="Email:"/>
+                            <p:inputText value="#{clienteController.actualMail}" style="width: 150px;"/>
+                            <p:commandButton value="Agregar" actionListener="#{clienteController.addMail}" update=":frmUpdate:sMails"/>
+
+                            <p:dataList  value="#{clienteController.mails}" var="objMail" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                                <f:facet name="header">
+                                    Email(s)
+                                </f:facet>
+
+                                <h:panelGrid columns="2">
+                                    <p:commandLink update=":frmAuxMail:mailDetail"  oncomplete="PF('mailDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
+                                        <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.selectedMail}" />
+                                        <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.actualMail}" />
+                                    </p:commandLink>
+                                    <h:outputText value="#{objMail}" style="display:compact "/>
+
+                                </h:panelGrid>
+                            </p:dataList>
+                        </h:panelGrid>
+                    </p:panelGrid>
+                    
                 </h:panelGrid>
             </p:dialog>
         </h:form>
@@ -174,7 +334,7 @@
                             <p:remoteCommand name="rc"  action="#{menuFertilizacionController.goToOpModificarCliente}" />
                             <p:dataTable var="obj" value="#{clienteController.model}" style="width: 90%; margin: auto auto"
                                          emptyMessage="No existen registros" filteredValue="#{clienteController.filter}" paginator="true" rows="10"
-                                         selection="#{clienteController.selected}" selectionMode="single" widgetVar="usuariosTable">
+                                         selection="#{clienteController.actual}" selectionMode="single" widgetVar="usuariosTable">
 
 
                                 <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{clienteController.loadSelectedClienteProvinciaCanton}" />
@@ -182,7 +342,7 @@
                                 <p:columnGroup type="header">
                                     <p:row>
                                         <p:column headerText="" style="width:16px"/>
-                                        <p:column colspan="7" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column colspan="8" headerText="Dar clic en el Objeto para Modificarlo"/>
                                     </p:row>
 
                                     <p:row>
@@ -190,6 +350,7 @@
                                         <p:column headerText="CÓDIGO" filterBy="#{obj.codigo}" filterMatchMode="contains"/>
                                         <p:column headerText="NOMBRE" filterBy="#{obj.nombre}" filterMatchMode="contains"/>
 
+                                        <p:column headerText="TIPO" filterBy="#{obj.tipoCliente}" filterMatchMode="contains"/>
 
                                         <p:column headerText="PAIS" filterBy="#{obj.leyendaPais}" filterMatchMode="contains"/>
                                         <p:column headerText="PROVINCIA" filterBy="#{obj.leyendaProvincia}" filterMatchMode="contains"/>
@@ -212,6 +373,9 @@
                                     <h:outputText value="#{obj.nombre}" />
                                 </p:column>
 
+                                <p:column >
+                                    <h:outputText value="#{obj.tipoCliente}" />
+                                </p:column>
                                 <p:column >
                                     <h:outputText value="#{obj.leyendaPais}" />
                                 </p:column>

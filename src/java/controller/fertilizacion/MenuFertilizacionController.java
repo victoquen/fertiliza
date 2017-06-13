@@ -17,7 +17,7 @@ import org.primefaces.model.menu.DefaultSubMenu;
 
 /**
  *
- * @author pablo
+ * @author VICTOR OQUENDO
  */
 @ViewScoped
 @Named
@@ -36,12 +36,21 @@ public class MenuFertilizacionController implements Serializable {
 
     String opCultivo;
     String opVariedad;
-    String opEdad;
+    String opEtapaCultivo;
 
     String opHacienda;
     String opLote;
     String opNuevaHacienda;
     String opNuevoLote;
+    String opSiembraCultivo;
+    String opNuevoSiembraCultivo;
+
+    String opProduccion;
+    String opNuevaProduccion;
+    String opHistoricoFertilizacion;
+    String opNuevoHistoricoFertilizacion;
+    String opProgramaFertilizacion;
+    String opNuevoProgramaFertilizacion;
 
     String opPais;
     String opProvincia;
@@ -67,7 +76,7 @@ public class MenuFertilizacionController implements Serializable {
 
     String opSubanalisis;
     String opDepartamento;
-    
+
     String opProfundidad;
 
     DefaultMenuModel modelMenu;
@@ -79,15 +88,18 @@ public class MenuFertilizacionController implements Serializable {
         this.opFuente = "crearFuente";
         this.opCombinacionFuenteCompuesto = "listadoCombinacionFuenComp";
         this.opNuevoCombinacioFuenteCompuesto = "crearCombinacionFuenComp";
-        this.opCliente = "listadoCliente";
+
         this.opNuevoCliente = "crearCliente";
         this.opCultivo = "crearCultivo";
         this.opVariedad = "crearVariedad";
-        this.opEdad = "crearEdad";
+        this.opEtapaCultivo = "crearEtapaCultivo";
+        this.opCliente = "listadoCliente";
         this.opHacienda = "listadoHacienda";
         this.opLote = "crearLote";
         this.opNuevaHacienda = "crearHacienda";
         this.opNuevoLote = "crearLote";
+        this.opSiembraCultivo = "listadoSiembraCultivo";
+        this.opNuevoSiembraCultivo = "crearSiembraCultivo";
         this.opPais = "crearPais";
         this.opProvincia = "crearProvincia";
         this.opCanton = "crearCanton";
@@ -109,6 +121,12 @@ public class MenuFertilizacionController implements Serializable {
         this.opModificarCliente = "modificarCliente";
         this.opDepartamento = "crearDepartamento";
         this.opProfundidad = "crearProfundidad";
+        this.opProduccion = "listadoProduccion";
+        this.opNuevaProduccion = "crearProduccion";
+        this.opHistoricoFertilizacion = "listadoHistoricoFertilizacion";
+        this.opNuevoHistoricoFertilizacion = "crearHistoricoFertilizacion";
+        this.opProgramaFertilizacion = "listadoProgramaFertilizacion";
+        this.opNuevoProgramaFertilizacion = "crearProgramaFertilizacion";
 
         modelMenu = new DefaultMenuModel();
 
@@ -120,7 +138,7 @@ public class MenuFertilizacionController implements Serializable {
         item.setId("inicio");
         indexSubmenu.addElement(item);
         indexSubmenu.setExpanded(true);
-        
+
         modelMenu.addElement(indexSubmenu);
         //**********************************************************************
         //**********************************************************************
@@ -131,7 +149,7 @@ public class MenuFertilizacionController implements Serializable {
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpIndex());
         item.setAjax(false);
-        agricolaSubmenu.addElement(item);        
+        agricolaSubmenu.addElement(item);
 
         item = new DefaultMenuItem("Aguas de Riego y Disoluciones Nutritivas");
         item.setIcon("ui-icon-gear");
@@ -202,7 +220,7 @@ public class MenuFertilizacionController implements Serializable {
         item.setCommand(goToOpIndex());
         item.setAjax(false);
         alimentarioSubmenu.addElement(item);
-        
+
         departementosSubmenu.addElement(alimentarioSubmenu);
         //**********************************************************************
         //**********************************************************************
@@ -237,12 +255,12 @@ public class MenuFertilizacionController implements Serializable {
         item.setAjax(false);
         cultivoSubmenu.addElement(item);
 
-        item = new DefaultMenuItem("Edad");
+        item = new DefaultMenuItem("Etapa Cultivo");
         item.setIcon("ui-icon-gear");
-        item.setCommand(goToOpEdad());
+        item.setCommand(goToOpEtapaCultivo());
         item.setAjax(false);
         cultivoSubmenu.addElement(item);
-        
+
         modelMenu.addElement(cultivoSubmenu);
         //**********************************************************************
         //**********************************************************************
@@ -253,6 +271,25 @@ public class MenuFertilizacionController implements Serializable {
         item.setCommand(goToOpCliente());
         item.setAjax(false);
         clienteSubmenu.addElement(item);
+
+        item = new DefaultMenuItem("Hacienda");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpHacienda());
+        item.setAjax(false);
+        clienteSubmenu.addElement(item);
+
+        item = new DefaultMenuItem("Lote");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpLote());
+        item.setAjax(false);
+        clienteSubmenu.addElement(item);
+
+        item = new DefaultMenuItem("Siembras Cultivo");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpSiembraCultivo());
+        item.setAjax(false);
+        clienteSubmenu.addElement(item);
+
         modelMenu.addElement(clienteSubmenu);
         //**********************************************************************
         //**********************************************************************
@@ -275,150 +312,167 @@ public class MenuFertilizacionController implements Serializable {
         item.setCommand(goToOpCombinacionFuenteCompuesto());
         item.setAjax(false);
         fuentesSubmenu.addElement(item);
-        
+
         modelMenu.addElement(fuentesSubmenu);
         //**********************************************************************
         //**********************************************************************
-        
+
         DefaultSubMenu laboratorioSubmenu = new DefaultSubMenu("LABORATORIO AGRICOLA");
         item = new DefaultMenuItem("Muestras Laboratorio");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpMuestraLaboratorio());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Subanálsis");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpSubanalisis());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Paquete de Análisis");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpAnalisisLaboratorio());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Unidad Medida");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpUnidadMedida());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Courier");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpCourier());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Resultados Laboratorio");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpResultadoLaboratorio());
         item.setAjax(false);
         laboratorioSubmenu.addElement(item);
-        
-        modelMenu.addElement(laboratorioSubmenu);        
+
+        modelMenu.addElement(laboratorioSubmenu);
         //**********************************************************************
         //**********************************************************************
-        
+
+        DefaultSubMenu produccionSubmenu = new DefaultSubMenu("PRODUC. FERTILIZACION");
+        item = new DefaultMenuItem("Ingreso Produccion");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpProduccion());
+        item.setAjax(false);
+        produccionSubmenu.addElement(item);
+
+        item = new DefaultMenuItem("Histórico Fertilización");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpHistoricoFertilizacion());
+        item.setAjax(false);
+        produccionSubmenu.addElement(item);
+
+        item = new DefaultMenuItem("Programa Fertilización");
+        item.setIcon("ui-icon-gear");
+        item.setCommand(goToOpProgramaFertilizacion());
+        item.setAjax(false);
+        produccionSubmenu.addElement(item);
+
+        modelMenu.addElement(produccionSubmenu);
+        //**********************************************************************
+        //**********************************************************************
+
         DefaultSubMenu ubicacionSubmenu = new DefaultSubMenu("ADMIN UBICACION");
         item = new DefaultMenuItem("País");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpPais());
         item.setAjax(false);
-        ubicacionSubmenu.addElement(item);       
-        
+        ubicacionSubmenu.addElement(item);
+
         item = new DefaultMenuItem("Provincia");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpProvincia());
         item.setAjax(false);
-        ubicacionSubmenu.addElement(item);       
-        
+        ubicacionSubmenu.addElement(item);
+
         item = new DefaultMenuItem("Cantón");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpCanton());
         item.setAjax(false);
         ubicacionSubmenu.addElement(item);
-        
+
         modelMenu.addElement(ubicacionSubmenu);
         //**********************************************************************
         //**********************************************************************
-                
+
         DefaultSubMenu parametrizableSubmenu = new DefaultSubMenu("PARAMETRIZABLES");
         item = new DefaultMenuItem("Departamento");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpDepartamento());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Laboratorio");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpLaboratorio());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Interpretación Laboratorio");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpInterpretacionLaboratorio());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Metodologías");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpMetodologia());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Sondas Tipo");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpSondaTipo());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Matriz");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpMatriz());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Tipo Aplica. Fuente");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpTipoAplicacionFuente());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Profundidad");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpProfundidad());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Código");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpCodigo());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
+
         item = new DefaultMenuItem("Reporte Laboratorio");
         item.setIcon("ui-icon-wrench");
         item.setCommand(goToOpReporteLaboratorio());
         item.setAjax(false);
         parametrizableSubmenu.addElement(item);
-        
-        
-                
+
         modelMenu.addElement(parametrizableSubmenu);
         //**********************************************************************
         //**********************************************************************
-        
-        
-        //**********************************************************************
-        //**********************************************************************
-        
-        
-        //**********************************************************************
-        //**********************************************************************
 
+        //**********************************************************************
+        //**********************************************************************
+        //**********************************************************************
+        //**********************************************************************
     }
 
     public DefaultMenuModel getModelMenu() {
@@ -441,11 +495,12 @@ public class MenuFertilizacionController implements Serializable {
 
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.ClienteController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.CultivoController-null-false");
-        sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.EdadController-null-false");
+        sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.EtapaCultivoController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.VariedadController-null-false");
 
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.HaciendaController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.LoteController-null-false");
+        sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.SiembraCultivoController-null-false");
 
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.PaisController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.ProvinciaController-null-false");
@@ -477,8 +532,8 @@ public class MenuFertilizacionController implements Serializable {
         reloadSession();
         return this.opIndex;
     }
-    
-    public String goToOpProfundidad(){
+
+    public String goToOpProfundidad() {
         reloadSession();
         return this.opProfundidad;
     }
@@ -518,9 +573,9 @@ public class MenuFertilizacionController implements Serializable {
         return this.opCultivo;
     }
 
-    public String goToOpEdad() {
+    public String goToOpEtapaCultivo() {
         reloadSession();
-        return this.opEdad;
+        return this.opEtapaCultivo;
     }
 
     public String goToOpVariedad() {
@@ -536,6 +591,16 @@ public class MenuFertilizacionController implements Serializable {
     public String goToOpLote() {
         reloadSession();
         return this.opLote;
+    }
+
+    public String goToOpSiembraCultivo() {
+        reloadSession();
+        return this.opSiembraCultivo;
+    }
+
+    public String goToOpNuevoSiembraCultivo() {
+        reloadSession();
+        return this.opNuevoSiembraCultivo;
     }
 
     public String goToOpNuevaHacienda() {
@@ -646,5 +711,20 @@ public class MenuFertilizacionController implements Serializable {
     public String goToOpDepartamento() {
         reloadSession();
         return this.opDepartamento;
+    }
+    
+    public String goToOpProduccion(){
+        reloadSession();
+        return this.opProduccion;
+    }
+    
+    public String goToOpHistoricoFertilizacion(){
+        reloadSession();
+        return this.opHistoricoFertilizacion;
+    }
+    
+    public String goToOpProgramaFertilizacion(){
+        reloadSession();
+        return this.opProgramaFertilizacion;
     }
 }

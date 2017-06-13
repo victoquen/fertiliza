@@ -8,7 +8,7 @@ package controller.fertilizacion;
 import entities.fertilizacion.Cliente;
 import entities.fertilizacion.Cultivo;
 import entities.fertilizacion.Departamento;
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.Hacienda;
 import entities.fertilizacion.HaciendaLoteCultivoAux;
 import entities.fertilizacion.Lote;
@@ -53,16 +53,7 @@ public class ClienteController implements Serializable {
     List<Cliente> filter;
     ClienteModel model;
 
-    HaciendaController hacienda;
-    //LoteController lote;
-
-    List<HaciendaController> listaHacienda;
-    //List<LoteController> listaLote;
-
-    HaciendaController selectedHacienda;
-    //LoteController selectedLote;
-    String auxNombreHacienda;
-    String auxCodigoLote;
+    
 
     String actualMail;
     String selectedMail;
@@ -72,8 +63,7 @@ public class ClienteController implements Serializable {
     String selectedFono;
     List<String> fonos;
 
-    String lat;
-    String lon;
+    
 
     Canton actualCan;
     Canton selectedCan;
@@ -97,47 +87,19 @@ public class ClienteController implements Serializable {
     
     
     
-    HaciendaLoteCultivoAux haciendaLoteCultivo;
-    String b;
-    List<HaciendaLoteCultivoAux> listadoLotes;
-    List<Cultivo> listadoCultivo;
-    List<Variedad> listadoVariedad;
-
-    List<Edad> listadoEdad;
-
-    private MapModel geoModel;
-    private MapModel revGeoModel;
-    private String centerGeoMap = "-2.207019, -79.913864";
-    private String centerRevGeoMap = "-2.207019, -79.913864";
-
-    @PostConstruct
-    public void init() {
-        geoModel = new DefaultMapModel();
-        revGeoModel = new DefaultMapModel();
-
-    }
+   
 
     public ClienteController() {
         this.actual = new Cliente();
         this.listado = Cliente.getAllClientes();
         this.model = new ClienteModel(listado);
-
-        hacienda = new HaciendaController();
-        //lote = new LoteController();
-        listaHacienda = new ArrayList<>();
-        //listaLote = new ArrayList<>();
-        selectedHacienda = new HaciendaController();
-        //selectedLote = new LoteController();
-
+      
         actualMail = "";
         mails = new ArrayList<>();
 
         actualFono = "";
         fonos = new ArrayList<>();
-
-        lat = "";
-        lon = "";
-
+      
         actualPs = new Pais();
         listadoPs = Pais.getAllPais();
         actualPr = new Provincia();
@@ -145,84 +107,96 @@ public class ClienteController implements Serializable {
 
         listadoDepartamento = Departamento.getAll();
 
-        haciendaLoteCultivo = new HaciendaLoteCultivoAux();
-        listadoLotes = new ArrayList<>();
-        listadoCultivo = Cultivo.getAllCultivos();
-        listadoVariedad = new ArrayList<>();
-        listadoEdad = new ArrayList<>();
+        
 
     }
 
-    public String getB() {
-        return b;
+    public Cliente getActual() {
+        return actual;
     }
 
-    public void setB(String b) {
-        this.b = b;
+    public void setActual(Cliente actual) {
+        this.actual = actual;
     }
 
-    public String getAuxNombreHacienda() {
-        return auxNombreHacienda;
+    public Cliente getSelected() {
+        return selected;
     }
 
-    public void setAuxNombreHacienda(String auxNombreHacienda) {
-        this.auxNombreHacienda = auxNombreHacienda;
+    public void setSelected(Cliente selected) {
+        this.selected = selected;
     }
 
-    public String getAuxCodigoLote() {
-        return auxCodigoLote;
+    public List<Cliente> getListado() {
+        return listado;
     }
 
-    public void setAuxCodigoLote(String auxCodigoLote) {
-        this.auxCodigoLote = auxCodigoLote;
+    public void setListado(List<Cliente> listado) {
+        this.listado = listado;
     }
 
-    public HaciendaLoteCultivoAux getHaciendaLoteCultivo() {
-        return haciendaLoteCultivo;
+    public List<Cliente> getFilter() {
+        return filter;
     }
 
-    public void setHaciendaLoteCultivo(HaciendaLoteCultivoAux haciendaLoteCultivo) {
-        this.haciendaLoteCultivo = haciendaLoteCultivo;
+    public void setFilter(List<Cliente> filter) {
+        this.filter = filter;
     }
 
-    public List<HaciendaLoteCultivoAux> getListadoLotes() {
-        return listadoLotes;
+    public ClienteModel getModel() {
+        return model;
     }
 
-    public void setListadoLotes(List<HaciendaLoteCultivoAux> listadoLotes) {
-        this.listadoLotes = listadoLotes;
+    public void setModel(ClienteModel model) {
+        this.model = model;
     }
 
-    public List<Cultivo> getListadoCultivo() {
-        return listadoCultivo;
+    public String getActualMail() {
+        return actualMail;
     }
 
-    public void setListadoCultivo(List<Cultivo> listadoCultivo) {
-        this.listadoCultivo = listadoCultivo;
+    public void setActualMail(String actualMail) {
+        this.actualMail = actualMail;
     }
 
-    public List<Variedad> getListadoVariedad() {
-        return listadoVariedad;
+    public String getSelectedMail() {
+        return selectedMail;
     }
 
-    public void setListadoVariedad(List<Variedad> listadoVariedad) {
-        this.listadoVariedad = listadoVariedad;
+    public void setSelectedMail(String selectedMail) {
+        this.selectedMail = selectedMail;
     }
 
-    public List<Edad> getListadoEdad() {
-        return listadoEdad;
+    public List<String> getMails() {
+        return mails;
     }
 
-    public void setListadoEdad(List<Edad> listadoEdad) {
-        this.listadoEdad = listadoEdad;
+    public void setMails(List<String> mails) {
+        this.mails = mails;
     }
 
-    public List<Departamento> getListadoDepartamento() {
-        return listadoDepartamento;
+    public String getActualFono() {
+        return actualFono;
     }
 
-    public void setListadoDepartamento(List<Departamento> listadoDepartamento) {
-        this.listadoDepartamento = listadoDepartamento;
+    public void setActualFono(String actualFono) {
+        this.actualFono = actualFono;
+    }
+
+    public String getSelectedFono() {
+        return selectedFono;
+    }
+
+    public void setSelectedFono(String selectedFono) {
+        this.selectedFono = selectedFono;
+    }
+
+    public List<String> getFonos() {
+        return fonos;
+    }
+
+    public void setFonos(List<String> fonos) {
+        this.fonos = fonos;
     }
 
     public Canton getActualCan() {
@@ -345,133 +319,15 @@ public class ClienteController implements Serializable {
         this.modelPs = modelPs;
     }
 
-    public HaciendaController getSelectedHacienda() {
-        return selectedHacienda;
+    public List<Departamento> getListadoDepartamento() {
+        return listadoDepartamento;
     }
 
-    public void setSelectedHacienda(HaciendaController selectedHacienda) {
-        this.selectedHacienda = selectedHacienda;
+    public void setListadoDepartamento(List<Departamento> listadoDepartamento) {
+        this.listadoDepartamento = listadoDepartamento;
     }
 
-    public String getLat() {
-        return lat;
-    }
-
-    public void setLat(String lat) {
-        this.lat = lat;
-    }
-
-    public String getLon() {
-        return lon;
-    }
-
-    public void setLon(String lon) {
-        this.lon = lon;
-    }
-
-    public String getActualMail() {
-        return actualMail;
-    }
-
-    public void setActualMail(String actualMail) {
-        this.actualMail = actualMail;
-    }
-
-    public String getSelectedMail() {
-        return selectedMail;
-    }
-
-    public void setSelectedMail(String selectedMail) {
-        this.selectedMail = selectedMail;
-    }
-
-    public List<String> getMails() {
-        return mails;
-    }
-
-    public void setMails(List<String> mails) {
-        this.mails = mails;
-    }
-
-    public String getActualFono() {
-        return actualFono;
-    }
-
-    public void setActualFono(String actualFono) {
-        this.actualFono = actualFono;
-    }
-
-    public String getSelectedFono() {
-        return selectedFono;
-    }
-
-    public void setSelectedFono(String selectedFono) {
-        this.selectedFono = selectedFono;
-    }
-
-    public List<String> getFonos() {
-        return fonos;
-    }
-
-    public void setFonos(List<String> fonos) {
-        this.fonos = fonos;
-    }
-
-    public Cliente getActual() {
-        return actual;
-    }
-
-    public void setActual(Cliente actual) {
-        this.actual = actual;
-    }
-
-    public Cliente getSelected() {
-        return selected;
-    }
-
-    public void setSelected(Cliente selected) {
-        this.selected = selected;
-    }
-
-    public List<Cliente> getListado() {
-        return listado;
-    }
-
-    public void setListado(List<Cliente> listado) {
-        this.listado = listado;
-    }
-
-    public List<Cliente> getFilter() {
-        return filter;
-    }
-
-    public void setFilter(List<Cliente> filter) {
-        this.filter = filter;
-    }
-
-    public ClienteModel getModel() {
-        return model;
-    }
-
-    public void setModel(ClienteModel model) {
-        this.model = model;
-    }
-
-    public HaciendaController getHacienda() {
-        return hacienda;
-    }
-
-    public void setHacienda(HaciendaController hacienda) {
-        this.hacienda = hacienda;
-    }
-
-    public List<HaciendaController> getListaHacienda() {
-        return listaHacienda;
-    }
-
-    public void setListaHacienda(List<HaciendaController> listaHacienda) {
-        this.listaHacienda = listaHacienda;
-    }
+    
 
     public void save() {
 
@@ -480,18 +336,6 @@ public class ClienteController implements Serializable {
             actual.setTelefono(fonos);
             actual.setEmail(mails);
             ObjectId auxCli = actual.save();
-
-            for (int i = 0; i < listaHacienda.size(); i++) {
-                listaHacienda.get(i).actual.setIdCliente(auxCli);
-
-                ObjectId auxHcda = listaHacienda.get(i).save();
-                /*for (int j = 0; j < listaLote.size(); j++) {
-                    if (listaLote.get(j).actual.getLeyendaHacienda().equals(listaHacienda.get(i).actual.getNombre())) {
-                        listaLote.get(j).actual.setIdHacienda(auxHcda);
-                        listaLote.get(j).save();
-                    }
-                }*/
-            }
 
             load();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Cliente Ingresado"));
@@ -502,8 +346,13 @@ public class ClienteController implements Serializable {
     }
 
     public void update() {
+        
+        selected = actual;
         if (controlDatos(selected)) {
+            selected.setTelefono(fonos);
+            selected.setEmail(mails);
             selected.update();
+            
             load();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Cliente Modificado"));
         } else {
@@ -522,13 +371,6 @@ public class ClienteController implements Serializable {
         actualFono = "";
         fonos = new ArrayList<>();
 
-        hacienda = new HaciendaController();
-        //lote = new LoteController();
-        listaHacienda = new ArrayList<>();
-        //listaLote = new ArrayList<>();
-        selectedHacienda = new HaciendaController();
-        //selectedLote = new LoteController();
-
     }
 
     Boolean controlDatos(Cliente u) {
@@ -537,87 +379,13 @@ public class ClienteController implements Serializable {
         if ((u.getNombre().equals("")) || (u.getRucCi().equals("")) || (u.getPais()==null) ||(u.getProvincia()==null) || (u.getCanton()==null)
                 || (u.getDepartamento()==null) || ("".equals(u.getTipoCliente()))) {
             res = false;
-
-            if (u.getTipoCliente().equals("PLANTECH")) {
-                if (listaHacienda.isEmpty()) {
-                    res = false;
-                }
-            }
+ 
         }
 
         return res;
     }
 
-    //metodos control HACIENDA**************************************************
-    public void addHacienda() {
-        if (controlHacienda(hacienda.actual)) {
-            hacienda.actual.setHectareas(new BigDecimal(hacienda.hectareasHacienda));
-            listaHacienda.add(hacienda);
-            hacienda = new HaciendaController();
-        }
-    }
-
-    public Boolean controlHacienda(Hacienda h) {
-        Boolean res = true;
-        if (h.getNombre().equals("")) {
-            res = false;
-        }
-        return res;
-    }
-
-    public void onRowSelect(SelectEvent event) {
-
-        this.selectedHacienda = (HaciendaController) event.getObject();
-        this.selectedHacienda.selected = this.selectedHacienda.actual;
-
-        auxNombreHacienda = this.selectedHacienda.actual.getNombre();
-
-    }
-
-    public void updateHacienda() {
-        int pos = findHacienda();
-        if (pos != -1) {
-
-            if (controlHacienda(selectedHacienda.selected)) {
-
-                //actualizar lotes
-                //updateHaciendasLotes();
-                //****************
-                selectedHacienda.actual = selectedHacienda.selected;
-                listaHacienda.set(pos, selectedHacienda);
-            }
-        }
-
-        selectedHacienda = new HaciendaController();
-    }
-
-    public void removeHacienda() {
-
-        int pos = findHacienda();
-        if (pos != -1) {
-
-            //remove hacienda's lotes
-            //removeHaciendasLotes(pos);
-            //***********************
-            listaHacienda.remove(pos);
-        }
-
-        selectedHacienda = new HaciendaController();
-    }
-
-    public int findHacienda() {
-        int cont = 0;
-        int res = -1;
-        while (cont < listaHacienda.size()) {
-            if (listaHacienda.get(cont).actual.getNombre().equals(selectedHacienda.actual.getNombre())) {
-                res = cont;
-                cont = listaHacienda.size();
-            }
-            cont++;
-        }
-        return res;
-
-    }
+   
 
     //**************************************************************************
     //MAIL & FONO **************************************************************
@@ -711,51 +479,7 @@ public class ClienteController implements Serializable {
     }
 
     //**************************************************************************
-    //MAPA**********************************************************************
-    public void onGeocode(GeocodeEvent event) {
-        List<GeocodeResult> results = event.getResults();
-
-        if (results != null && !results.isEmpty()) {
-            LatLng center = results.get(0).getLatLng();
-            centerGeoMap = center.getLat() + "," + center.getLng();
-
-            for (int i = 0; i < results.size(); i++) {
-                GeocodeResult result = results.get(i);
-                geoModel.addOverlay(new Marker(result.getLatLng(), result.getAddress()));
-            }
-        }
-    }
-
-    public void onReverseGeocode(ReverseGeocodeEvent event) {
-        revGeoModel = new DefaultMapModel();
-        List<String> addresses = event.getAddresses();
-        LatLng coord = event.getLatlng();
-
-        if (addresses != null && !addresses.isEmpty()) {
-            centerRevGeoMap = coord.getLat() + "," + coord.getLng();
-            revGeoModel.addOverlay(new Marker(coord, addresses.get(0)));
-
-            hacienda.actual.setLatitud(Double.toString(coord.getLat()));
-            hacienda.actual.setLongitud(Double.toString(coord.getLng()));
-        }
-    }
-
-    public MapModel getGeoModel() {
-        return geoModel;
-    }
-
-    public MapModel getRevGeoModel() {
-        return revGeoModel;
-    }
-
-    public String getCenterGeoMap() {
-        return centerGeoMap;
-    }
-
-    public String getCenterRevGeoMap() {
-        return centerRevGeoMap;
-    }
-
+   
     //**************************************************************************
     //METODOS PAIS PROVINCIA CANTON*********************************************
     public void onCountryChange() {
@@ -787,61 +511,24 @@ public class ClienteController implements Serializable {
     }
 
     public void loadSelectedClienteProvinciaCanton() {
-        listadoPr = Provincia.getAllProvinciaByPais(selected.getPais());
+        listadoPr = Provincia.getAllProvinciaByPais(actual.getPais());
+        listadoCan = Canton.getAllCantonByProvincia(actual.getProvincia());
+
+       
+
+        this.mails = new ArrayList<String>(this.actual.getEmail());
+        this.fonos = new ArrayList<String>(this.actual.getTelefono());
+
+        /*listadoPr = Provincia.getAllProvinciaByPais(selected.getPais());
         listadoCan = Canton.getAllCantonByProvincia(selected.getProvincia());
 
         this.actual = this.selected;
 
-        this.mails = this.selected.getEmail();
-        this.fonos = this.selected.getTelefono();
-
+        this.mails = new ArrayList<String>(this.selected.getEmail());
+        this.fonos = new ArrayList<String>(this.selected.getTelefono());
+        */
+        
     }
     //**************************************************************************
 
-    //METODOS INGRESO NUEVO CULTIVO - VARIEDAD - EDAD **************************
-/* 
-    public void saveNewCultivo() {
-        this.lote.saveC();
-
-    }
-
-    public void saveNewVariedad() {
-        this.lote.saveV();
-
-    }
-
-    public void saveNewEdad() {
-        this.lote.saveE();
-
-    }
-     */
-    //**************************************************************************
-    //HACIENDA control datos de lotes cultivo aux*********************************************************
-    public void onRowSelectLoteCultivoAux(SelectEvent event) {
-
-        this.haciendaLoteCultivo = (HaciendaLoteCultivoAux) event.getObject();
-        //this.hacienda.auxLote = this.haciendaLoteCultivo;
-        this.hacienda.auxLoteSelected = this.haciendaLoteCultivo;
-        
-        this.hacienda.listadoMonitoreos  = this.haciendaLoteCultivo.getListaPeriodosMonitoreos();
-        this.hacienda.listadoM = this.hacienda.auxLoteSelected.getListaEstacionMonitoreo();
-        //this.hacienda.listadoM = this.hacienda.auxLoteSelected.getListadoMonitoreo();
-        //this.hacienda.onCultivoChange();
-        this.hacienda.onCultivoChangeSelectedIni();
-        //this.hacienda.onCultivoChangeSelected();
-
-    }
-
-    public void onRowSelectLoteCultivoAuxSelected(SelectEvent event) {
-
-        this.haciendaLoteCultivo = (HaciendaLoteCultivoAux) event.getObject();
-        //this.hacienda.auxLote = this.haciendaLoteCultivo;
-        this.selectedHacienda.auxLoteSelected = this.haciendaLoteCultivo;
-        
-        this.selectedHacienda.listadoMonitoreos  = this.haciendaLoteCultivo.getListaPeriodosMonitoreos();
-        this.selectedHacienda.listadoM = this.hacienda.auxLoteSelected.getListaEstacionMonitoreo();
-        
-        this.selectedHacienda.onCultivoChangeSelectedIni();
-
-    }
 }

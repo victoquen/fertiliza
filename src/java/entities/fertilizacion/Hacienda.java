@@ -49,22 +49,18 @@ public class Hacienda implements Serializable {
         this.numLotes = new BigDecimal(0);
         contactos = new ArrayList<>();
 
-        this.latitud = "";
-        this.longitud = "";
+        this.latitud = "-2.207019";
+        this.longitud = "-79.913864";
+        
+        /*this.latitud = "";
+        this.longitud = "";*/
 
         this.leyendaCliente = "";
         this.listadoLotes = new ArrayList<>();
+        this.darBaja = "0";
         //this.lotes = new ArrayList<>();
     }
 
-    public Hacienda(String nombre, BigDecimal hectareas, BigDecimal numLotes, List<Contacto> contactos, String latitud, String longitud) {
-        this.nombre = nombre;
-        this.hectareas = hectareas;
-        this.numLotes = numLotes;
-        this.contactos = contactos;
-        this.latitud = latitud;
-        this.longitud = longitud;
-    }
 
     /*
     public List<Lote> getLotes() {
@@ -167,7 +163,7 @@ public class Hacienda implements Serializable {
         List<Document> listObj = new ArrayList<>();
         MongoManager mongo = MongoManager.getInstance();
 
-        List<Document> listLotes = new ArrayList<>();
+        /*List<Document> listLotes = new ArrayList<>();
         int contLotes = listadoLotes.size();
         for (int i = 0; i < contLotes; i++) {
             Document aux = new Document().append("idLotes", listadoLotes.get(i).idLotes).append("cultivo", listadoLotes.get(i).cultivo)
@@ -210,12 +206,15 @@ public class Hacienda implements Serializable {
 
             aux.append("listadoMonitoreo", listEstMonit);
             listLotes.add(aux);
-        }
+        }*/
 
         MongoCollection table = mongo.db.getCollection("hacienda");
 
-        Document obj = new Document("idcliente", this.idCliente).append("nombre", this.nombre.toUpperCase()).append("hectareas", this.hectareas.toString())
-                .append("numlotes", this.numLotes.toString()).append("latitud", this.latitud).append("longitud", this.longitud).append("listadoLotes", listLotes).append("darBaja", this.darBaja);
+        Document obj = new Document("idcliente", this.idCliente)
+                .append("nombre", this.nombre.toUpperCase())                
+                .append("latitud", this.latitud)
+                .append("longitud", this.longitud)              
+                .append("darBaja", this.darBaja);
         for (int i = 0; i < contactos.size(); i++) {
 
             List<String> lm = contactos.get(i).email;
@@ -243,7 +242,7 @@ public class Hacienda implements Serializable {
 
     public void update() {
 
-        List<Document> listLotes = new ArrayList<>();
+        /*List<Document> listLotes = new ArrayList<>();
         int contLotes = listadoLotes.size();
         for (int i = 0; i < contLotes; i++) {
             Document aux = new Document().append("idLotes", listadoLotes.get(i).idLotes).append("cultivo", listadoLotes.get(i).cultivo)
@@ -285,7 +284,7 @@ public class Hacienda implements Serializable {
             }
             aux.append("listadoMonitoreo", listEstMonit);
             listLotes.add(aux);
-        }
+        }*/
 
         List<Document> listObj = new ArrayList<>();
 
@@ -310,9 +309,11 @@ public class Hacienda implements Serializable {
 
         //Fuente before = getFuenteById(this.id);
         MongoManager mongo = MongoManager.getInstance();
-        Document obj = new Document("$set", new Document("idcliente", this.idCliente).append("nombre", this.nombre.toUpperCase()).append("hectareas", this.hectareas.toString())
-                .append("numlotes", this.numLotes.toString()).append("latitud", this.latitud).append("longitud", this.longitud)
-                .append("listadoLotes", listLotes).append("darBaja", this.darBaja).append("contacto", asList(listObj)));
+        Document obj = new Document("$set", new Document("idcliente", this.idCliente)
+                .append("nombre", this.nombre.toUpperCase())                
+                .append("latitud", this.latitud).append("longitud", this.longitud)
+                .append("darBaja", this.darBaja)
+                .append("contacto", asList(listObj)));
 
         mongo.db.getCollection("hacienda").updateOne(new Document("_id", this.id), obj);
 
@@ -341,9 +342,7 @@ public class Hacienda implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.idCliente = (ObjectId) document.get("idcliente");
-                obj.nombre = document.get("nombre").toString();
-                obj.hectareas = obj.StrToBDecimal(document.get("hectareas").toString());
-                obj.numLotes = obj.StrToBDecimal(document.get("numlotes").toString());
+                obj.nombre = document.get("nombre").toString();                
                 obj.latitud = document.get("latitud").toString();
                 obj.longitud = document.get("longitud").toString();
 
@@ -370,7 +369,7 @@ public class Hacienda implements Serializable {
                     }
                 }
 
-                List<Document> lista = (List<Document>) document.get("listadoLotes");
+                /*List<Document> lista = (List<Document>) document.get("listadoLotes");
                 int contLista = lista.size();
                 for (int i = 0; i < contLista; i++) {
                     Document dbo = (Document) lista.get(i);
@@ -382,7 +381,7 @@ public class Hacienda implements Serializable {
                     aux.darBaja = dbo.getString("darBaja");
                     aux.leyendaCultivo = Cultivo.getCultivoById(aux.cultivo).getNombre();
                     aux.leyendaVariedad = Variedad.getVariedadById(aux.variedad).getNombre();
-                    aux.leyendaEdad = Edad.getEdadById(aux.edad).getNombre();
+                    aux.leyendaEdad = EtapaCultivo.getEdadById(aux.edad).getNombre();
                     aux.hectareas = obj.StrToBDecimal(dbo.getString("hectareas"));
 
                     aux.codigoMayorEstacion = dbo.getString("codigoMayorEstacion");
@@ -435,7 +434,7 @@ public class Hacienda implements Serializable {
                     }
 
                     obj.listadoLotes.add(aux);
-                }
+                }*/
 
             }
 
@@ -456,13 +455,11 @@ public class Hacienda implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.idCliente = (ObjectId) document.get("idcliente");
-                obj.nombre = document.get("nombre").toString();
-                obj.hectareas = obj.StrToBDecimal(document.get("hectareas").toString());
-                obj.numLotes = obj.StrToBDecimal(document.get("numlotes").toString());
+                obj.nombre = document.get("nombre").toString();              
                 obj.latitud = document.get("latitud").toString();
                 obj.longitud = document.get("longitud").toString();
 
-                //obj.leyendaCliente = Cliente.getClienteById(obj.idCliente).nombre;
+                obj.leyendaCliente = Cliente.getClienteById(obj.idCliente).nombre;
                 //obj.lotes = Lote.getAllLotesByHaciendaId(obj.id);
                 List<Document> comps = (List<Document>) document.get("contacto");
 
@@ -483,7 +480,7 @@ public class Hacienda implements Serializable {
                     }
                 }
 
-                List<Document> lista = (List<Document>) document.get("listadoLotes");
+               /* List<Document> lista = (List<Document>) document.get("listadoLotes");
                 int contLista = lista.size();
                 for (int i = 0; i < contLista; i++) {
                     Document dbo = (Document) lista.get(i);
@@ -495,7 +492,7 @@ public class Hacienda implements Serializable {
                     aux.darBaja = dbo.getString("darBaja");
                     aux.leyendaCultivo = Cultivo.getCultivoById(aux.cultivo).getNombre();
                     aux.leyendaVariedad = Variedad.getVariedadById(aux.variedad).getNombre();
-                    aux.leyendaEdad = Edad.getEdadById(aux.edad).getNombre();
+                    aux.leyendaEdad = EtapaCultivo.getEdadById(aux.edad).getNombre();
                     aux.hectareas = obj.StrToBDecimal(dbo.getString("hectareas"));
 
                     aux.codigoMayorEstacion = dbo.getString("codigoMayorEstacion");
@@ -548,7 +545,7 @@ public class Hacienda implements Serializable {
                     }
 
                     obj.listadoLotes.add(aux);
-                }
+                }*/
 
                 res.add(obj);
             }
@@ -570,9 +567,7 @@ public class Hacienda implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.idCliente = (ObjectId) document.get("idcliente");
-                obj.nombre = document.get("nombre").toString();
-                obj.hectareas = obj.StrToBDecimal(document.get("hectareas").toString());
-                obj.numLotes = obj.StrToBDecimal(document.get("numlotes").toString());
+                obj.nombre = document.get("nombre").toString();                
                 obj.latitud = document.get("latitud").toString();
                 obj.longitud = document.get("longitud").toString();
 
@@ -598,7 +593,7 @@ public class Hacienda implements Serializable {
                     }
                 }
 
-                List<Document> lista = (List<Document>) document.get("listadoLotes");
+                /*List<Document> lista = (List<Document>) document.get("listadoLotes");
                 int contLista = lista.size();
                 for (int i = 0; i < contLista; i++) {
                     Document dbo = (Document) lista.get(i);
@@ -610,7 +605,7 @@ public class Hacienda implements Serializable {
                     aux.darBaja = dbo.getString("darBaja");
                     aux.leyendaCultivo = Cultivo.getCultivoById(aux.cultivo).getNombre();
                     aux.leyendaVariedad = Variedad.getVariedadById(aux.variedad).getNombre();
-                    aux.leyendaEdad = Edad.getEdadById(aux.edad).getNombre();
+                    aux.leyendaEdad = EtapaCultivo.getEdadById(aux.edad).getNombre();
                     aux.hectareas = obj.StrToBDecimal(dbo.getString("hectareas"));
 
                     aux.codigoMayorEstacion = dbo.getString("codigoMayorEstacion");
@@ -663,7 +658,7 @@ public class Hacienda implements Serializable {
                     }
 
                     obj.listadoLotes.add(aux);
-                }
+                }*/
 
                 res.add(obj);
             }
@@ -685,9 +680,7 @@ public class Hacienda implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.idCliente = (ObjectId) document.get("idcliente");
-                obj.nombre = document.get("nombre").toString();
-                obj.hectareas = obj.StrToBDecimal(document.get("hectareas").toString());
-                obj.numLotes = obj.StrToBDecimal(document.get("numlotes").toString());
+                obj.nombre = document.get("nombre").toString();                
                 obj.latitud = document.get("latitud").toString();
                 obj.longitud = document.get("longitud").toString();
 
@@ -713,7 +706,7 @@ public class Hacienda implements Serializable {
                     }
                 }
 
-                List<Document> lista = (List<Document>) document.get("listadoLotes");
+                /*List<Document> lista = (List<Document>) document.get("listadoLotes");
                 int contLista = lista.size();
                 for (int i = 0; i < contLista; i++) {
                     Document dbo = (Document) lista.get(i);
@@ -725,7 +718,7 @@ public class Hacienda implements Serializable {
                     aux.darBaja = dbo.getString("darBaja");
                     aux.leyendaCultivo = Cultivo.getCultivoById(aux.cultivo).getNombre();
                     aux.leyendaVariedad = Variedad.getVariedadById(aux.variedad).getNombre();
-                    aux.leyendaEdad = Edad.getEdadById(aux.edad).getNombre();
+                    aux.leyendaEdad = EtapaCultivo.getEdadById(aux.edad).getNombre();
                     aux.hectareas = obj.StrToBDecimal(dbo.getString("hectareas"));
 
                     aux.codigoMayorEstacion = dbo.getString("codigoMayorEstacion");
@@ -778,7 +771,7 @@ public class Hacienda implements Serializable {
                     }
 
                     obj.listadoLotes.add(aux);
-                }
+                }*/
 
                 res.add(obj);
             }
@@ -804,22 +797,7 @@ public class Hacienda implements Serializable {
         return res;
     }
 
-    /*public static EstacionMonitoreo getPeriodoMonitoreoAuxByIdEstacionMonitoreo(List<EstacionMonitoreo> lista, String codEstacion) {
-        EstacionMonitoreo res = null;
 
-        int cont = 0;
-        int sizeLista = lista.size();
-        while (cont < sizeLista) {
-            if (lista.get(cont).codigo.equals(codEstacion)) {
-                res = lista.get(cont);
-                res.ListaPeriodosMonitoreosPendientes();
-                cont = sizeLista;
-            }
-            cont++;
-        }
-
-        return res;
-    }*/
     
     public static HaciendaLoteCultivoAux getPeriodoMonitoreoAuxByIdEstacionCategoriaMayor(List<HaciendaLoteCultivoAux> lista, String codEstacion) {
         HaciendaLoteCultivoAux res = null;

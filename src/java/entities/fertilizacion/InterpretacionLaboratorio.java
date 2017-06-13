@@ -221,7 +221,7 @@ public class InterpretacionLaboratorio implements Serializable {
                 obj.leyendaMetodologiaNombre = Metodologia.getMetodologiaById(obj.metodologia).nombre;
                 obj.leyendaMetodologiaLiteratura = Metodologia.getMetodologiaById(obj.metodologia).literatura;
                 obj.leyendaVariedad = Variedad.getVariedadById(obj.variedad).nombre;
-                obj.leyendaEdad = Edad.getEdadById(obj.edad).nombre;
+                obj.leyendaEdad = EtapaCultivo.getById(obj.edad).nombre;
                 obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaSubanalisis = Subanalisis.getById(obj.subanalisis).simbolo + "(" + Subanalisis.getById(obj.subanalisis).nombre + ")";
             }
@@ -253,7 +253,7 @@ public class InterpretacionLaboratorio implements Serializable {
                 obj.leyendaMetodologiaNombre = Metodologia.getMetodologiaById(obj.metodologia).nombre;
                 obj.leyendaMetodologiaLiteratura = Metodologia.getMetodologiaById(obj.metodologia).literatura;
                 obj.leyendaVariedad = Variedad.getVariedadById(obj.variedad).nombre;
-                obj.leyendaEdad = Edad.getEdadById(obj.edad).nombre;
+                obj.leyendaEdad = EtapaCultivo.getById(obj.edad).nombre;
                 obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaSubanalisis = Subanalisis.getById(obj.subanalisis).simbolo + "(" + Subanalisis.getById(obj.subanalisis).nombre + ")";
                 res.add(obj);

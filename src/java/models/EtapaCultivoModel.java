@@ -5,7 +5,7 @@
  */
 package models;
 
-import entities.fertilizacion.Edad;
+import entities.fertilizacion.EtapaCultivo;
 import java.util.List;
 import javax.faces.model.ListDataModel;
 import org.bson.types.ObjectId;
@@ -15,27 +15,27 @@ import org.primefaces.model.SelectableDataModel;
  *
  * @author pablo
  */
-public class EdadModel extends ListDataModel <Edad> implements SelectableDataModel<Edad>{
+public class EtapaCultivoModel extends ListDataModel <EtapaCultivo> implements SelectableDataModel<EtapaCultivo>{
     
     
-    public EdadModel() {
+    public EtapaCultivoModel() {
     }
 
-    public EdadModel(List<Edad> list) {
+    public EtapaCultivoModel(List<EtapaCultivo> list) {
         super(list);
 
     }
     
     
     @Override
-    public Object getRowKey(Edad t) {
+    public Object getRowKey(EtapaCultivo t) {
        return t.getId();
     }
 
     @Override
-    public Edad getRowData(String id) {
+    public EtapaCultivo getRowData(String id) {
        ObjectId aux = new ObjectId(id);
-       Edad obj = Edad.getEdadById(aux);
+       EtapaCultivo obj = EtapaCultivo.getById(aux);
        return obj;
     }
     
