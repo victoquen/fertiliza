@@ -127,4 +127,8 @@ public class UnidadMedida implements Serializable{
 
         return res;
     }
+    
+    public String toString(){ 
+        return this.nombre;  
+    } 
 }
