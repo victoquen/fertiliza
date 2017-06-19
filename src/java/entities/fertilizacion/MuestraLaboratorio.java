@@ -34,15 +34,21 @@ public class MuestraLaboratorio implements Serializable {
 
     String codigo;
     int numeroCodigo;
+
     ObjectId cliente;
-    ObjectId hacienda;
-    String lote;
-    HaciendaLoteCultivoAux loteCompleto;
-    ObjectId cultivo;
+//    ObjectId hacienda;
+//    String lote;
+//    HaciendaLoteCultivoAux loteCompleto;
+//    ObjectId cultivo;
+
+
+    ObjectId idSiembraCultivo;//reemplazando string lote, cliente, hacienda, loteCompleto, cultivo
+    SiembraCultivo siembraCultivo;
+
     String tipoMuestra;
     String estacionMonitoreo;
-    String numeroMonitoreo;
-    
+    int numeroMonitoreo;
+
     String personaContacto;
     String emailInforme;
     String direccionInforme;
@@ -102,6 +108,32 @@ public class MuestraLaboratorio implements Serializable {
         this.estadoMuestra = "ANALISIS";
     }
 
+    public ObjectId getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(ObjectId cliente) {
+        this.cliente = cliente;
+    }
+
+  
+
+    public ObjectId getIdSiembraCultivo() {
+        return idSiembraCultivo;
+    }
+
+    public void setIdSiembraCultivo(ObjectId idSiembraCultivo) {
+        this.idSiembraCultivo = idSiembraCultivo;
+    }
+
+    public SiembraCultivo getSiembraCultivo() {
+        return siembraCultivo;
+    }
+
+    public void setSiembraCultivo(SiembraCultivo siembraCultivo) {
+        this.siembraCultivo = siembraCultivo;
+    }
+
     public String getEstadoMuestra() {
         return estadoMuestra;
     }
@@ -142,13 +174,15 @@ public class MuestraLaboratorio implements Serializable {
         this.estacionMonitoreo = estacionMonitoreo;
     }
 
-    public String getNumeroMonitoreo() {
+    public int getNumeroMonitoreo() {
         return numeroMonitoreo;
     }
 
-    public void setNumeroMonitoreo(String numeroMonitoreo) {
+    public void setNumeroMonitoreo(int numeroMonitoreo) {
         this.numeroMonitoreo = numeroMonitoreo;
     }
+
+    
 
     public String getLeyendaDepartamento() {
         return leyendaDepartamento;
@@ -276,46 +310,6 @@ public class MuestraLaboratorio implements Serializable {
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
-    }
-
-    public ObjectId getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(ObjectId cliente) {
-        this.cliente = cliente;
-    }
-
-    public ObjectId getHacienda() {
-        return hacienda;
-    }
-
-    public void setHacienda(ObjectId hacienda) {
-        this.hacienda = hacienda;
-    }
-
-    public String getLote() {
-        return lote;
-    }
-
-    public void setLote(String lote) {
-        this.lote = lote;
-    }
-
-    public HaciendaLoteCultivoAux getLoteCompleto() {
-        return loteCompleto;
-    }
-
-    public void setLoteCompleto(HaciendaLoteCultivoAux loteCompleto) {
-        this.loteCompleto = loteCompleto;
-    }
-
-    public ObjectId getCultivo() {
-        return cultivo;
-    }
-
-    public void setCultivo(ObjectId cultivo) {
-        this.cultivo = cultivo;
     }
 
     public String getPersonaContacto() {
@@ -469,16 +463,33 @@ public class MuestraLaboratorio implements Serializable {
         List<Document> listObjSubanalisis = listadoSubanalisis();
         List<Document> listObjPaquete = listadoPaqueteAnalisis();
 
-        Document obj = new Document("codigo", this.codigo.toUpperCase()).append("cliente", this.cliente).append("hacienda", this.hacienda)
-                .append("lote", this.lote).append("cultivo", this.cultivo).append("personacontacto", this.personaContacto)
-                .append("emailinforme", this.emailInforme).append("direccioninforme", this.direccionInforme).append("canton", this.canton)
-                .append("productor", this.productor).append("muestreador", this.muestreador.toUpperCase()).append("fechamuestreo", this.fechaMuestreo)
-                .append("fechaenvio", this.fechaEnvio).append("observaciones", this.observaciones)
-                .append("matriz", this.matriz).append("courier", this.courier).append("trackerNumber", this.trackerNumber).append("tipoMuestra", this.tipoMuestra)
-                .append("fechaCreacion", this.fechaCreacion).append("departamento", this.departamento)
-                .append("estacionMonitoreo", this.estacionMonitoreo).append("numeroMonitoreo", this.numeroMonitoreo)
-                .append("numeroCodigo", this.numeroCodigo).append("estadoMuestra", this.estadoMuestra)
-                .append("subanalisis", listObjSubanalisis).append("paquetes", listObjPaquete);
+        //.append("hacienda", this.hacienda)
+        //.append("lote", this.lote)
+        //.append("cultivo", this.cultivo)
+        Document obj = new Document("codigo", this.codigo.toUpperCase())
+                .append("cliente", this.cliente)
+                .append("idSiembraCultivo", this.idSiembraCultivo)
+                .append("personacontacto", this.personaContacto)
+                .append("emailinforme", this.emailInforme)
+                .append("direccioninforme", this.direccionInforme)
+                .append("canton", this.canton)
+                .append("productor", this.productor)
+                .append("muestreador", this.muestreador.toUpperCase())
+                .append("fechamuestreo", this.fechaMuestreo)
+                .append("fechaenvio", this.fechaEnvio)
+                .append("observaciones", this.observaciones)
+                .append("matriz", this.matriz)
+                .append("courier", this.courier)
+                .append("trackerNumber", this.trackerNumber)
+                .append("tipoMuestra", this.tipoMuestra)
+                .append("fechaCreacion", this.fechaCreacion)
+                .append("departamento", this.departamento)
+                .append("estacionMonitoreo", this.estacionMonitoreo)
+                .append("numeroMonitoreo", this.numeroMonitoreo)
+                .append("numeroCodigo", this.numeroCodigo)
+                .append("estadoMuestra", this.estadoMuestra)
+                .append("subanalisis", listObjSubanalisis)
+                .append("paquetes", listObjPaquete);
 
         table.insertOne(obj);
         return (ObjectId) obj.get("_id");
@@ -491,23 +502,39 @@ public class MuestraLaboratorio implements Serializable {
 
         List<Document> listObjSubanalisis = listadoSubanalisis();
         List<Document> listObjPaquete = listadoPaqueteAnalisis();
-
-        Document obj = new Document("$set", new Document("codigo", this.codigo.toUpperCase()).append("cliente", this.cliente).append("hacienda", this.hacienda)
-                .append("lote", this.lote).append("cultivo", this.cultivo).append("personacontacto", this.personaContacto)
-                .append("emailinforme", this.emailInforme).append("direccioninforme", this.direccionInforme).append("canton", this.canton)
-                .append("productor", this.productor).append("muestreador", this.muestreador.toUpperCase()).append("fechamuestreo", this.fechaMuestreo)
-                .append("fechaenvio", this.fechaEnvio).append("observaciones", this.observaciones)
-                .append("matriz", this.matriz).append("courier", this.courier).append("trackerNumber", this.trackerNumber).append("tipoMuestra", this.tipoMuestra)
-                .append("fechaCreacion", this.fechaCreacion).append("departamento", this.departamento)
-                .append("estacionMonitoreo", this.estacionMonitoreo).append("numeroMonitoreo", this.numeroMonitoreo)
-                .append("numeroCodigo", this.numeroCodigo).append("estadoMuestra", this.estadoMuestra)
-                .append("subanalisis", listObjSubanalisis).append("paquetes", listObjPaquete));
+        
+        //.append("hacienda", this.hacienda)
+        //.append("lote", this.lote)
+        //.append("cultivo", this.cultivo)
+        Document obj = new Document("$set", new Document("codigo", this.codigo.toUpperCase())
+                .append("cliente", this.cliente)
+                .append("idSiembraCultivo", this.idSiembraCultivo)
+                .append("personacontacto", this.personaContacto)
+                .append("emailinforme", this.emailInforme)
+                .append("direccioninforme", this.direccionInforme)
+                .append("canton", this.canton)
+                .append("productor", this.productor)
+                .append("muestreador", this.muestreador.toUpperCase())
+                .append("fechamuestreo", this.fechaMuestreo)
+                .append("fechaenvio", this.fechaEnvio)
+                .append("observaciones", this.observaciones)
+                .append("matriz", this.matriz)
+                .append("courier", this.courier)
+                .append("trackerNumber", this.trackerNumber)
+                .append("tipoMuestra", this.tipoMuestra)
+                .append("fechaCreacion", this.fechaCreacion)
+                .append("departamento", this.departamento)
+                .append("estacionMonitoreo", this.estacionMonitoreo)
+                .append("numeroMonitoreo", this.numeroMonitoreo)
+                .append("numeroCodigo", this.numeroCodigo)
+                .append("estadoMuestra", this.estadoMuestra)
+                .append("subanalisis", listObjSubanalisis)
+                .append("paquetes", listObjPaquete)
+        );
 
         mongo.db.getCollection("muestralaboratorio").updateOne(new Document("_id", this.id), obj);
 
     }
-    
-    
 
     public static MuestraLaboratorio getMuestraLaboratorioByCodigo(String code) {
         MuestraLaboratorio obj = new MuestraLaboratorio();
@@ -522,9 +549,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.cliente = (ObjectId) document.get("cliente");
-                obj.hacienda = (ObjectId) document.get("hacienda");
-                obj.lote = document.getString("lote");
-                obj.cultivo = (ObjectId) document.get("cultivo");
+//                obj.hacienda = (ObjectId) document.get("hacienda");
+//                obj.lote = document.getString("lote");
+//                obj.cultivo = (ObjectId) document.get("cultivo");
+                obj.idSiembraCultivo = document.getObjectId("idSiembraCultivo");
+                obj.siembraCultivo = SiembraCultivo.getById(obj.idSiembraCultivo);
                 obj.codigo = document.get("codigo").toString();
                 obj.personaContacto = document.get("personacontacto").toString();
                 obj.emailInforme = document.get("emailinforme").toString();
@@ -544,10 +573,10 @@ public class MuestraLaboratorio implements Serializable {
                 obj.departamento = document.getObjectId("departamento");
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.estacionMonitoreo = document.getString("estacionMonitoreo");
-                obj.numeroMonitoreo = document.getString("numeroMonitoreo");
+                obj.numeroMonitoreo = document.getInteger("numeroMonitoreo");
                 obj.numeroCodigo = document.getInteger("numeroCodigo");
                 obj.estadoMuestra = document.getString("estadoMuestra");
-                
+
                 if (obj.fechaCreacion != null) {
                     SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
                     obj.fechaFormatCreacion = formateadorRec.format(obj.fechaCreacion);
@@ -592,12 +621,12 @@ public class MuestraLaboratorio implements Serializable {
 
                 }
 
-                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
-
+//                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
                 obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
-                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
-                obj.leyendaLote = obj.lote;
-                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
+//                obj.leyendaLote = obj.lote;
+//                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                
                 obj.leyendaCanton = Canton.getCantonById(obj.canton).getNombre() + " (" + Canton.getCantonById(obj.canton).getLeyendaPais() + ")";
                 obj.leyendaMatriz = Matriz.getById(obj.matriz).getNombre();
                 obj.leyendaCourier = Courier.getById(obj.courier).getNombre();
@@ -622,9 +651,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 obj.id = (ObjectId) document.get("_id");
                 obj.cliente = (ObjectId) document.get("cliente");
-                obj.hacienda = (ObjectId) document.get("hacienda");
-                obj.lote = document.getString("lote");
-                obj.cultivo = (ObjectId) document.get("cultivo");
+//                obj.hacienda = (ObjectId) document.get("hacienda");
+//                obj.lote = document.getString("lote");
+//                obj.cultivo = (ObjectId) document.get("cultivo");
+                obj.idSiembraCultivo = document.getObjectId("idSiembraCultivo");
+                obj.siembraCultivo = SiembraCultivo.getById(obj.idSiembraCultivo);
                 obj.codigo = document.get("codigo").toString();
                 obj.personaContacto = document.get("personacontacto").toString();
                 obj.emailInforme = document.get("emailinforme").toString();
@@ -644,10 +675,10 @@ public class MuestraLaboratorio implements Serializable {
                 obj.departamento = document.getObjectId("departamento");
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.estacionMonitoreo = document.getString("estacionMonitoreo");
-                obj.numeroMonitoreo = document.getString("numeroMonitoreo");
+                obj.numeroMonitoreo = document.getInteger("numeroMonitoreo");
                 obj.numeroCodigo = document.getInteger("numeroCodigo");
                 obj.estadoMuestra = document.getString("estadoMuestra");
-                
+
                 if (obj.fechaCreacion != null) {
                     SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
                     obj.fechaFormatCreacion = formateadorRec.format(obj.fechaCreacion);
@@ -692,12 +723,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 }
 
-                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
-
-                obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
-                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
-                obj.leyendaLote = obj.lote;
-                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
+               obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
+//                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
+//                obj.leyendaLote = obj.lote;
+//                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaCanton = Canton.getCantonById(obj.canton).getNombre() + " (" + Canton.getCantonById(obj.canton).getLeyendaPais() + ")";
                 obj.leyendaMatriz = Matriz.getById(obj.matriz).getNombre();
                 obj.leyendaCourier = Courier.getById(obj.courier).getNombre();
@@ -708,7 +738,7 @@ public class MuestraLaboratorio implements Serializable {
         return obj;
     }
 
-    public static int getNumberMuestraLaboratorio(ObjectId idmuestra, ObjectId idCliente, ObjectId idHacienda, String idLote, ObjectId idCultivo) {
+    public static int getNumberMuestraLaboratorio1(ObjectId idmuestra, ObjectId idCliente, ObjectId idHacienda, String idLote, ObjectId idCultivo) {
         int num = 1;
 
         List<MuestraLaboratorio> res = new ArrayList<>();
@@ -738,7 +768,37 @@ public class MuestraLaboratorio implements Serializable {
         return num;
     }
     
-    public static int getMaxNumeroCodigo(){
+    public static int getNumberMuestraLaboratorio(ObjectId idmuestra, ObjectId idSiembraCultivo) {
+        int num = 1;
+
+        List<MuestraLaboratorio> res = new ArrayList<>();
+
+        MongoManager mongo = MongoManager.getInstance();
+        FindIterable<Document> iterable = mongo.db.getCollection("muestralaboratorio").find(new Document("idSiembraCultivo", idSiembraCultivo)).sort(new Document("_id", -1));
+        iterable.forEach(new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                MuestraLaboratorio obj = new MuestraLaboratorio();
+                obj.id = (ObjectId) document.get("_id");
+
+                res.add(obj);
+            }
+        });
+
+        int cont = 0;
+        while (cont < res.size()) {
+            if (res.get(cont).id.equals(idmuestra)) {
+                num = cont + 1;
+                cont = res.size();
+            }
+
+            cont++;
+        }
+
+        return num;
+    }
+
+    public static int getMaxNumeroCodigo() {
         int num = 1;
         List<MuestraLaboratorio> res = new ArrayList<>();
 
@@ -753,12 +813,12 @@ public class MuestraLaboratorio implements Serializable {
                 res.add(obj);
             }
         });
-        
-        for(int i=0; i<res.size();i++){
-            num = res.get(i).getNumeroCodigo() +1;
+
+        for (int i = 0; i < res.size(); i++) {
+            num = res.get(i).getNumeroCodigo() + 1;
         }
         return num;
-        
+
     }
 
     public static List<MuestraLaboratorio> getAllMuestraLaboratorio() {
@@ -772,9 +832,11 @@ public class MuestraLaboratorio implements Serializable {
                 MuestraLaboratorio obj = new MuestraLaboratorio();
                 obj.id = (ObjectId) document.get("_id");
                 obj.cliente = (ObjectId) document.get("cliente");
-                obj.hacienda = (ObjectId) document.get("hacienda");
-                obj.lote = document.getString("lote");
-                obj.cultivo = (ObjectId) document.get("cultivo");
+//                obj.hacienda = (ObjectId) document.get("hacienda");
+//                obj.lote = document.getString("lote");
+//                obj.cultivo = (ObjectId) document.get("cultivo");
+                obj.idSiembraCultivo = document.getObjectId("idSiembraCultivo");
+                obj.siembraCultivo = SiembraCultivo.getById(obj.idSiembraCultivo);
                 obj.codigo = document.get("codigo").toString();
                 obj.personaContacto = document.get("personacontacto").toString();
                 obj.emailInforme = document.get("emailinforme").toString();
@@ -794,10 +856,10 @@ public class MuestraLaboratorio implements Serializable {
                 obj.departamento = document.getObjectId("departamento");
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.estacionMonitoreo = document.getString("estacionMonitoreo");
-                obj.numeroMonitoreo = document.getString("numeroMonitoreo");
+                obj.numeroMonitoreo = document.getInteger("numeroMonitoreo");
                 obj.numeroCodigo = document.getInteger("numeroCodigo");
                 obj.estadoMuestra = document.getString("estadoMuestra");
-                
+
                 if (obj.fechaCreacion != null) {
                     SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
                     obj.fechaFormatCreacion = formateadorRec.format(obj.fechaCreacion);
@@ -842,12 +904,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 }
 
-                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
-
+//                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
                 obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
-                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
-                obj.leyendaLote = obj.lote;
-                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
+//                obj.leyendaLote = obj.lote;
+//                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaCanton = Canton.getCantonById(obj.canton).getNombre() + " (" + Canton.getCantonById(obj.canton).getLeyendaPais() + ")";
                 obj.leyendaMatriz = Matriz.getById(obj.matriz).getNombre();
                 obj.leyendaCourier = Courier.getById(obj.courier).getNombre();
@@ -859,12 +920,12 @@ public class MuestraLaboratorio implements Serializable {
 
         return res;
     }
-    
+
     public static List<MuestraLaboratorio> getAllMuestraLaboratorioBetweenDateFechaCreacion(Date fi, Date ff) {
         List<MuestraLaboratorio> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
-        FindIterable<Document> iterable = mongo.db.getCollection("muestralaboratorio").find(and(gte("fechaCreacion",fi),lte("fechaCreacion",ff)))
+        FindIterable<Document> iterable = mongo.db.getCollection("muestralaboratorio").find(and(gte("fechaCreacion", fi), lte("fechaCreacion", ff)))
                 .sort(new Document("_id", -1));
         iterable.forEach(new Block<Document>() {
             @Override
@@ -872,9 +933,11 @@ public class MuestraLaboratorio implements Serializable {
                 MuestraLaboratorio obj = new MuestraLaboratorio();
                 obj.id = (ObjectId) document.get("_id");
                 obj.cliente = (ObjectId) document.get("cliente");
-                obj.hacienda = (ObjectId) document.get("hacienda");
-                obj.lote = document.getString("lote");
-                obj.cultivo = (ObjectId) document.get("cultivo");
+//                obj.hacienda = (ObjectId) document.get("hacienda");
+//                obj.lote = document.getString("lote");
+//                obj.cultivo = (ObjectId) document.get("cultivo");
+                obj.idSiembraCultivo = document.getObjectId("idSiembraCultivo");
+                obj.siembraCultivo = SiembraCultivo.getById(obj.idSiembraCultivo);
                 obj.codigo = document.get("codigo").toString();
                 obj.personaContacto = document.get("personacontacto").toString();
                 obj.emailInforme = document.get("emailinforme").toString();
@@ -894,10 +957,10 @@ public class MuestraLaboratorio implements Serializable {
                 obj.departamento = document.getObjectId("departamento");
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.estacionMonitoreo = document.getString("estacionMonitoreo");
-                obj.numeroMonitoreo = document.getString("numeroMonitoreo");
+                obj.numeroMonitoreo = document.getInteger("numeroMonitoreo");
                 obj.numeroCodigo = document.getInteger("numeroCodigo");
                 obj.estadoMuestra = document.getString("estadoMuestra");
-                
+
                 if (obj.fechaCreacion != null) {
                     SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
                     obj.fechaFormatCreacion = formateadorRec.format(obj.fechaCreacion);
@@ -942,12 +1005,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 }
 
-                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
-
+//                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
                 obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
-                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
-                obj.leyendaLote = obj.lote;
-                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
+//                obj.leyendaLote = obj.lote;
+//                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaCanton = Canton.getCantonById(obj.canton).getNombre() + " (" + Canton.getCantonById(obj.canton).getLeyendaPais() + ")";
                 obj.leyendaMatriz = Matriz.getById(obj.matriz).getNombre();
                 obj.leyendaCourier = Courier.getById(obj.courier).getNombre();
@@ -959,24 +1021,24 @@ public class MuestraLaboratorio implements Serializable {
 
         return res;
     }
-    
-    
+
     public static List<MuestraLaboratorio> getAllMuestraLaboratorioPlantechSortByEstacionMonitoreoByFechas(Date fi, Date ff) {
         List<MuestraLaboratorio> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
-        FindIterable<Document> iterable = mongo.db.getCollection("muestralaboratorio").find(and(gte("fechaCreacion",fi),lte("fechaCreacion",ff),eq("tipoMuestra","PLANTECH")))
-                .sort(ascending("cliente", "hacienda","lote","estacionMonitoreo"))
-                ;
+        FindIterable<Document> iterable = mongo.db.getCollection("muestralaboratorio").find(and(gte("fechaCreacion", fi), lte("fechaCreacion", ff), eq("tipoMuestra", "PLANTECH")))
+                .sort(ascending("cliente", "hacienda", "lote", "estacionMonitoreo"));
         iterable.forEach(new Block<Document>() {
             @Override
             public void apply(final Document document) {
                 MuestraLaboratorio obj = new MuestraLaboratorio();
                 obj.id = (ObjectId) document.get("_id");
                 obj.cliente = (ObjectId) document.get("cliente");
-                obj.hacienda = (ObjectId) document.get("hacienda");
-                obj.lote = document.getString("lote");
-                obj.cultivo = (ObjectId) document.get("cultivo");
+//                obj.hacienda = (ObjectId) document.get("hacienda");
+//                obj.lote = document.getString("lote");
+//                obj.cultivo = (ObjectId) document.get("cultivo");
+                obj.idSiembraCultivo = document.getObjectId("idSiembraCultivo");
+                obj.siembraCultivo = SiembraCultivo.getById(obj.idSiembraCultivo);
                 obj.codigo = document.get("codigo").toString();
                 obj.personaContacto = document.get("personacontacto").toString();
                 obj.emailInforme = document.get("emailinforme").toString();
@@ -996,10 +1058,10 @@ public class MuestraLaboratorio implements Serializable {
                 obj.departamento = document.getObjectId("departamento");
                 obj.leyendaDepartamento = Departamento.getById(obj.departamento).getNombre();
                 obj.estacionMonitoreo = document.getString("estacionMonitoreo");
-                obj.numeroMonitoreo = document.getString("numeroMonitoreo");
+                obj.numeroMonitoreo = document.getInteger("numeroMonitoreo");
                 obj.numeroCodigo = document.getInteger("numeroCodigo");
                 obj.estadoMuestra = document.getString("estadoMuestra");
-                
+
                 if (obj.fechaCreacion != null) {
                     SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
                     obj.fechaFormatCreacion = formateadorRec.format(obj.fechaCreacion);
@@ -1044,12 +1106,11 @@ public class MuestraLaboratorio implements Serializable {
 
                 }
 
-                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
-
+//                obj.loteCompleto = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.hacienda).getListadoLotes(), obj.lote);
                 obj.leyendaCliente = Cliente.getClienteById(obj.cliente).nombre;
-                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
-                obj.leyendaLote = obj.lote;
-                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
+//                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.hacienda).nombre;
+//                obj.leyendaLote = obj.lote;
+//                obj.leyendaCultivo = Cultivo.getCultivoById(obj.cultivo).nombre;
                 obj.leyendaCanton = Canton.getCantonById(obj.canton).getNombre() + " (" + Canton.getCantonById(obj.canton).getLeyendaPais() + ")";
                 obj.leyendaMatriz = Matriz.getById(obj.matriz).getNombre();
                 obj.leyendaCourier = Courier.getById(obj.courier).getNombre();
@@ -1061,8 +1122,6 @@ public class MuestraLaboratorio implements Serializable {
 
         return res;
     }
-    
-    
 
     List<AnalisisLaboratorio> loadListAnalisis(List<Document> analisisLista) {
         List<AnalisisLaboratorio> listaux = new ArrayList<>();

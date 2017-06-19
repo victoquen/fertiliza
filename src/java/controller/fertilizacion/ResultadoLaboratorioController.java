@@ -399,7 +399,7 @@ public class ResultadoLaboratorioController implements Serializable {
     public void onMuestraChange() {
         actual.setFechaRecepcion(MuestraLaboratorio.getMuestraLaboratorioById(actual.getMuestra()).getFechaMuestreo());
         actual.setFechaEnvio(MuestraLaboratorio.getMuestraLaboratorioById(actual.getMuestra()).getFechaEnvio());
-        actual.setCultivo(MuestraLaboratorio.getMuestraLaboratorioById(actual.getMuestra()).getCultivo());
+        actual.setCultivo(MuestraLaboratorio.getMuestraLaboratorioById(actual.getMuestra()).getSiembraCultivo().getIdCultivo());
         actual.setLeyendaCultivo(Cultivo.getCultivoById(actual.getCultivo()).getNombre());
         
         this.matriz = Matriz.getById(MuestraLaboratorio.getMuestraLaboratorioById(actual.getMuestra()).getMatriz()).getNombre();
@@ -431,7 +431,7 @@ public class ResultadoLaboratorioController implements Serializable {
     public void onMuestraChangeSelected() {
         selected.setFechaRecepcion(MuestraLaboratorio.getMuestraLaboratorioById(selected.getMuestra()).getFechaMuestreo());
         selected.setFechaEnvio(MuestraLaboratorio.getMuestraLaboratorioById(selected.getMuestra()).getFechaEnvio());
-        selected.setCultivo(MuestraLaboratorio.getMuestraLaboratorioById(selected.getMuestra()).getCultivo());
+        selected.setCultivo(MuestraLaboratorio.getMuestraLaboratorioById(selected.getMuestra()).getSiembraCultivo().getIdCultivo());
         selected.setLeyendaCultivo(Cultivo.getCultivoById(selected.getCultivo()).getNombre());
         
         this.matriz = Matriz.getById(MuestraLaboratorio.getMuestraLaboratorioById(selected.getMuestra()).getMatriz()).getNombre();

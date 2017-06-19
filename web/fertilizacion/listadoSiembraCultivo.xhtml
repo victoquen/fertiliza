@@ -94,16 +94,71 @@ and open the template in the editor.
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
 
-        <h:form id="frmUpdate">
+        <h:form id="frmIngreso">
 
-            <p:dialog header="Info MUESTRA" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="1200px" > 
+            <p:dialog header="Info SIEMBRA CULTIVO" widgetVar="objDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="1200px" > 
 
                 <p:menubar>      
-                    <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpSiembraCultivo}" icon="ui-icon-extlink" update=":frmUpdate, :frmListado"/>
-                    <p:menuitem  value="Actualizar"  actionListener="#{siembraCultivoController.update}" icon="ui-icon-disk" update=":frmUpdate, :frmListado" />
+                    <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpSiembraCultivo}" icon="ui-icon-extlink" update=":frmIngreso, :frmListado"/>
+                    <p:menuitem  value="Actualizar"  actionListener="#{siembraCultivoController.update}" icon="ui-icon-disk" update=":frmIngreso, :frmListado" />
                 </p:menubar> 
 
                 <h:panelGrid id="display" columns="1" cellpadding="4" style="font-size: 12px">
+                    <h:panelGrid columns="2" styleClass="panelColumns">
+                        <p:panelGrid columns="2">
+                            <h:outputLabel value="Código:"/>
+                            <p:inputText value="#{siembraCultivoController.actual.codigo}" style="width: 250px;" />
+
+                            <h:outputLabel value="Fecha de Siembra:"/>
+                            <p:calendar id="fCreacion"  value="#{siembraCultivoController.actual.fechaSiembra}" readonlyInput="true"
+                                        locale="es" navigator="true" pattern="yyyy-MMM-dd" >
+                                <p:ajax event="dateSelect" listener="#{siembraCultivoController.onFechaSiembreChange}" update=":frmIngreso:ec"/>
+                            </p:calendar>
+
+                            <h:outputLabel value="Cultivo:"/>
+                            <p:selectOneMenu id="depar" value="#{siembraCultivoController.actual.idCultivo}" style="width:150px" converter="GenericConverter" filter="true" > 
+                                <p:ajax listener="#{siembraCultivoController.onCultivoChange}" update=":frmIngreso:var"/>
+                                <f:selectItem itemLabel="Seleccionar Cultivo" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{siembraCultivoController.listadoCultivo}" var="cul" itemLabel="#{cul.nombre}" itemValue="#{cul.id}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="Variedad:"/>
+                            <p:selectOneMenu id="var" value="#{siembraCultivoController.actual.idVariedad}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                                <p:ajax listener="#{siembraCultivoController.onVariedadChange}" update=":frmIngreso:ec"/>
+                                <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{siembraCultivoController.listadoVariedad}" var="var" itemLabel="#{var.nombre}" itemValue="#{var.id}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="Etapa Cultivo"/>
+                            <p:inputText id="ec" value="#{siembraCultivoController.actual.leyendaEtapaCultivo}" style="width: 250px;" readonly="true"/>
+
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2">
+                            <h:outputLabel value="Cliente:"/>                                
+                            <p:selectOneMenu id="cli" value="#{siembraCultivoController.idCliente}" style="width:150px" converter="GenericConverter" filter="true" > 
+                                <p:ajax listener="#{siembraCultivoController.onClienteChange}" update=":frmIngreso:hac"/>
+                                <f:selectItem itemLabel="Seleccionar Cliente" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{siembraCultivoController.listadoCliente}" var="cli" itemLabel="#{cli.nombre}" itemValue="#{cli.id}" />
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="Hacienda:"/>                                
+                            <p:selectOneMenu id="hac" value="#{siembraCultivoController.actual.idHacienda}" style="width:150px" converter="GenericConverter" filter="true" > 
+                                <p:ajax listener="#{siembraCultivoController.onHaciendaChange}" update=":frmIngreso:lot"/>
+                                <f:selectItem itemLabel="Seleccionar Hacienda" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{siembraCultivoController.listadoHacienda}" var="hac" itemLabel="#{hac.nombre}" itemValue="#{hac.id}" />
+                            </p:selectOneMenu>
+
+                            <h3 style="margin-top: 0">Lotes:</h3>
+                            <h:panelGrid id="lot">
+                                <p:pickList id="pickList" value="#{siembraCultivoController.listadoLotes}" var="elemento" itemLabel="#{elemento.codigo} (#{elemento.hectareas} htas.) " itemValue="#{elemento}" 
+                                            showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="GenericConverter">
+
+                                </p:pickList>
+                            </h:panelGrid>
+
+                        </p:panelGrid>
+                    </h:panelGrid>
 
 
                 </h:panelGrid>
@@ -154,14 +209,14 @@ and open the template in the editor.
                         <p:menuitem value="Nuevo" action="#{menuFertilizacionController.goToOpNuevoSiembraCultivo}" icon="ui-icon-document" ajax="false" />
                     </p:menubar>
 
-                    <p:panel header="Muestra">
+                    <p:panel header="SIEMBRA CULTIVO">
 
-                        <p:panel id="pnlUsuariosIngresados" header="Muestras Existentes">
+                        <p:panel id="pnlUsuariosIngresados" header="Registros Existentes">
                             <p:dataTable var="obj" value="#{siembraCultivoController.model}" style="width: 95%; margin: auto auto"
                                          emptyMessage="No existen registros" filteredValue="#{siembraCultivoController.filter}" paginator="true" rows="10"
-                                         selection="#{siembraCultivoController.selected}" selectionMode="single" widgetVar="usuariosTable">
+                                         selection="#{siembraCultivoController.actual}" selectionMode="single" widgetVar="usuariosTable">
 
-                                <p:ajax  event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{siembraCultivoController.loadListasSelected}" />
+                                <p:ajax  event="rowSelect" update=":frmIngreso:display" oncomplete="PF('objDialog').show()" listener="#{siembraCultivoController.loadSelected}" />
 
                                 <p:columnGroup type="header">
                                     <p:row>

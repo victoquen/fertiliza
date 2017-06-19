@@ -120,7 +120,7 @@ public class Cultivo implements Serializable{
         List<Cultivo> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
-        FindIterable<Document> iterable = mongo.db.getCollection("cultivo").find().sort(new Document("_id", -1));       
+        FindIterable<Document> iterable = mongo.db.getCollection("cultivo").find().sort(new Document("nombre", 1));       
         iterable.forEach(new Block<Document>() {
             @Override
             public void apply(final Document document) {

@@ -15,16 +15,7 @@
             }
         </style>
 
-        <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
 
-        <script type="text/javascript">
-            function reverseGeocode() {
-                var lat = document.getElementById('lat').value;
-                var lng = document.getElementById('lng').value;
-
-                PF('revGeoMap').reverseGeocode(lat, lng);
-            }
-        </script>
 
         <script type="text/javascript">
 
@@ -100,182 +91,111 @@
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
 
-        <h:form id="frmAuxFono">
-            <p:dialog header="Info Teléfono" widgetVar="fonoDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
-                <p:outputPanel id="fonoDetail" style="text-align: justify;">
-                    <h:panelGrid  columns="2"  columnClasses="label,value">
-
-
-                        <h:outputText value="Teléfono:" />
-                        <h:outputText value="#{clienteController.selectedFono}" />
-
-                        <h:outputText value="Nuevo:" />
-                        <p:inputText value="#{clienteController.actualFono}" style="width: 200px"/>
-
-
-                        <f:facet name="footer">
-                            <h:panelGrid columns="2">
-                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateFono}"  update=":frmUpdate:sTelefonos :frmAuxFono"/>
-                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeFono}" update=":frmUpdate:sTelefonos :frmAuxFono"/>
-                            </h:panelGrid>
-                        </f:facet>
-
-                    </h:panelGrid>
-
-                </p:outputPanel>
-            </p:dialog>
-        </h:form>
-
-        <h:form id="frmAuxMail">
-            <p:dialog header="Info Email" widgetVar="mailDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
-                <p:outputPanel id="mailDetail" style="text-align: justify;">
-                    <h:panelGrid  columns="2"  columnClasses="label,value">
-
-
-                        <h:outputText value="Email:" />
-                        <h:outputText value="#{clienteController.selectedMail}" />
-
-                        <h:outputText value="Nuevo:" />
-                        <p:inputText value="#{clienteController.actualMail}" style="width: 200px"/>
-
-
-                        <f:facet name="footer">
-                            <h:panelGrid columns="2">
-                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateMail}"  update=":frmUpdate:sMails :frmAuxMail"/>
-                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeMail}" update=":frmUpdate:sMails :frmAuxMail"/>
-                            </h:panelGrid>
-                        </f:facet>
-
-                    </h:panelGrid>
-
-                </p:outputPanel>
-            </p:dialog>
-        </h:form>
 
 
 
 
-        <h:form id="frmUpdate">
+
+        <h:form id="frmIngreso">
             <p:dialog id="objDialog" widgetVar="objDialog" width="60%" height="600" modal="true" closable="false">
                 <h:panelGrid id="display" columns="1">
 
                     <h:panelGrid columns="2">
 
-                        <p:commandButton  value="Actualizar"  action="#{clienteController.update}"  update=":frmUpdate :frmListado" />
+                        <p:commandButton  value="Actualizar"  action="#{produccionController.update}"  update=":frmIngreso :frmListado" />
 
-                        <p:commandButton value="Cerrar"  update=":frmUpdate :frmListado "/>
+                        <p:commandButton value="Cerrar"  update=":frmIngreso :frmListado "/>
                     </h:panelGrid>
 
-                    <p:panelGrid columns="4" style="font-size: xx-large" >
-                        <h:outputLabel value="Cliente: *"/>
-                        <p:selectOneRadio id="cli" value="#{clienteController.actual.tipoCliente}"  layout="grid" columns="2" required="true" requiredMessage="Tipo Cliente. Campo Obligatorio">
-                            <f:selectItem itemLabel="GENERICO" itemValue="GENERICO" />
-                            <f:selectItem itemLabel="PLANTECH" itemValue="PLANTECH" />
-                        </p:selectOneRadio>
+                    <h:panelGrid columns="1">
+                            <p:panelGrid columns="4" style="font-size: xx-large" >
+                                <h:outputLabel value="Año: *"/>
+                                <p:inputText value="#{produccionController.actual.anio}" style="width: 250px;" />
+                                <h:outputLabel value="Cliente: *"/>
+                                <p:selectOneMenu id="cli" value="#{produccionController.actual.idCliente}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                                    <p:ajax listener="#{produccionController.onClienteChange}" update=":frmIngreso:hac :frmIngreso:cul :frmIngreso:var :frmIngreso:res :frmIngreso:totPr :frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy"/>
+                                    <f:selectItem itemLabel="Seleccionar Cliente" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{produccionController.listadoCliente}" var="objc" itemLabel="#{objc.nombre}" itemValue="#{objc.id}" />
+                                </p:selectOneMenu>
 
-                        <h:outputLabel value="Departamento: *"/>
-                        <p:selectOneMenu id="depar" value="#{clienteController.actual.departamento}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Departamento. Campo Obligatorio">                                        
-                            <f:selectItem itemLabel="Seleccionar Departamento" itemValue="" noSelectionOption="true" />
-                            <f:selectItems value="#{clienteController.listadoDepartamento}" var="dep" itemLabel="#{dep.nombre}" itemValue="#{dep.id}" />
-                        </p:selectOneMenu>
+                                <h:outputLabel value="Ciclo: *"/>
+                                <p:inputText value="#{produccionController.actual.ciclo}" style="width: 250px;" />
+                                <h:outputLabel value="Hacienda: *"/>
+                                <p:selectOneMenu id="hac" value="#{produccionController.actual.idHacienda}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                                    <p:ajax listener="#{produccionController.onHaciendaChange}" update=":frmIngreso:cul :frmIngreso:var :frmIngreso:res :frmIngreso:totPr :frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy"/>
+                                    <f:selectItem itemLabel="Seleccionar Hacienda" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{produccionController.listadoHacienda}" var="objh" itemLabel="#{objh.nombre}" itemValue="#{objh.id}" />
+                                </p:selectOneMenu>
 
-                        <h:outputLabel value="Código: *"/>
-                        <p:inputText value="#{clienteController.actual.codigo}" style="width: 250px;" required="true" requiredMessage="Código. Campo Obligatorio"/>
-                        <h:outputLabel value="Nombre: *"/>
-                        <p:inputText value="#{clienteController.actual.nombre}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Nombre. Campo Obligatorio"/>
-                        <h:outputLabel value="Tipo:"/>
-                        <p:inputText value="#{clienteController.actual.tipo}" style="width: 250px;"/>
-                        <h:outputLabel value="Ruc: *"/>                                   
-                        <p:inputMask id="ruc" value="#{clienteController.actual.rucCi}" mask="9999999999 999" required="true" requiredMessage="Ruc. Campo Obligatorio"/>
-
-
-                        <h:outputLabel value="Mercado:"/>
-                        <p:inputText value="#{clienteController.actual.mercado}" style="width: 250px; "/>
-                        <h:outputLabel value="A Facturar:"/>
-                        <p:inputText value="#{clienteController.actual.afacturar}" style="width: 250px;"/>
-                        <h:outputLabel value="Vendedor:"/>
-                        <p:inputText value="#{clienteController.actual.vendedor}" style="width: 250px; text-transform: uppercase"/>
-                        <h:outputLabel value="Atención Factura:"/>
-                        <p:inputText value="#{clienteController.actual.atencionFactura}" style="width: 250px;"/>
+                                <h:outputLabel value="Unidad Producción: *"/>
+                                <p:inputText value="#{produccionController.actual.unidadProduccion}" style="width: 250px;" />
+                                <h:outputLabel value="Cultivo: *"/>
+                                <p:selectOneMenu id="cul" value="#{produccionController.actual.idCultivo}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                                    <p:ajax listener="#{produccionController.onCultivoChange}" update=":frmIngreso:var :frmIngreso:res :frmIngreso:totPr :frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy"/>
+                                    <f:selectItem itemLabel="Seleccionar Cultivo" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{produccionController.listadoCultivo}" var="objcl" itemLabel="#{objcl.nombre}" itemValue="#{objcl.id}" />
+                                </p:selectOneMenu>
 
 
-                        <p:outputLabel value="País: *"  />
-                        <p:selectOneMenu id="country" value="#{clienteController.actual.pais}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="País. Campo Obligatorio">
-                            <p:ajax listener="#{clienteController.onCountryChange}" update=":frmUpdate:prov" />
-                            <f:selectItem itemLabel="Seleccionar País" itemValue="" noSelectionOption="true" />
-                            <f:selectItems value="#{clienteController.listadoPs}" var="pais" itemLabel="#{pais.nombre}" itemValue="#{pais.id}" />
-                        </p:selectOneMenu>
-                        <h:outputLabel value="Sector"/>
-                        <p:inputText value="#{clienteController.actual.sector}" style="width: 250px;"/>
-                        <p:outputLabel value="Provincia: *"  />                                
-                        <p:selectOneMenu id="prov" value="#{clienteController.actual.provincia}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Provincia. Campo Obligatorio">
-                            <p:ajax listener="#{clienteController.onProvinciaChange}" update=":frmUpdate:cant" />
-                            <f:selectItem itemLabel="Seleccionar Provincia" itemValue="" noSelectionOption="true" />
-                            <f:selectItems value="#{clienteController.listadoPr}" var="prov" itemLabel="#{prov.nombre}" itemValue="#{prov.id}" />
-                        </p:selectOneMenu>
-                        <h:outputLabel value="Dirección: "/>
-                        <p:inputText value="#{clienteController.actual.direccion}" style="width: 250px; text-transform: uppercase"/>
-                        <h:outputLabel value="Cantón: *"/>
-                        <p:selectOneMenu id="cant" value="#{clienteController.actual.canton}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Cantón. Campo Obligatorio" >                                       
-                            <f:selectItem itemLabel="Seleccionar Cantón" itemValue="" noSelectionOption="true" />
-                            <f:selectItems value="#{clienteController.listadoCan}" var="cant" itemLabel="#{cant.nombre}" itemValue="#{cant.id}" />
-                        </p:selectOneMenu>
+                                <h:outputLabel value="Factor Conversión: *"/>
+                                <p:inputText value="#{produccionController.actual.factorConversion}" style="width: 250px; " >
+                                    <p:ajax listener="#{produccionController.calculoTotales()}" update=":frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy"/>
+                                </p:inputText>
+                                <h:outputLabel value="Variedad: *"/>
+                                <p:selectOneMenu id="var" value="#{produccionController.actual.idVariedad}" style="width:150px" converter="GenericConverter" filter="true" >                                        
+                                    <p:ajax listener="#{produccionController.onVariedadChange()}" update=":frmIngreso:res :frmIngreso:totPr :frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy"/>
+                                    <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{produccionController.listadoVariedad}" var="objv" itemLabel="#{objv.nombre}" itemValue="#{objv.id}" />
+                                </p:selectOneMenu>
+                            </p:panelGrid>
 
-
-                        <h:outputLabel value=""/>
-                        <h:outputLabel value=""/>
-
-
-                        <h:outputLabel value="OBSERVACION"/>
-                        <p:inputTextarea rows="6" cols="33" value="#{clienteController.actual.observacionGenerico}" />
-
-
-                        <h:panelGrid id="sTelefonos" columns="1" >
-                            <h:outputLabel value="Teléfono:"/>
-                            <p:inputText value="#{clienteController.actualFono}" style="width: 150px;"/>
-                            <p:commandButton value="Agregar" actionListener="#{clienteController.addFono}" update=":frmUpdate:sTelefonos"/>
-
-                            <p:dataList  value="#{clienteController.fonos}" var="objFono" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
+                            <p:dataTable id="res" var="obj" style="width: 90%; margin: auto auto" value="#{produccionController.listadoProduccionLote}" editable="true" editMode="cell" >
                                 <f:facet name="header">
-                                    Teléfono(s)
+                                    Ingreso Producción por Lote 
                                 </f:facet>
 
-                                <h:panelGrid columns="2">
-                                    <p:commandLink update=":frmAuxFono:fonoDetail"  oncomplete="PF('fonoDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
-                                        <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.selectedFono}" />
-                                        <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.actualFono}" />
-                                    </p:commandLink>
-                                    <h:outputText value="#{objFono}" style="display:compact "/>
+                                <p:ajax event="cellEdit" listener="#{produccionController.onCellEdit}" update=":frmIngreso:totPr :frmIngreso:totKg :frmIngreso:mN :frmIngreso:mF :frmIngreso:proy" />
 
+                                <p:column headerText="Hctas." width="20%" >
+                                    #{obj.leyendaHectareas}
+                                </p:column>
+                                <p:column headerText="LOTE" width="30%" >
+                                    #{obj.leyendaLote}
+                                </p:column>
+                                <p:column headerText="CULTIVO" width="20%" >
+                                    #{produccionController.actualCultivo.nombre}
+                                </p:column>                                
+                                <p:column headerText="Producción" width="30%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.prodLote}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.prodLote}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>                                
+                            </p:dataTable>
 
-                                </h:panelGrid>
-                            </p:dataList>
+                            <p:panelGrid columns="2">
+                                <h:outputLabel value="Total Producción: "/>
+                                <p:inputText id="totPr" value="#{produccionController.actual.totalProduccion}" style="width: 250px;"/>
+
+                                <h:outputLabel value="Total Kg Anual: "/>
+                                <p:inputText id="totKg" value="#{produccionController.actual.totalKgAnual}" style="width: 250px;"/>
+
+                                <h:outputLabel value="Merma Natural 12%: "/>
+                                <p:inputText id="mN" value="#{produccionController.actual.mermaNatural}" style="width: 250px;"/>
+
+                                <h:outputLabel value="Merma Fitosanitaria 10%: "/>
+                                <p:inputText id="mF" value="#{produccionController.actual.mermaFitosanitaria}" style="width: 250px;"/>
+
+                                <h:outputLabel value="Proyección 2%: "/>
+                                <p:inputText id="proy" value="#{produccionController.actual.proyeccion}" style="width: 250px;"/>
+                            </p:panelGrid>
+
                         </h:panelGrid>
 
-
-
-                        <h:panelGrid id="sMails" columns="1" >
-                            <h:outputLabel value="Email:"/>
-                            <p:inputText value="#{clienteController.actualMail}" style="width: 150px;"/>
-                            <p:commandButton value="Agregar" actionListener="#{clienteController.addMail}" update=":frmUpdate:sMails"/>
-
-                            <p:dataList  value="#{clienteController.mails}" var="objMail" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
-                                <f:facet name="header">
-                                    Email(s)
-                                </f:facet>
-
-                                <h:panelGrid columns="2">
-                                    <p:commandLink update=":frmAuxMail:mailDetail"  oncomplete="PF('mailDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
-                                        <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.selectedMail}" />
-                                        <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.actualMail}" />
-                                    </p:commandLink>
-                                    <h:outputText value="#{objMail}" style="display:compact "/>
-
-                                </h:panelGrid>
-                            </p:dataList>
-                        </h:panelGrid>
-                    </p:panelGrid>
-                    
                 </h:panelGrid>
             </p:dialog>
         </h:form>
@@ -320,44 +240,56 @@
 
                 <h:form id="frmListado">
                     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
-                    <p:panel header="CLIENTES">
+                    <p:panel header="PRODUCCION">
                         <p:menubar>
-                            <p:menuitem value="Nuevo" ajax="false"  action="#{menuFertilizacionController.goToOpNuevoCliente}" icon="ui-icon-document" />
+                            <p:menuitem value="Nuevo" ajax="false"  action="#{menuFertilizacionController.goToOpNuevoProduction()}" icon="ui-icon-document" />
                         </p:menubar>
 
 
 
 
 
-                        <p:panel id="pnlUsuariosIngresados" header="Clientes Existentes">
-
-                            <p:remoteCommand name="rc"  action="#{menuFertilizacionController.goToOpModificarCliente}" />
-                            <p:dataTable var="obj" value="#{clienteController.model}" style="width: 90%; margin: auto auto"
-                                         emptyMessage="No existen registros" filteredValue="#{clienteController.filter}" paginator="true" rows="10"
-                                         selection="#{clienteController.actual}" selectionMode="single" widgetVar="usuariosTable">
+                        <p:panel id="pnlIngresados" header="INFO Existente">
 
 
-                                <p:ajax event="rowSelect" update=":frmUpdate:display" oncomplete="PF('objDialog').show()" listener="#{clienteController.loadSelectedClienteProvinciaCanton}" />
+                            <p:dataTable var="obj" value="#{produccionController.model}" style="width: 100%; margin: auto auto"
+                                         emptyMessage="No existen registros" filteredValue="#{produccionController.filter}" paginator="true" rows="10"
+                                         selection="#{produccionController.actual}" selectionMode="single" widgetVar="usuariosTable">
+
+
+                                <p:ajax event="rowSelect" update=":frmIngreso:display" oncomplete="PF('objDialog').show()" listener="#{produccionController.loadSelectedCliHacCultVar}" />
 
                                 <p:columnGroup type="header">
                                     <p:row>
                                         <p:column headerText="" style="width:16px"/>
-                                        <p:column colspan="8" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column colspan="5" headerText="Dar clic en el Objeto para Modificarlo"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        <p:column headerText="" style="width:40px"/>
+                                        
                                     </p:row>
 
                                     <p:row>
                                         <p:column headerText="" style="width:16px"/>
-                                        <p:column headerText="CÓDIGO" filterBy="#{obj.codigo}" filterMatchMode="contains"/>
-                                        <p:column headerText="NOMBRE" filterBy="#{obj.nombre}" filterMatchMode="contains"/>
+                                        <p:column headerText="AÑO" filterBy="#{obj.anio}" filterMatchMode="contains"/>
+                                        <p:column headerText="CLIENTE" filterBy="#{obj.leyendaCliente}" filterMatchMode="contains"/>
+                                        <p:column headerText="HACIENDA" filterBy="#{obj.leyendaHacienda}" filterMatchMode="contains"/>
+                                        <p:column headerText="CULTIVO" filterBy="#{obj.leyendaCultivo}" filterMatchMode="contains"/>
+                                        <p:column headerText="VARIEDAD" filterBy="#{obj.leyendaVariedad}" filterMatchMode="contains"/>
+                                        <p:column headerText="CICLO" />
+                                        <p:column headerText="TOT. PROD Kg" />
+                                        <p:column headerText="UNIDAD PROD" />
+                                        <p:column headerText="PESO x UnidTon" />
+                                        <p:column headerText="M. Natural" />
+                                        <p:column headerText="M. Fitosanitaria" />
 
-                                        <p:column headerText="TIPO" filterBy="#{obj.tipoCliente}" filterMatchMode="contains"/>
-
-                                        <p:column headerText="PAIS" filterBy="#{obj.leyendaPais}" filterMatchMode="contains"/>
-                                        <p:column headerText="PROVINCIA" filterBy="#{obj.leyendaProvincia}" filterMatchMode="contains"/>
-                                        <p:column headerText="CANTÓN" filterBy="#{obj.leyendaCanton}" filterMatchMode="contains"/>
-
-                                        <p:column headerText="TELÉFONO(s)" filterBy="#{obj.telefono}" filterMatchMode="contains"/>
-                                        <p:column headerText="EMAIL(s)" filterBy="#{obj.email}" filterMatchMode="contains"/>
+                                        <p:column headerText="PROD. BRUTA" />
+                                        <p:column headerText="VAR. ANUAL"  />
 
                                     </p:row>  
                                 </p:columnGroup>
@@ -367,155 +299,70 @@
                                 </p:column>
 
                                 <p:column >
-                                    <h:outputText value="#{obj.codigo}" />
+                                    <h:outputText value="#{obj.anio}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.nombre}" />
-                                </p:column>
-
-                                <p:column >
-                                    <h:outputText value="#{obj.tipoCliente}" />
+                                    <h:outputText value="#{obj.leyendaCliente}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.leyendaPais}" />
+                                    <h:outputText value="#{obj.leyendaHacienda}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.leyendaProvincia}" />
+                                    <h:outputText value="#{obj.leyendaCultivo}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.leyendaCanton}" />
-                                </p:column>
-
-                                <p:column >
-                                    <h:outputText value="#{obj.telefono}" />
+                                    <h:outputText value="#{obj.leyendaVariedad}" />
                                 </p:column>
                                 <p:column >
-                                    <h:outputText value="#{obj.email}" />
+                                    <h:outputText value="#{obj.ciclo}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.totalKgAnual}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.unidadProduccion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.factorConversion}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.mermaNatural}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.mermaFitosanitaria}" />
+                                </p:column>
+                                <p:column >
+                                    <h:outputText value="#{obj.leyendaProduccionBruta}" />
+                                </p:column>
+                                <p:column  >
+                                    <h:outputText value="#{obj.leyendaVariacion}" />
                                 </p:column>
 
                                 <p:rowExpansion>
 
-                                    <p:dataTable id="obj2" value="#{obj.haciendas}" var="hac" style="width: 80%; margin: auto auto" >
+                                    <p:dataTable id="obj2" value="#{obj.listadoProduccionLote}" var="sub" style="width: 80%; margin: auto auto" >
 
                                         <f:facet name="header">
-                                            #{obj.nombre} (#{obj.rucCi})
+                                            LOTES
                                         </f:facet>
 
                                         <p:column style="width:16px">
                                             <p:rowToggler />
                                         </p:column>
 
-                                        <p:column headerText="Nombre" style="font-size: 11px">
-                                            <h:outputText value="#{hac.nombre}" />
+                                        <p:column headerText="Lote" style="font-size: 11px">
+                                            <h:outputText value="#{sub.leyendaLote}" />
                                         </p:column>
                                         <p:column headerText="Hectareas" style="font-size: 11px">
-                                            <h:outputText value="#{hac.hectareas}" />
+                                            <h:outputText value="#{sub.leyendaHectareas}" />
                                         </p:column>
-                                        <p:column headerText="NumLotes" style="font-size: 11px">
-                                            <h:outputText value="#{hac.numLotes}" />
+                                        <p:column headerText="CULTIVO" style="font-size: 11px">
+                                            <h:outputText value="#{obj.leyendaCultivo}" />
                                         </p:column>
-                                        <p:column headerText="Latitud" style="font-size: 11px">
-                                            <h:outputText value="#{hac.latitud}" />
+                                        <p:column headerText="Producción" style="font-size: 11px">
+                                            <h:outputText value="#{sub.prodLote}" />
                                         </p:column>
-                                        <p:column headerText="Longitud" style="font-size: 11px">
-                                            <h:outputText value="#{hac.longitud}" />
-                                        </p:column>
-                                        <p:rowExpansion>
-                                            <p:dataTable id="obj2" value="#{hac.contactos}" var="contacto" style="width: 75%; margin: auto auto" >
 
-                                                <f:facet name="header">
-                                                    CONTACTOS
-                                                </f:facet>
-                                                <p:column headerText="Tipo" style="font-size: 11px">
-                                                    <h:outputText value="#{contacto.tipo}" />
-                                                </p:column>
-                                                <p:column headerText="Nombre" style="font-size: 11px">
-                                                    <h:outputText value="#{contacto.nombre}" />
-                                                </p:column>
-                                                <p:column headerText="Cargo" style="font-size: 11px">
-                                                    <h:outputText value="#{contacto.cargo}" />
-                                                </p:column>
-                                                <p:column headerText="Teléfono" style="font-size: 11px">
-                                                    <h:outputText value="#{contacto.telefono}" />
-                                                </p:column>
-                                                <p:column headerText="Email" style="font-size: 11px">
-                                                    <h:outputText value="#{contacto.email}" />
-                                                </p:column>
-                                            </p:dataTable>
-
-                                            <p:dataTable id="obj3" value="#{hac.listadoLotes}" var="lote" style="width: 85%; margin: auto auto" >
-
-                                                <f:facet name="header">
-                                                    LOTES
-                                                </f:facet>
-                                                <p:column style="width:16px">
-                                                    <p:rowToggler />
-                                                </p:column>
-                                                <p:column headerText="CODIGO" style="font-size: 11px">
-                                                    <h:outputText value="#{lote.idLotes}" />
-                                                </p:column>
-                                                <p:column headerText="Cultivo" style="font-size: 11px">
-                                                    <h:outputText value="#{lote.leyendaCultivo}" />
-                                                </p:column>
-                                                <p:column headerText="Variedad" style="font-size: 11px">
-                                                    <h:outputText value="#{lote.leyendaVariedad}" />
-                                                </p:column>
-                                                <p:column headerText="Edad" style="font-size: 11px">
-                                                    <h:outputText value="#{lote.leyendaEdad}" />
-                                                </p:column>
-
-
-
-                                                <p:rowExpansion>
-
-                                                    <p:dataTable id="obj6" value="#{lote.listaPeriodosMonitoreos}" var="monitoreo" style="width: 50%; margin: auto auto; "  >
-
-                                                        <p:column headerText="N° Monitoreo" style="font-size: 11px">
-                                                            <h:outputText value="#{monitoreo.numeroMonitoreo}" />
-                                                        </p:column>
-                                                        <p:column headerText="Período [Días]" style="font-size: 11px">
-                                                            <h:outputText value="#{monitoreo.numeroDias}" /> días
-                                                        </p:column>
-
-                                                    </p:dataTable>
-
-                                                    <p:dataTable id="obj4" value="#{lote.listaEstacionMonitoreo}" var="estacion" style="width: 85%; margin: auto auto; "  >
-
-                                                        <f:facet name="header">
-                                                            ESTACION MONITOREO: #{lote.codigoMayorEstacion}
-                                                        </f:facet>
-                                                        <p:column style="width:16px">
-                                                            <p:rowToggler />
-                                                        </p:column>
-                                                        <p:column headerText="SubEstación" style="font-size: 11px">
-                                                            <h:outputText value="#{estacion.codigo}" />
-                                                        </p:column>
-                                                        <p:column headerText="Latitud" style="font-size: 11px">
-                                                            <h:outputText value="#{estacion.latitudestacion}" />
-                                                        </p:column>
-                                                        <p:column headerText="Longitud" style="font-size: 11px">
-                                                            <h:outputText value="#{estacion.longitudestacion}" />
-                                                        </p:column>
-
-                                                        <p:rowExpansion>
-                                                            <p:dataTable id="obj5" value="#{estacion.listaSondas}" var="sonda" style="width: 50%; margin: auto auto; "  >
-
-                                                                <p:column headerText="Sonda" style="font-size: 11px">
-                                                                    <h:outputText value="#{sonda.descripcion}" />
-                                                                </p:column>
-                                                                <p:column headerText="TipoSonda" style="font-size: 11px">
-                                                                    <h:outputText value="#{sonda.leyendaTipoSonda}" />
-                                                                </p:column>
-
-                                                            </p:dataTable>
-
-                                                        </p:rowExpansion>
-
-                                                    </p:dataTable>
-                                                </p:rowExpansion>
-
-                                            </p:dataTable>
-                                        </p:rowExpansion>
                                     </p:dataTable>
 
                                 </p:rowExpansion>

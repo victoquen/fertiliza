@@ -371,11 +371,11 @@ public class MenuFertilizacionController implements Serializable {
         item.setAjax(false);
         produccionSubmenu.addElement(item);
 
-        item = new DefaultMenuItem("Programa Fertilización");
+        /*item = new DefaultMenuItem("Programa Fertilización");
         item.setIcon("ui-icon-gear");
         item.setCommand(goToOpProgramaFertilizacion());
         item.setAjax(false);
-        produccionSubmenu.addElement(item);
+        produccionSubmenu.addElement(item);*/
 
         modelMenu.addElement(produccionSubmenu);
         //**********************************************************************
@@ -526,6 +526,9 @@ public class MenuFertilizacionController implements Serializable {
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.SubanalisisController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.DepartamentoController-null-false");
         sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.ProfundidadController-null-false");
+        
+        sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.ProduccionController-null-false");
+        sMap.remove("org.jboss.weld.context.http.HttpSessionContext#org.jboss.weld.bean-web-ManagedBean-web-controllers.fertilizacion.HistoricoFertilizacionController-null-false");
     }
 
     public String goToOpIndex() {
@@ -716,6 +719,21 @@ public class MenuFertilizacionController implements Serializable {
     public String goToOpProduccion(){
         reloadSession();
         return this.opProduccion;
+    }
+    
+    public String goToOpNuevoProduction(){
+        reloadSession();
+        return this.opNuevaProduccion;
+    }
+    
+    public String goToOpNuevoHistoricoFertilizacion(){
+        reloadSession();
+        return this.opNuevoHistoricoFertilizacion;
+    }
+    
+    public String goToOpNuevoProgramaFertilizacion(){
+        reloadSession();
+        return this.opNuevoProgramaFertilizacion;
     }
     
     public String goToOpHistoricoFertilizacion(){

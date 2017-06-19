@@ -12,6 +12,7 @@ import entities.fertilizacion.EtapaCultivo;
 import entities.fertilizacion.Hacienda;
 import entities.fertilizacion.HaciendaLoteCultivoAux;
 import entities.fertilizacion.Lote;
+import entities.fertilizacion.LoteSiembraAux;
 import entities.fertilizacion.PeriodoMonitoreoAux;
 import entities.fertilizacion.Profundidad;
 import entities.fertilizacion.SiembraCultivo;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -33,6 +35,7 @@ import javax.inject.Named;
 import models.SiembraCultivoModel;
 import org.bson.types.ObjectId;
 import org.primefaces.event.CellEditEvent;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TransferEvent;
 import org.primefaces.model.DualListModel;
 
@@ -44,6 +47,7 @@ import org.primefaces.model.DualListModel;
 @ViewScoped
 public class SiembraCultivoController implements Serializable {
 
+    Date fechaSiembreAux;
     SiembraCultivo actual;
     SiembraCultivo selected;
     List<SiembraCultivo> listado;
@@ -120,6 +124,14 @@ public class SiembraCultivoController implements Serializable {
         listadoCliente = Cliente.getAllClientes();
         listadoHacienda = new ArrayList<>();
 
+    }
+
+    public Date getFechaSiembreAux() {
+        return fechaSiembreAux;
+    }
+
+    public void setFechaSiembreAux(Date fechaSiembreAux) {
+        this.fechaSiembreAux = fechaSiembreAux;
     }
 
     public ObjectId getIdCliente() {
@@ -366,6 +378,16 @@ public class SiembraCultivoController implements Serializable {
 
         if (controlDatos(actual)) {
 
+            List<LoteSiembraAux> listAux = new ArrayList<>();
+            int n = this.listadoLotes.getTarget().size();
+            for (int i = 0; i < n; i++) {
+                LoteSiembraAux aux = new LoteSiembraAux();
+                aux.setIdLote(this.listadoLotes.getTarget().get(i).getId());
+                aux.setEstado("activo");
+                listAux.add(aux);
+            }
+
+            actual.setListaLotesSiembra(listAux);
             actual.save();
             load();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Información Ingresada"));
@@ -398,6 +420,40 @@ public class SiembraCultivoController implements Serializable {
             res = false;
         }
         return res;
+    }
+
+    public void loadSelected() {
+        listadoCultivo = Cultivo.getAllCultivos();
+        listadoCliente = Cliente.getAllClientes();
+        this.idCliente = Hacienda.getHaciendaById(this.actual.getIdHacienda()).getIdCliente();
+        listadoHacienda = Hacienda.getAllHaciendaByClienteId(this.idCliente);
+        listadoVariedad = Variedad.getAllVariedadByCultivo(this.actual.getIdCultivo());
+        onVariedadChange();
+
+        List<Lote> elementosSource = new ArrayList<Lote>();
+        List<Lote> elementosTarget = new ArrayList<Lote>();
+        List<Lote> auxLot = Lote.getAllLotesByHaciendaId(this.actual.getIdHacienda());
+        int n = actual.getListaLotesSiembra().size();
+        int i;
+        boolean ban;
+        for (Lote item : auxLot) {
+            i=0;
+            ban = true;
+            while (i < n) {
+                if (item.getId().equals(actual.getListaLotesSiembra().get(i).getIdLote())) {                   
+                    ban = false;
+                    i=n;
+                }
+                i++;
+            }
+            if(ban){
+                elementosSource.add(item);
+            }else{
+                elementosTarget.add(item);
+            }
+        }
+        listadoLotes = new DualListModel<Lote>(elementosSource, elementosTarget);
+
     }
 
     //*********************************************************************************************************************
@@ -434,6 +490,7 @@ public class SiembraCultivoController implements Serializable {
     //METODOS control datos de lotes cultivo aux***************************************************************************
     public void onCultivoChange() {
         if (this.actual.getIdCultivo() != null) {
+            this.actual.setIdVariedad(null);
             listadoVariedad = Variedad.getAllVariedadByCultivo(this.actual.getIdCultivo());
             listadoEtapaCultivo = new ArrayList<>();
         } else {
@@ -443,10 +500,44 @@ public class SiembraCultivoController implements Serializable {
     }
 
     public void onVariedadChange() {
-        if (this.variedad.getId() != null) {
-            listadoEtapaCultivo = EtapaCultivo.getAllByVariedad(this.variedad.getId());
+        if ((this.actual.getIdVariedad() != null)) {
+
+            final long MILLSECS_PER_DAY = 24 * 60 * 60 * 1000; //Milisegundos al día 
+            java.util.Date hoy = new Date(); //Fecha de hoy            
+
+            long diferencia = (hoy.getTime() - this.actual.getFechaSiembra().getTime()) / MILLSECS_PER_DAY;
+            Integer dias = (int) (long) diferencia;
+            //String leyend = EtapaCultivo.getByDiasVariedad(dias, this.actual.getIdVariedad()).getNombre();
+            List<EtapaCultivo> lisAux = EtapaCultivo.getAllByVariedad(this.actual.getIdVariedad());
+            String leyend = "";
+            int i = 0;
+            int tot = lisAux.size();
+            while (i < tot) {
+                EtapaCultivo ec = lisAux.get(i);
+                if ((dias >= ec.getDiasInicio()) && (dias < ec.getDiasFin())) {
+                    leyend = ec.getNombre();
+                    i = tot;
+                }
+                i++;
+            }
+            this.actual.setLeyendaEtapaCultivo(leyend);
+
+            //listadoEtapaCultivo = EtapaCultivo.getAllByVariedad(this.variedad.getId());
         } else {
             listadoEtapaCultivo = new ArrayList<>();
+        }
+
+    }
+
+    public void onFechaSiembreChange(SelectEvent event) {
+        Date dateaux = (Date) event.getObject();
+        this.actual.setFechaSiembra(dateaux);
+        if (this.actual.getFechaSiembra() != null) {
+
+            onVariedadChange();
+            // this.actual.setLeyendaEtapaCultivo(this.actual.getFechaSiembra().toString());
+        } else {
+            this.actual.setLeyendaEtapaCultivo("buuuu");
         }
 
     }
@@ -594,10 +685,7 @@ public class SiembraCultivoController implements Serializable {
     }
 
     //**************************************************************************
-    
-    
-    
-     public void onTransfer(TransferEvent event) {
-        
+    public void onTransfer(TransferEvent event) {
+
     }
 }

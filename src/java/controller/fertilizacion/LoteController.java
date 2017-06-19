@@ -6,27 +6,17 @@
 package controller.fertilizacion;
 
 import entities.fertilizacion.Cliente;
-import entities.fertilizacion.Cultivo;
-import entities.fertilizacion.EtapaCultivo;
-import entities.fertilizacion.EstacionMonitoreo;
 import entities.fertilizacion.Hacienda;
 import entities.fertilizacion.Lote;
-import entities.fertilizacion.SondaAux;
-import entities.fertilizacion.SondaTipo;
-import entities.fertilizacion.Variedad;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import models.ClienteModel;
-import models.CultivoModel;
-import models.EtapaCultivoModel;
 import models.HaciendaModel;
 import models.LoteModel;
-import models.VariedadModel;
 
 /**
  *

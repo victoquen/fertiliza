@@ -188,7 +188,10 @@ and open the template in the editor.
                                 <p:inputText value="#{siembraCultivoController.actual.codigo}" style="width: 250px;" required="true" requiredMessage="Código. Campo Obligatorio" />
 
                                 <h:outputLabel value="Fecha de Siembra:"/>
-                                <p:calendar id="fCreacion"  value="#{siembraCultivoController.actual.fechaSiembra}" locale="es" navigator="true" pattern="yyyy-MMM-dd" required="true" requiredMessage="Fecha Siembra. Campo Obligatorio"/>
+                                <p:calendar id="fCreacion"  value="#{siembraCultivoController.actual.fechaSiembra}" readonlyInput="true"
+                                            locale="es" navigator="true" pattern="yyyy-MMM-dd" required="true" requiredMessage="Fecha Siembra. Campo Obligatorio">
+                                    <p:ajax event="dateSelect" listener="#{siembraCultivoController.onFechaSiembreChange}" update=":frmIngreso:ec"/>
+                                </p:calendar>
 
                                 <h:outputLabel value="Cultivo:"/>
                                 <p:selectOneMenu id="depar" value="#{siembraCultivoController.actual.idCultivo}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Cultivo. Campo Obligatorio"> 
@@ -198,14 +201,14 @@ and open the template in the editor.
                                 </p:selectOneMenu>
 
                                 <h:outputLabel value="Variedad:"/>
-                                <p:selectOneMenu id="var" value="#{siembraCultivoController.actual.idVariedad}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Variedad. . Campo Obligatorio" >                                        
-                                    <p:ajax listener="#{siembraCultivoController.onVariedadChange}" update=":frmIngreso:var"/>
+                                <p:selectOneMenu id="var" value="#{siembraCultivoController.actual.idVariedad}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Variedad. Campo Obligatorio" >                                        
+                                    <p:ajax listener="#{siembraCultivoController.onVariedadChange}" update=":frmIngreso:ec"/>
                                     <f:selectItem itemLabel="Seleccionar Variedad" itemValue="" noSelectionOption="true" />
                                     <f:selectItems value="#{siembraCultivoController.listadoVariedad}" var="var" itemLabel="#{var.nombre}" itemValue="#{var.id}" />
                                 </p:selectOneMenu>
 
                                 <h:outputLabel value="Etapa Cultivo"/>
-                                <p:inputText value="#{siembraCultivoController.actual.leyendaEtapaCultivo}" style="width: 250px;" />
+                                <p:inputText id="ec" value="#{siembraCultivoController.actual.leyendaEtapaCultivo}" style="width: 250px;" readonly="true"/>
 
                             </p:panelGrid>
 

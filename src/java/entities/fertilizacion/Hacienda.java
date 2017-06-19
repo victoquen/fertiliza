@@ -40,7 +40,7 @@ public class Hacienda implements Serializable {
 
     String darBaja; //0 activos, 1 desactivados
 
-    List<HaciendaLoteCultivoAux> listadoLotes;
+    //List<HaciendaLoteCultivoAux> listadoLotes;
 
     //List<Lote> lotes;
     public Hacienda() {
@@ -56,7 +56,7 @@ public class Hacienda implements Serializable {
         this.longitud = "";*/
 
         this.leyendaCliente = "";
-        this.listadoLotes = new ArrayList<>();
+        
         this.darBaja = "0";
         //this.lotes = new ArrayList<>();
     }
@@ -79,13 +79,7 @@ public class Hacienda implements Serializable {
         this.darBaja = darBaja;
     }
 
-    public List<HaciendaLoteCultivoAux> getListadoLotes() {
-        return listadoLotes;
-    }
-
-    public void setListadoLotes(List<HaciendaLoteCultivoAux> listadoLotes) {
-        this.listadoLotes = listadoLotes;
-    }
+   
 
     public ObjectId getId() {
         return id;

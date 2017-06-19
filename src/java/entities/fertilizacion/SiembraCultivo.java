@@ -70,6 +70,7 @@ public class SiembraCultivo implements Serializable {
         this.estado = "activo";
     }
 
+    
     public ObjectId getId() {
         return id;
     }
@@ -418,7 +419,8 @@ public class SiembraCultivo implements Serializable {
 
                     obj.listaPeriodosMonitoreos.add(auxPeriod);
 
-                }
+                }                
+                obj.ListaPeriodosMonitoreosPendientes();
 
                 List<Document> listaEstMonit = (List<Document>) document.get("listadoMonitoreo");
                 int contListaEstMonit = listaEstMonit.size();
@@ -517,6 +519,7 @@ public class SiembraCultivo implements Serializable {
                     obj.listaPeriodosMonitoreos.add(auxPeriod);
 
                 }
+                obj.ListaPeriodosMonitoreosPendientes();
 
                 List<Document> listaEstMonit = (List<Document>) document.get("listadoMonitoreo");
                 int contListaEstMonit = listaEstMonit.size();
@@ -550,10 +553,306 @@ public class SiembraCultivo implements Serializable {
         });
 
         return res;
-    }
+    } 
 
+    public static List<SiembraCultivo> getAllByHacienda(ObjectId idHac) {
+        List<SiembraCultivo> res = new ArrayList<>();
+
+        MongoManager mongo = MongoManager.getInstance();
+        FindIterable<Document> iterable = mongo.db.getCollection("siembraCultivo").find(new Document("estado", "activo").append("idHacienda", idHac));        
+        iterable.forEach(new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                SiembraCultivo obj = new SiembraCultivo();
+
+                obj.id = document.getObjectId("_id");
+                obj.idHacienda = document.getObjectId("idHacienda");
+                obj.idCultivo = document.getObjectId("idCultivo");
+                obj.idVariedad = document.getObjectId("idVariedad");
+                obj.codigo = document.getString("codigo");
+                obj.fechaSiembra = document.getDate("fechaSiembra");
+                obj.estado = document.getString("estado");
+                obj.unidadManejo = document.getString("unidadManejo");
+
+                obj.leyendaCultivo = Cultivo.getCultivoById(obj.idCultivo).getNombre();
+                obj.leyendaVariedad = Variedad.getVariedadById(obj.idVariedad).getNombre();
+                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.idHacienda).getNombre();
+                obj.leyendaCliente = Hacienda.getHaciendaById(obj.idHacienda).getLeyendaCliente();
+
+                if (obj.fechaSiembra != null) {
+                    SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                    obj.fechaSiembraFormat = formateadorRec.format(obj.fechaSiembra);
+                } else {
+                    obj.fechaSiembraFormat = "---";
+                }
+
+                List<Document> listaLotes = (List<Document>) document.get("listadoLotes");
+                int contListaLotes = listaLotes.size();
+                for (int k = 0; k < contListaLotes; k++) {
+                    Document dboLote = (Document) listaLotes.get(k);
+                    LoteSiembraAux auxLote = new LoteSiembraAux();
+                    auxLote.idLote = dboLote.getObjectId("idLote");
+                    auxLote.estado = dboLote.getString("estado");
+                    auxLote.leyendaLote = Lote.getLoteById(auxLote.idLote).getCodigo() + "(" + Lote.getLoteById(auxLote.idLote).getHectareas() + " hctas.)";
+
+                    obj.listaLotesSiembra.add(auxLote);
+
+                }
+
+                List<Document> listaPeriodos = (List<Document>) document.get("listaPeriodos");
+                int contListaPerio = listaPeriodos.size();
+                for (int l = 0; l < contListaPerio; l++) {
+                    Document dboPeriodo = (Document) listaPeriodos.get(l);
+                    PeriodoMonitoreoAux auxPeriod = new PeriodoMonitoreoAux();
+                    auxPeriod.numeroMonitoreo = dboPeriodo.getInteger("numeroMonitoreo");
+                    auxPeriod.numeroDias = dboPeriodo.getInteger("numeroDias");
+                    auxPeriod.fechaMonitoreo = dboPeriodo.getDate("fechaMonitoreo");
+                    auxPeriod.pendiente = dboPeriodo.getString("pendiente");
+
+                    if (auxPeriod.fechaMonitoreo != null) {
+                        SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                        auxPeriod.fechaMonitoreoFormat = formateadorRec.format(auxPeriod.fechaMonitoreo);
+                    } else {
+                        auxPeriod.fechaMonitoreoFormat = "---";
+                    }
+
+                    obj.listaPeriodosMonitoreos.add(auxPeriod);
+
+                }
+                obj.ListaPeriodosMonitoreosPendientes();
+
+                List<Document> listaEstMonit = (List<Document>) document.get("listadoMonitoreo");
+                int contListaEstMonit = listaEstMonit.size();
+                for (int j = 0; j < contListaEstMonit; j++) {
+                    Document dboEstMon = (Document) listaEstMonit.get(j);
+                    EstacionMonitoreo auxEstMon = new EstacionMonitoreo();
+                    auxEstMon.codigo = dboEstMon.getString("codigo");
+                    auxEstMon.latitudestacion = dboEstMon.getString("latitudestacion");
+                    auxEstMon.longitudestacion = dboEstMon.getString("longitudestacion");
+
+                    List<Document> listaSondas = (List<Document>) dboEstMon.get("listaSondas");
+                    int contListaSonda = listaSondas.size();
+                    for (int k = 0; k < contListaSonda; k++) {
+                        Document dboSonda = (Document) listaSondas.get(k);
+                        SondaAux auxSonda = new SondaAux();
+                        auxSonda.tipoSonda = dboSonda.getObjectId("tipoSonda");
+                        auxSonda.descripcion = dboSonda.getString("descripcion");
+                        auxSonda.leyendaTipoSonda = SondaTipo.getSondaTipoById(auxSonda.tipoSonda).getNombre();
+                        auxSonda.profundidad = dboSonda.getObjectId("profundidad");
+                        auxSonda.leyendaProfundidad = Profundidad.getById(auxSonda.profundidad).getNombre();
+
+                        auxEstMon.listaSondas.add(auxSonda);
+                    }
+
+                    obj.listaEstacionMonitoreo.add(auxEstMon);
+                }
+                
+                res.add(obj);
+            }
+
+        });
+
+        return res;
+    } 
     
+    public static List<SiembraCultivo> getAllByHaciendaCultivo(ObjectId idHac, ObjectId idCult) {
+        List<SiembraCultivo> res = new ArrayList<>();
 
+        MongoManager mongo = MongoManager.getInstance();
+        FindIterable<Document> iterable = mongo.db.getCollection("siembraCultivo").find(new Document("estado", "activo").append("idHacienda", idHac).append("idCultivo", idCult));        
+        iterable.forEach(new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                SiembraCultivo obj = new SiembraCultivo();
+
+                obj.id = document.getObjectId("_id");
+                obj.idHacienda = document.getObjectId("idHacienda");
+                obj.idCultivo = document.getObjectId("idCultivo");
+                obj.idVariedad = document.getObjectId("idVariedad");
+                obj.codigo = document.getString("codigo");
+                obj.fechaSiembra = document.getDate("fechaSiembra");
+                obj.estado = document.getString("estado");
+                obj.unidadManejo = document.getString("unidadManejo");
+
+                obj.leyendaCultivo = Cultivo.getCultivoById(obj.idCultivo).getNombre();
+                obj.leyendaVariedad = Variedad.getVariedadById(obj.idVariedad).getNombre();
+                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.idHacienda).getNombre();
+                obj.leyendaCliente = Hacienda.getHaciendaById(obj.idHacienda).getLeyendaCliente();
+
+                if (obj.fechaSiembra != null) {
+                    SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                    obj.fechaSiembraFormat = formateadorRec.format(obj.fechaSiembra);
+                } else {
+                    obj.fechaSiembraFormat = "---";
+                }
+
+                List<Document> listaLotes = (List<Document>) document.get("listadoLotes");
+                int contListaLotes = listaLotes.size();
+                for (int k = 0; k < contListaLotes; k++) {
+                    Document dboLote = (Document) listaLotes.get(k);
+                    LoteSiembraAux auxLote = new LoteSiembraAux();
+                    auxLote.idLote = dboLote.getObjectId("idLote");
+                    auxLote.estado = dboLote.getString("estado");
+                    auxLote.leyendaLote = Lote.getLoteById(auxLote.idLote).getCodigo() + "(" + Lote.getLoteById(auxLote.idLote).getHectareas() + " hctas.)";
+
+                    obj.listaLotesSiembra.add(auxLote);
+
+                }
+
+                List<Document> listaPeriodos = (List<Document>) document.get("listaPeriodos");
+                int contListaPerio = listaPeriodos.size();
+                for (int l = 0; l < contListaPerio; l++) {
+                    Document dboPeriodo = (Document) listaPeriodos.get(l);
+                    PeriodoMonitoreoAux auxPeriod = new PeriodoMonitoreoAux();
+                    auxPeriod.numeroMonitoreo = dboPeriodo.getInteger("numeroMonitoreo");
+                    auxPeriod.numeroDias = dboPeriodo.getInteger("numeroDias");
+                    auxPeriod.fechaMonitoreo = dboPeriodo.getDate("fechaMonitoreo");
+                    auxPeriod.pendiente = dboPeriodo.getString("pendiente");
+
+                    if (auxPeriod.fechaMonitoreo != null) {
+                        SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                        auxPeriod.fechaMonitoreoFormat = formateadorRec.format(auxPeriod.fechaMonitoreo);
+                    } else {
+                        auxPeriod.fechaMonitoreoFormat = "---";
+                    }
+
+                    obj.listaPeriodosMonitoreos.add(auxPeriod);
+
+                }
+                obj.ListaPeriodosMonitoreosPendientes();
+
+                List<Document> listaEstMonit = (List<Document>) document.get("listadoMonitoreo");
+                int contListaEstMonit = listaEstMonit.size();
+                for (int j = 0; j < contListaEstMonit; j++) {
+                    Document dboEstMon = (Document) listaEstMonit.get(j);
+                    EstacionMonitoreo auxEstMon = new EstacionMonitoreo();
+                    auxEstMon.codigo = dboEstMon.getString("codigo");
+                    auxEstMon.latitudestacion = dboEstMon.getString("latitudestacion");
+                    auxEstMon.longitudestacion = dboEstMon.getString("longitudestacion");
+
+                    List<Document> listaSondas = (List<Document>) dboEstMon.get("listaSondas");
+                    int contListaSonda = listaSondas.size();
+                    for (int k = 0; k < contListaSonda; k++) {
+                        Document dboSonda = (Document) listaSondas.get(k);
+                        SondaAux auxSonda = new SondaAux();
+                        auxSonda.tipoSonda = dboSonda.getObjectId("tipoSonda");
+                        auxSonda.descripcion = dboSonda.getString("descripcion");
+                        auxSonda.leyendaTipoSonda = SondaTipo.getSondaTipoById(auxSonda.tipoSonda).getNombre();
+                        auxSonda.profundidad = dboSonda.getObjectId("profundidad");
+                        auxSonda.leyendaProfundidad = Profundidad.getById(auxSonda.profundidad).getNombre();
+
+                        auxEstMon.listaSondas.add(auxSonda);
+                    }
+
+                    obj.listaEstacionMonitoreo.add(auxEstMon);
+                }
+                
+                res.add(obj);
+            }
+
+        });
+
+        return res;
+    } 
     
+    
+    public static List<SiembraCultivo> getAllByHaciendaCultivoVariedad(ObjectId idHac, ObjectId idCult, ObjectId idVar) {
+        List<SiembraCultivo> res = new ArrayList<>();
 
+        MongoManager mongo = MongoManager.getInstance();
+        FindIterable<Document> iterable = mongo.db.getCollection("siembraCultivo").find(new Document("estado", "activo").append("idHacienda", idHac).append("idCultivo", idCult).append("idVariedad", idVar));        
+        iterable.forEach(new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                SiembraCultivo obj = new SiembraCultivo();
+
+                obj.id = document.getObjectId("_id");
+                obj.idHacienda = document.getObjectId("idHacienda");
+                obj.idCultivo = document.getObjectId("idCultivo");
+                obj.idVariedad = document.getObjectId("idVariedad");
+                obj.codigo = document.getString("codigo");
+                obj.fechaSiembra = document.getDate("fechaSiembra");
+                obj.estado = document.getString("estado");
+                obj.unidadManejo = document.getString("unidadManejo");
+
+                obj.leyendaCultivo = Cultivo.getCultivoById(obj.idCultivo).getNombre();
+                obj.leyendaVariedad = Variedad.getVariedadById(obj.idVariedad).getNombre();
+                obj.leyendaHacienda = Hacienda.getHaciendaById(obj.idHacienda).getNombre();
+                obj.leyendaCliente = Hacienda.getHaciendaById(obj.idHacienda).getLeyendaCliente();
+
+                if (obj.fechaSiembra != null) {
+                    SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                    obj.fechaSiembraFormat = formateadorRec.format(obj.fechaSiembra);
+                } else {
+                    obj.fechaSiembraFormat = "---";
+                }
+
+                List<Document> listaLotes = (List<Document>) document.get("listadoLotes");
+                int contListaLotes = listaLotes.size();
+                for (int k = 0; k < contListaLotes; k++) {
+                    Document dboLote = (Document) listaLotes.get(k);
+                    LoteSiembraAux auxLote = new LoteSiembraAux();
+                    auxLote.idLote = dboLote.getObjectId("idLote");
+                    auxLote.estado = dboLote.getString("estado");
+                    auxLote.leyendaLote = Lote.getLoteById(auxLote.idLote).getCodigo() + "(" + Lote.getLoteById(auxLote.idLote).getHectareas() + " hctas.)";
+
+                    obj.listaLotesSiembra.add(auxLote);
+
+                }
+
+                List<Document> listaPeriodos = (List<Document>) document.get("listaPeriodos");
+                int contListaPerio = listaPeriodos.size();
+                for (int l = 0; l < contListaPerio; l++) {
+                    Document dboPeriodo = (Document) listaPeriodos.get(l);
+                    PeriodoMonitoreoAux auxPeriod = new PeriodoMonitoreoAux();
+                    auxPeriod.numeroMonitoreo = dboPeriodo.getInteger("numeroMonitoreo");
+                    auxPeriod.numeroDias = dboPeriodo.getInteger("numeroDias");
+                    auxPeriod.fechaMonitoreo = dboPeriodo.getDate("fechaMonitoreo");
+                    auxPeriod.pendiente = dboPeriodo.getString("pendiente");
+
+                    if (auxPeriod.fechaMonitoreo != null) {
+                        SimpleDateFormat formateadorRec = new SimpleDateFormat("EEEE',' dd 'de' MMMM 'de' yyyy", new Locale("ES"));
+                        auxPeriod.fechaMonitoreoFormat = formateadorRec.format(auxPeriod.fechaMonitoreo);
+                    } else {
+                        auxPeriod.fechaMonitoreoFormat = "---";
+                    }
+
+                    obj.listaPeriodosMonitoreos.add(auxPeriod);
+
+                }
+                obj.ListaPeriodosMonitoreosPendientes();
+
+                List<Document> listaEstMonit = (List<Document>) document.get("listadoMonitoreo");
+                int contListaEstMonit = listaEstMonit.size();
+                for (int j = 0; j < contListaEstMonit; j++) {
+                    Document dboEstMon = (Document) listaEstMonit.get(j);
+                    EstacionMonitoreo auxEstMon = new EstacionMonitoreo();
+                    auxEstMon.codigo = dboEstMon.getString("codigo");
+                    auxEstMon.latitudestacion = dboEstMon.getString("latitudestacion");
+                    auxEstMon.longitudestacion = dboEstMon.getString("longitudestacion");
+
+                    List<Document> listaSondas = (List<Document>) dboEstMon.get("listaSondas");
+                    int contListaSonda = listaSondas.size();
+                    for (int k = 0; k < contListaSonda; k++) {
+                        Document dboSonda = (Document) listaSondas.get(k);
+                        SondaAux auxSonda = new SondaAux();
+                        auxSonda.tipoSonda = dboSonda.getObjectId("tipoSonda");
+                        auxSonda.descripcion = dboSonda.getString("descripcion");
+                        auxSonda.leyendaTipoSonda = SondaTipo.getSondaTipoById(auxSonda.tipoSonda).getNombre();
+                        auxSonda.profundidad = dboSonda.getObjectId("profundidad");
+                        auxSonda.leyendaProfundidad = Profundidad.getById(auxSonda.profundidad).getNombre();
+
+                        auxEstMon.listaSondas.add(auxSonda);
+                    }
+
+                    obj.listaEstacionMonitoreo.add(auxEstMon);
+                }
+                
+                res.add(obj);
+            }
+
+        });
+
+        return res;
+    } 
 }

@@ -81,29 +81,34 @@ public class ReporteResultadoLaboratorio extends HttpServlet {
 
             ResultadoLaboratorio resLab = ResultadoLaboratorio.getResultadoLaboratorioById(parametroObtenido);
             MuestraLaboratorio muestra = MuestraLaboratorio.getMuestraLaboratorioById(resLab.getMuestra());
-            Cliente cli = Cliente.getClienteById(muestra.getCliente());
-            Hacienda hac = Hacienda.getHaciendaById(muestra.getHacienda());
+            Cliente cli = Cliente.getClienteById(Hacienda.getHaciendaById(muestra.getSiembraCultivo().getIdHacienda()).getIdCliente());
+            Hacienda hac = Hacienda.getHaciendaById(Hacienda.getHaciendaById(muestra.getSiembraCultivo().getIdHacienda()).getId());
             //Lote lot = Lote.getLoteById(muestra.getLote());
-            String lot = muestra.getLote();
-            Cultivo cul = Cultivo.getCultivoById(muestra.getCultivo());
+            //String lot = muestra.getLote();
+            Cultivo cul = Cultivo.getCultivoById(muestra.getSiembraCultivo().getIdCultivo());
 
             String cliente = cli.getNombre().toUpperCase();
             String ubicacion = Canton.getCantonById(cli.getCanton()).getNombre() + " - " + Canton.getCantonById(cli.getCanton()).getLeyendaProvincia() + " - " + Canton.getCantonById(cli.getCanton()).getLeyendaPais();
             String codigMuestra = muestra.getCodigo();
 
             String hacienda = hac.getNombre();
-            String cultivo = cul.getNombre();            
+            String cultivo = cul.getNombre();
             //String varie = Variedad.getVariedadById(lot.getIdVariedad()).getNombre();
-            String varie = muestra.getLoteCompleto().getLeyendaVariedad();
+            String varie = muestra.getSiembraCultivo().getLeyendaVariedad();
             //String estacionMonitoreo = lot.getEstacion().get(0).getCodigo();
-            String estacionMonitoreo = muestra.getLoteCompleto().getListaEstacionMonitoreo().get(0).getCodigo();
+            String estacionMonitoreo = muestra.getSiembraCultivo().getUnidadManejo();
             //String estacionMonitoreo = muestra.getLoteCompleto().getListadoMonitoreo().get(0).getCodigo();
             String tituloProyecto = "Análisis" + resLab.getLeyendaMatriz();
             String tipoMuestra = resLab.getLeyendaMatriz();
-            String numeroMuestra = Integer.toString(MuestraLaboratorio.getNumberMuestraLaboratorio(muestra.getId(), cli.getId(), hac.getId(), muestra.getLote(), cul.getId()));
+            String numeroMuestra = Integer.toString(MuestraLaboratorio.getNumberMuestraLaboratorio(muestra.getId(), muestra.getIdSiembraCultivo()));
             String numeroMonitoreo = numeroMuestra;
             //String lote = lot.getCodigo();
-            String lote = muestra.getLoteCompleto().getIdLotes();
+            String lote = "";
+            int nn = muestra.getSiembraCultivo().getListaLotesSiembra().size();
+            for (int i =0; i<nn; i++ ) {
+                lote = lote.concat(muestra.getSiembraCultivo().getListaLotesSiembra().get(i).getLeyendaLote());
+            }
+
             String muestreador = muestra.getMuestreador();
             String fechaMuestreo = muestra.getFechaFormatMuestreo();
             String fechaRecepcionMuestra = muestra.getFechaFormatEnvio();
@@ -283,11 +288,9 @@ public class ReporteResultadoLaboratorio extends HttpServlet {
             ini.setAlignment(Element.ALIGN_CENTER);
             ini.setSpacingBefore(100f);
 
-           
-
             PdfPTable cabT = new PdfPTable(new float[]{1f});
-             cabT.setWidthPercentage(100);
-            PdfPCell cellCab = new PdfPCell(new Phrase("Informe de Prueba", font12Bold));            
+            cabT.setWidthPercentage(100);
+            PdfPCell cellCab = new PdfPCell(new Phrase("Informe de Prueba", font12Bold));
             cellCab.setPadding(2f);
             cellCab.setHorizontalAlignment(Element.ALIGN_CENTER);
             cabT.addCell(cellCab);

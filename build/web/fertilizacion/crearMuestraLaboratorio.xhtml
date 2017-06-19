@@ -232,9 +232,8 @@
                 <h:form id="frmIngreso">
                     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
 
-                    <p:menubar>      
-                        <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpMuestraLaboratorio}" icon="ui-icon-extlink"/>
-                        <p:menuitem value="Guardar"    actionListener="#{muestraLaboratorioController.loadListaLaboratorio(1)}" icon="ui-icon-disk" />
+                    <p:menubar>                              
+                        <p:menuitem value="Guardar" action="#{menuFertilizacionController.goToOpMuestraLaboratorio}" actionListener="#{muestraLaboratorioController.save}" update=":frmIngreso"  icon="ui-icon-disk" />
 
                     </p:menubar> 
 
@@ -248,7 +247,7 @@
                                     <h:panelGroup><h2 style="color: green">#{muestraLaboratorioController.actual.tipoMuestra}</h2></h:panelGroup>
 
                                     <h:outputLabel value="Cliente"/>
-                                    <p:selectOneMenu id="muestra" value="#{muestraLaboratorioController.actual.cliente}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <p:selectOneMenu id="muestra" value="#{muestraLaboratorioController.idCliente}" style="width:200px" converter="GenericConverter" filter="true" >
                                         <p:ajax listener="#{muestraLaboratorioController.onClienteChange}" update=":frmIngreso:datosCliente :frmIngreso:hacienda :frmIngreso:canton :frmIngreso:cabeceraMuestra" />
                                         <f:selectItem itemLabel="Seleccionar Cliente" itemValue="" noSelectionOption="true" />
                                         <f:selectItems value="#{muestraLaboratorioController.listaCliente}" var="cli" itemLabel="#{cli.nombre} (#{cli.rucCi})" itemValue="#{cli.id}" />
@@ -260,7 +259,7 @@
                                     <p:panelGrid columns="2">
 
                                         <h:outputLabel value="Departamento:"/>
-                                        <p:selectOneMenu id="depart" value="#{muestraLaboratorioController.actual.departamento}" style="width:200px" converter="GenericConverter" filter="true" >   
+                                        <p:selectOneMenu id="depart" value="#{muestraLaboratorioController.actual.departamento}" style="width:200px" converter="GenericConverter" filter="true" required="true" requiredMessage="DEPARTAMENTO. Campo Obligatorio" >   
                                             <p:ajax listener="#{muestraLaboratorioController.onDepartamentoChange}" update=":frmIngreso:datosCodigo" />
                                             <f:selectItem itemLabel="Seleccionar Departamento" itemValue="" noSelectionOption="true" />
                                             <f:selectItems value="#{muestraLaboratorioController.listaDepartamento}" var="dep" itemLabel="#{dep.nombre} #{dep.abreviatura}" itemValue="#{dep.id}" />
@@ -268,7 +267,7 @@
                                         
                                         <h:outputLabel value="Código:"/>
                                         <h:panelGrid columns="2" id="datosCodigo">
-                                            <p:inputText value="#{muestraLaboratorioController.actual.codigo}" style="width: 100px;" readonly="true"/>
+                                            <p:inputText value="#{muestraLaboratorioController.actual.codigo}" style="width: 100px;" readonly="true" required="true" requiredMessage="CODIGO MUESTRA. Campo Obligatorio"/>
                                             <p:inputText value="#{muestraLaboratorioController.actual.numeroCodigo}" style="width: 50px;" />
                                         </h:panelGrid>
                                         
@@ -293,7 +292,7 @@
                                 <p:panelGrid columns="4" rendered="#{muestraLaboratorioController.renderDatosCliente}">  
 
                                     <h:outputLabel value="Hacienda"/>
-                                    <p:selectOneMenu id="hacienda" value="#{muestraLaboratorioController.actual.hacienda}" style="width:200px" converter="GenericConverter" filter="true" >
+                                    <p:selectOneMenu id="hacienda" value="#{muestraLaboratorioController.idHacienda}" style="width:200px" converter="GenericConverter" filter="true" >
                                         <p:ajax listener="#{muestraLaboratorioController.onHaciendaChange}" update=":frmIngreso:lote :frmIngreso:persona :frmIngreso:email" />
                                         <f:selectItem itemLabel="Seleccionar Hacienda" itemValue="" noSelectionOption="true" />
                                         <f:selectItems value="#{muestraLaboratorioController.listaHacienda}" var="hac" itemLabel="#{hac.nombre}" itemValue="#{hac.id}" />
@@ -302,48 +301,47 @@
                                     <h:outputLabel value="Persona Contacto:"/>
                                     <p:inputText id="persona" value="#{muestraLaboratorioController.actual.personaContacto}" style="width: 200px;" />
 
-                                    <h:outputLabel value="Lote:"/>
-                                    <p:selectOneMenu id="lote" value="#{muestraLaboratorioController.actual.lote}" style="width:200px" converter="GenericConverter" filter="true" >
-                                        <p:ajax listener="#{muestraLaboratorioController.onLoteChange}" update=":frmIngreso:nombrecultivo :frmIngreso:estacion :frmIngreso:periodo" />
-                                        <f:selectItem itemLabel="Seleccionar Lote" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{muestraLaboratorioController.listaLote}" var="lot" itemLabel="#{lot.idLotes}" itemValue="#{lot.idLotes}" />
+                                    <h:outputLabel value="Siembra Cultivo:"/>
+                                    <p:selectOneMenu id="lote" value="#{muestraLaboratorioController.actual.idSiembraCultivo}" style="width:200px" converter="GenericConverter" filter="true" >
+                                        <p:ajax listener="#{muestraLaboratorioController.onSiembraCultivoChage}" update=":frmIngreso:nombrecultivo :frmIngreso:estacion :frmIngreso:periodo :frmIngreso:lotes" />
+                                        <f:selectItem itemLabel="Seleccionar Siembra" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{muestraLaboratorioController.listaSiembraCultivo}" var="lot" itemLabel="#{lot.leyendaCultivo} - #{lot.leyendaVariedad}" itemValue="#{lot.id}" />
                                     </p:selectOneMenu>
 
                                     <h:outputLabel value="E-mail envio Informe:"/>
                                     <p:inputText id="email" value="#{muestraLaboratorioController.actual.emailInforme}" style="width: 200px;" />
 
-                                    <h:outputLabel value="Cultivo:"/>                               
-                                    <p:inputText id="nombrecultivo" value="#{muestraLaboratorioController.actual.leyendaCultivo}" readonly="true" style="width: 200px;" />
+                                    <h:outputLabel value="Cultivo - Variedad:"/>                               
+                                    <p:inputText id="nombrecultivo" value="#{muestraLaboratorioController.actual.siembraCultivo.leyendaCultivo} - #{muestraLaboratorioController.actual.siembraCultivo.leyendaVariedad}" readonly="true" style="width: 200px;" />
 
                                     <h:outputLabel value="Cantón:"/>
                                     <p:inputText id="canton" value="#{muestraLaboratorioController.actual.leyendaCanton}" style="width: 200px;" readonly="true" />
 
-                                    <h:outputLabel value="Estación Monitoreo:"/>
-                                    <p:inputText id="estacion" value="#{muestraLaboratorioController.actual.estacionMonitoreo}" style="width: 200px;" readonly="true"/>
-
-                                        
+                                    
+                                    <h:outputLabel value="Lotes: "/>
+                                    <h:inputText  id="lotes" value="#{muestraLaboratorioController.leyendaLotes}" readonly="true"/>
                                         
                                     <h:outputLabel value="Muestreador:"/>
                                     <p:inputText value="#{muestraLaboratorioController.actual.muestreador}" style="width: 200px;" />
 
-                                    <h:outputLabel value="Período Monitoreo:"/>
-                                    <p:selectOneMenu id="periodo" value="#{muestraLaboratorioController.actual.numeroMonitoreo}" style="width:200px" converter="GenericConverter" filter="true" >                                        
-                                        <f:selectItem itemLabel="Seleccionar Periodo" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{muestraLaboratorioController.listaPeriodoMonitoreo}" var="per" itemLabel="#{per.numeroMonitoreo} (#{per.numeroDias} días)" itemValue="#{per.numeroMonitoreo}" />
-                                    </p:selectOneMenu>
+                                    <h:outputLabel value="Estación Monitoreo:"/>
+                                    <p:inputText id="estacion" value="#{muestraLaboratorioController.actual.siembraCultivo.unidadManejo}" style="width: 200px;" readonly="true"/>
+
+                                   
 
                                     <h:outputLabel value="Dirección envio Informe:"/>
                                     <p:inputText value="#{muestraLaboratorioController.actual.direccionInforme}" style="width: 200px;" />
 
-                                    <h:outputLabel value=""/>
-                                    <h:outputLabel value=""/>
+                                     <h:outputLabel value="Período Monitoreo:"/>
+                                    <p:selectOneMenu id="periodo" value="#{muestraLaboratorioController.actual.numeroMonitoreo}" style="width:200px" converter="GenericConverter" filter="true" >                                        
+                                        <f:selectItem itemLabel="Seleccionar Periodo" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{muestraLaboratorioController.actual.siembraCultivo.listaPeriodosMonitoreos}" var="per" itemLabel="#{per.numeroMonitoreo} (#{per.numeroDias} días)" itemValue="#{per.numeroMonitoreo}" />
+                                    </p:selectOneMenu>
 
                                     <h:outputLabel value="Productor:"/>
                                     <p:inputText value="#{muestraLaboratorioController.actual.productor}" style="width: 200px;" />
 
                                 </p:panelGrid>
-
-
 
                             </h:panelGrid>
 

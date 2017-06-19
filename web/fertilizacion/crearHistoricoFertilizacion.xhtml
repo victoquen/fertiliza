@@ -6,12 +6,12 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
 
-        <title>CLIENTE</title>
+        <title>SISTEMA FERTILIZACION</title>
         <style type="text/css">
             .ui-widget,
             .ui-widget .ui-widget
             {
-                font-size: 95% !important;
+                font-size: 90% !important;
             }
 
             .panelColumns td {
@@ -25,27 +25,6 @@
                 text-align: center;
             }
         </style>
-
-        <!-- <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>-->
-        <script async="async" defer="defer" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBXe08AQa5hT5UW17v7tJajANyD96FLvw&amp;callback=initMap" type="text/javascript"></script>
-
-        <script type="text/javascript">
-            function reverseGeocode() {
-                var lat = document.getElementById('lat').value;
-                var lng = document.getElementById('lng').value;
-                PF('revGeoMap').reverseGeocode(lat, lng);
-            }
-        </script>
-
-        <script type="text/javascript">
-            function reverseGeocodeSelected() {
-                var lat = document.getElementById('latSelected').value;
-                var lng = document.getElementById('lngSelected').value;
-                PF('revGeoMapSelected').reverseGeocode(lat, lng);
-            }
-
-
-        </script>
 
         <script type="text/javascript">
             PrimeFaces.locales['es'] = {
@@ -151,64 +130,6 @@
     </h:head>
     <h:body onload="#{mainUserController.releaseSessions()}">
 
-        <h:form id="frmAuxFono">
-            <p:dialog header="Info Teléfono" widgetVar="fonoDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false"  width="300px">
-                <p:outputPanel id="fonoDetail" style="text-align: justify;">
-                    <h:panelGrid  columns="2"  columnClasses="label,value">
-
-
-                        <h:outputText value="Teléfono:" />
-                        <h:outputText value="#{clienteController.selectedFono}" />
-
-                        <h:outputText value="Nuevo:" />
-                        <p:inputText value="#{clienteController.actualFono}" style="width: 200px"/>
-
-
-                        <f:facet name="footer">
-                            <h:panelGrid columns="2">
-                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateFono}"  update=":frmIngreso:sTab:sTelefonos :frmAuxFono"/>
-                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeFono}" update=":frmIngreso:sTab:sTelefonos :frmAuxFono"/>
-                            </h:panelGrid>
-                        </f:facet>
-
-                    </h:panelGrid>
-
-                </p:outputPanel>
-            </p:dialog>
-        </h:form>
-
-        <h:form id="frmAuxMail">
-            <p:dialog header="Info Email" widgetVar="mailDialog"  modal="true" showEffect="blind" hideEffect="explode" resizable="false" width="300px" >
-                <p:outputPanel id="mailDetail" style="text-align: justify;">
-                    <h:panelGrid  columns="2"  columnClasses="label,value">
-
-
-                        <h:outputText value="Email:" />
-                        <h:outputText value="#{clienteController.selectedMail}" />
-
-                        <h:outputText value="Nuevo:" />
-                        <p:inputText value="#{clienteController.actualMail}" style="width: 200px"/>
-
-
-                        <f:facet name="footer">
-                            <h:panelGrid columns="2">
-                                <p:commandButton value="Actualizar" actionListener="#{clienteController.updateMail}"  update=":frmIngreso:sTab:sMails :frmAuxMail"/>
-                                <p:commandButton value="Eliminar" actionListener="#{clienteController.removeMail}" update=":frmIngreso:sTab:sMails :frmAuxMail"/>
-                            </h:panelGrid>
-                        </f:facet>
-
-                    </h:panelGrid>
-
-                </p:outputPanel>
-            </p:dialog>
-        </h:form>
-        
-        
-        
-        
-
-
-
 
         <p:layout fullPage="true">
 
@@ -252,137 +173,167 @@
 
 
                 <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
-                <p:panel header="Nuevo CLIENTE">
+                <p:panel header="Nuevo HISTORICO FERTILIZACION">
 
 
                     <h:form id="frmIngreso" prependId="false">
 
                         <p:menubar>      
-                            <p:menuitem value="Regresar"  action="#{menuFertilizacionController.goToOpCliente}" icon="ui-icon-extlink"/>
-                            <p:menuitem value="Guardar" action="#{menuFertilizacionController.goToOpCliente}"  actionListener="#{clienteController.save}"  icon="ui-icon-disk" update=":frmIngreso"/>
+                           
+                            <p:menuitem value="Guardar" action="#{menuFertilizacionController.goToOpHistoricoFertilizacion()}"  actionListener="#{historicoFertilizacionController.save}"  icon="ui-icon-disk" update=":frmIngreso"/>
 
                         </p:menubar>    
 
+                        <h:panelGrid columns="1">
+                            <p:panelGrid columns="4" style="font-size: xx-large" >
+                                
+                                <h:outputLabel value="Cliente: *"/>
+                                <p:selectOneMenu id="cli" value="#{historicoFertilizacionController.actual.idCliente}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Cliente. Campo Obligatorio">                                        
+                                    <p:ajax listener="#{historicoFertilizacionController.onClienteChange}" update=":frmIngreso:hac :frmIngreso:prod  :frmIngreso:res "/>
+                                    <f:selectItem itemLabel="Seleccionar Cliente" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{historicoFertilizacionController.listadoCliente}" var="objc" itemLabel="#{objc.nombre}" itemValue="#{objc.id}" />
+                                </p:selectOneMenu>
+                                <h:outputLabel value="Año Producción: *"/>
+                                <p:selectOneMenu id="prod" value="#{historicoFertilizacionController.actual.idProduccion}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Año Producción. Campo Obligatorio">                                        
+                                    <p:ajax listener="#{historicoFertilizacionController.onProduccionChange}" update=":frmIngreso:res "/>
+                                    <f:selectItem itemLabel="Seleccionar Año Producción" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{historicoFertilizacionController.listadoProduccion}" var="objp" itemLabel="#{objp.anio} - #{objp.leyendaCultivo} - #{objp.leyendaVariedad}" itemValue="#{objp.id}" />
+                                </p:selectOneMenu>
+                                
+                                <h:outputLabel value="Hacienda: *"/>
+                                <p:selectOneMenu id="hac" value="#{historicoFertilizacionController.actual.idHacienda}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Hacienda. Campo Obligatorio">                                        
+                                    <p:ajax listener="#{historicoFertilizacionController.onHaciendaChange}" update=":frmIngreso:prod :frmIngreso:res "/>
+                                    <f:selectItem itemLabel="Seleccionar Hacienda" itemValue="" noSelectionOption="true" />
+                                    <f:selectItems value="#{historicoFertilizacionController.listadoHacienda}" var="objh" itemLabel="#{objh.nombre}" itemValue="#{objh.id}" />
+                                </p:selectOneMenu>
+                                
+                                
+                            </p:panelGrid>
 
+                            <p:dataTable id="res" var="obj" style="width: 90%; margin: auto auto" value="#{historicoFertilizacionController.listadoHistoricoFertilizacionLote}" editable="true" editMode="cell" >
+                                <f:facet name="header">
+                                    Ingreso Fertilización por Lote 
+                                </f:facet>
 
-                        <p:accordionPanel dynamic="true" cache="true" id="sTab">
-                            <p:tab title="DATOS Cliente">
+                               
 
-                                <p:panelGrid columns="4" style="font-size: xx-large" >
-                                    <h:outputLabel value="Cliente: *"/>
-                                    <p:selectOneRadio id="cli" value="#{clienteController.actual.tipoCliente}"  layout="grid" columns="2" required="true" requiredMessage="Tipo Cliente. Campo Obligatorio">
-                                        <f:selectItem itemLabel="GENERICO" itemValue="GENERICO" />
-                                        <f:selectItem itemLabel="PLANTECH" itemValue="PLANTECH" />
-                                    </p:selectOneRadio>
+                                <p:column headerText="Hctas." width="10%" >
+                                    #{obj.leyendaHectareas}
+                                </p:column>
+                                <p:column headerText="LOTE" width="20%" >
+                                    #{obj.leyendaLote}
+                                </p:column>
+                                <p:column headerText="CULTIVO" width="10%" >
+                                    #{obj.leyendaCultivo}
+                                </p:column>  
+                                <p:column headerText="PRODUCCION" width="10%" >
+                                    #{obj.prodLote}
+                                </p:column> 
+                                
+                                <p:column headerText="N" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.n}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.n}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column> 
+                                <p:column headerText="P" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.p}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.p}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>  
+                                <p:column headerText="K" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.k}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.k}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Ca" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.ca}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.ca}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>  
+                                <p:column headerText="Mg" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.mg}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.mg}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="S" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.s}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.s}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>  
+                                <p:column headerText="B" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.b}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.b}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Mn" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.mn}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.mn}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>  
+                                <p:column headerText="Zn" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.zn}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.zn}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Cu" width="5%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{obj.cu}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{obj.cu}" style="width: 80%"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                
+                            </p:dataTable>                            
 
-                                    <h:outputLabel value="Departamento: *"/>
-                                    <p:selectOneMenu id="depar" value="#{clienteController.actual.departamento}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Departamento. Campo Obligatorio">                                        
-                                        <f:selectItem itemLabel="Seleccionar Departamento" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{clienteController.listadoDepartamento}" var="dep" itemLabel="#{dep.nombre}" itemValue="#{dep.id}" />
-                                    </p:selectOneMenu>
-
-                                    <h:outputLabel value="Código: *"/>
-                                    <p:inputText value="#{clienteController.actual.codigo}" style="width: 250px;" required="true" requiredMessage="Código. Campo Obligatorio"/>
-                                    <h:outputLabel value="Nombre: *"/>
-                                    <p:inputText value="#{clienteController.actual.nombre}" style="width: 250px; text-transform: uppercase" required="true" requiredMessage="Nombre. Campo Obligatorio"/>
-                                    <h:outputLabel value="Tipo:"/>
-                                    <p:inputText value="#{clienteController.actual.tipo}" style="width: 250px;"/>
-                                    <h:outputLabel value="Ruc: *"/>                                   
-                                    <p:inputMask id="ruc" value="#{clienteController.actual.rucCi}" mask="9999999999 999" required="true" requiredMessage="Ruc. Campo Obligatorio"/>
-
-                                    
-                                    <h:outputLabel value="Mercado:"/>
-                                    <p:inputText value="#{clienteController.actual.mercado}" style="width: 250px; "/>
-                                    <h:outputLabel value="A Facturar:"/>
-                                    <p:inputText value="#{clienteController.actual.afacturar}" style="width: 250px;"/>
-                                    <h:outputLabel value="Vendedor:"/>
-                                    <p:inputText value="#{clienteController.actual.vendedor}" style="width: 250px; text-transform: uppercase"/>
-                                    <h:outputLabel value="Atención Factura:"/>
-                                    <p:inputText value="#{clienteController.actual.atencionFactura}" style="width: 250px;"/>
-
-
-                                    <p:outputLabel value="País: *"  />
-                                    <p:selectOneMenu id="country" value="#{clienteController.actual.pais}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="País. Campo Obligatorio">
-                                        <p:ajax listener="#{clienteController.onCountryChange}" update=":frmIngreso:sTab:prov" />
-                                        <f:selectItem itemLabel="Seleccionar País" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{clienteController.listadoPs}" var="pais" itemLabel="#{pais.nombre}" itemValue="#{pais.id}" />
-                                    </p:selectOneMenu>
-                                    <h:outputLabel value="Sector"/>
-                                    <p:inputText value="#{clienteController.actual.sector}" style="width: 250px;"/>
-                                    <p:outputLabel value="Provincia: *"  />                                
-                                    <p:selectOneMenu id="prov" value="#{clienteController.actual.provincia}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Provincia. Campo Obligatorio">
-                                        <p:ajax listener="#{clienteController.onProvinciaChange}" update=":frmIngreso:sTab:cant" />
-                                        <f:selectItem itemLabel="Seleccionar Provincia" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{clienteController.listadoPr}" var="prov" itemLabel="#{prov.nombre}" itemValue="#{prov.id}" />
-                                    </p:selectOneMenu>
-                                    <h:outputLabel value="Dirección: "/>
-                                    <p:inputText value="#{clienteController.actual.direccion}" style="width: 250px; text-transform: uppercase"/>
-                                    <h:outputLabel value="Cantón: *"/>
-                                    <p:selectOneMenu id="cant" value="#{clienteController.actual.canton}" style="width:150px" converter="GenericConverter" filter="true" required="true" requiredMessage="Cantón. Campo Obligatorio" >                                       
-                                        <f:selectItem itemLabel="Seleccionar Cantón" itemValue="" noSelectionOption="true" />
-                                        <f:selectItems value="#{clienteController.listadoCan}" var="cant" itemLabel="#{cant.nombre}" itemValue="#{cant.id}" />
-                                    </p:selectOneMenu>
-
-
-                                    <h:outputLabel value=""/>
-                                    <h:outputLabel value=""/>
-
-
-                                    <h:outputLabel value="OBSERVACION"/>
-                                    <p:inputTextarea rows="6" cols="33" value="#{clienteController.actual.observacionGenerico}" />
-
-
-                                    <h:panelGrid id="sTelefonos" columns="1" >
-                                        <h:outputLabel value="Teléfono:"/>
-                                        <p:inputText value="#{clienteController.actualFono}" style="width: 150px;"/>
-                                        <p:commandButton value="Agregar" actionListener="#{clienteController.addFono}" update=":frmIngreso:sTab:sTelefonos"/>
-
-                                        <p:dataList  value="#{clienteController.fonos}" var="objFono" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
-                                            <f:facet name="header">
-                                                Teléfono(s)
-                                            </f:facet>
-
-                                            <h:panelGrid columns="2">
-                                                <p:commandLink update=":frmAuxFono:fonoDetail"  oncomplete="PF('fonoDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
-                                                    <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.selectedFono}" />
-                                                    <f:setPropertyActionListener value="#{objFono}" target="#{clienteController.actualFono}" />
-                                                </p:commandLink>
-                                                <h:outputText value="#{objFono}" style="display:compact "/>
-
-
-                                            </h:panelGrid>
-                                        </p:dataList>
-                                    </h:panelGrid>
-
-
-
-                                    <h:panelGrid id="sMails" columns="1" >
-                                        <h:outputLabel value="Email:"/>
-                                        <p:inputText value="#{clienteController.actualMail}" style="width: 150px;"/>
-                                        <p:commandButton value="Agregar" actionListener="#{clienteController.addMail}" update=":frmIngreso:sTab:sMails"/>
-
-                                        <p:dataList  value="#{clienteController.mails}" var="objMail" type="unordered" itemType="none" paginator="true" rows="10" styleClass="paginated">
-                                            <f:facet name="header">
-                                                Email(s)
-                                            </f:facet>
-
-                                            <h:panelGrid columns="2">
-                                                <p:commandLink update=":frmAuxMail:mailDetail"  oncomplete="PF('mailDialog').show()" title="Ver Detalle" styleClass="ui-icon ui-icon-search" >
-                                                    <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.selectedMail}" />
-                                                    <f:setPropertyActionListener value="#{objMail}" target="#{clienteController.actualMail}" />
-                                                </p:commandLink>
-                                                <h:outputText value="#{objMail}" style="display:compact "/>
-
-                                            </h:panelGrid>
-                                        </p:dataList>
-                                    </h:panelGrid>
-                                </p:panelGrid>
-
-                            </p:tab>
-
-                            
-                        </p:accordionPanel>
-
+                        </h:panelGrid>
 
                     </h:form>
                 </p:panel>

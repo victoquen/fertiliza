@@ -17,6 +17,7 @@ import entities.fertilizacion.Laboratorio;
 import entities.fertilizacion.Matriz;
 import entities.fertilizacion.MuestraLaboratorio;
 import entities.fertilizacion.PeriodoMonitoreoAux;
+import entities.fertilizacion.SiembraCultivo;
 import entities.fertilizacion.Subanalisis;
 import helpers.Canton;
 import java.io.Serializable;
@@ -52,6 +53,13 @@ public class MuestraLaboratorioController implements Serializable {
 
     List<Cliente> listaCliente;
     List<Hacienda> listaHacienda;
+    List<SiembraCultivo> listaSiembraCultivo;
+    
+    ObjectId idHacienda;
+    ObjectId idCliente;
+    SiembraCultivo siembraCultivo;
+    
+    
     List<HaciendaLoteCultivoAux> listaLote;
     List<Cultivo> listaCultivo;
 
@@ -69,6 +77,8 @@ public class MuestraLaboratorioController implements Serializable {
     Boolean renderDatosCliente;
     List<EstacionMonitoreo> listaEstacionMonitoreo;
     List<PeriodoMonitoreoAux> listaPeriodoMonitoreo;
+    
+    String leyendaLotes;
     
     /*List<AnalisisLaboratorio> listaSuelo;
     List<AnalisisLaboratorio> listaAgua;
@@ -107,12 +117,11 @@ public class MuestraLaboratorioController implements Serializable {
     @PostConstruct
     public void init() {
 
-        //List<Subanalisis> elementosSourceE = Subanalisis.getAllActivos();
+        
         List<Subanalisis> elementosSourceE = new ArrayList<Subanalisis>();
         List<Subanalisis> elementosTargetE = new ArrayList<Subanalisis>();
         listadoElementos = new DualListModel<Subanalisis>(elementosSourceE, elementosTargetE);
 
-        //List<AnalisisLaboratorio> elementosSourceP = AnalisisLaboratorio.getAllAnalisisActivo();
         List<AnalisisLaboratorio> elementosSourceP = new ArrayList<AnalisisLaboratorio>();
         List<AnalisisLaboratorio> elementosTargetP = new ArrayList<AnalisisLaboratorio>();
         listadoPaquetes = new DualListModel<AnalisisLaboratorio>(elementosSourceP, elementosTargetP);
@@ -143,6 +152,58 @@ public class MuestraLaboratorioController implements Serializable {
         
         actual.setNumeroCodigo(MuestraLaboratorio.getMaxNumeroCodigo());
         
+        siembraCultivo = new SiembraCultivo();
+        leyendaLotes = "";
+    }
+
+    public String getLeyendaLotes() {
+        return leyendaLotes;
+    }
+
+    public void setLeyendaLotes(String leyendaLotes) {
+        this.leyendaLotes = leyendaLotes;
+    }
+
+    
+    public SiembraCultivo getSiembraCultivo() {
+        return siembraCultivo;
+    }
+
+    public void setSiembraCultivo(SiembraCultivo siembraCultivo) {
+        this.siembraCultivo = siembraCultivo;
+    }
+
+    public ObjectId getIdHacienda() {
+        return idHacienda;
+    }
+
+    public void setIdHacienda(ObjectId idHacienda) {
+        this.idHacienda = idHacienda;
+    }
+
+    public ObjectId getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(ObjectId idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    
+    public List<SiembraCultivo> getListaSiembraCultivo() {
+        return listaSiembraCultivo;
+    }
+
+    public void setListaSiembraCultivo(List<SiembraCultivo> listaSiembraCultivo) {
+        this.listaSiembraCultivo = listaSiembraCultivo;
+    }
+
+    public ObjectId getMatrizSelected() {
+        return matrizSelected;
+    }
+
+    public void setMatrizSelected(ObjectId matrizSelected) {
+        this.matrizSelected = matrizSelected;
     }
 
     public List<PeriodoMonitoreoAux> getListaPeriodoMonitoreo() {
@@ -383,11 +444,15 @@ public class MuestraLaboratorioController implements Serializable {
             //if (controlDatosLaboratorio()) {
             if (controlDatos(actual)) {
 
+                loadListaLaboratorio();
+                
+                actual.setCliente(this.idCliente);
                 actual.setListadoPaquetesoAux(listadoAnalisisLaboratorioAuxP);
                 actual.setListadoSubanalisisAux(listadoAnalisisLaboratorioAuxE);
                 actual.save();
                 load();
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Información Ingresada"));
+               
             } else {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error!", "Ingresar y seleccionar datos obligatorios"));
             }
@@ -399,12 +464,13 @@ public class MuestraLaboratorioController implements Serializable {
 
     public void update() {
         //if (controlDatosLaboratorio()) {
-            if (controlDatos(selected)) {
+            if (controlDatos(actual)) {
 
-                
-                selected.setListadoPaquetesoAux(listadoAnalisisLaboratorioAuxP);
-                selected.setListadoSubanalisisAux(listadoAnalisisLaboratorioAuxE);
-                selected.update();
+                loadListaLaboratorio();
+                actual.setCliente(this.idCliente);
+                actual.setListadoPaquetesoAux(listadoAnalisisLaboratorioAuxP);
+                actual.setListadoSubanalisisAux(listadoAnalisisLaboratorioAuxE);
+                actual.update();
                 load();
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Exito!", "Información Modificada"));
             } else {
@@ -439,18 +505,24 @@ public class MuestraLaboratorioController implements Serializable {
 
     Boolean controlDatos(MuestraLaboratorio u) {
         Boolean res = true;
-
-        if ((u.getCodigo().equals(""))  
+        if(u.getTipoMuestra().equals("PLANTECH")){
+            if ((u.getCodigo().equals(""))  
                 || u.getMatriz()==null 
                 || u.getCourier()==null 
-                || u.getLote()=="" 
-                || u.getCliente()==null
-                || u.getHacienda()==null 
-                || u.getCultivo()==null
-                || u.getCanton()==null 
+                || u.getIdSiembraCultivo()==null
                 || u.getDepartamento()==null) {
             res = false;
+            }
+        }else{
+            if ((u.getCodigo().equals(""))  
+                || u.getMatriz()==null 
+                || u.getCourier()==null                
+                || u.getDepartamento()==null) {
+            res = false;
+            }
+            
         }
+
         return res;
     }
 
@@ -473,12 +545,17 @@ public class MuestraLaboratorioController implements Serializable {
     }
 
     public void onClienteChange() {
-        if (actual.getCliente() != null) {
-            listaHacienda = Hacienda.getAllHaciendaByClienteId(actual.getCliente());
+        if (this.idCliente != null) {
+            this.idHacienda = null;
+            this.actual.setIdSiembraCultivo(null);
+            this.leyendaLotes = "";
+            
+            listaHacienda = Hacienda.getAllHaciendaByClienteId(this.idCliente);
+            listaSiembraCultivo = new ArrayList<>();
 
-            actual.setCanton(Cliente.getClienteById(actual.getCliente()).getCanton());
-            actual.setLeyendaCanton(Canton.getCantonById(Cliente.getClienteById(actual.getCliente()).getCanton()).getNombre() + " (" + Canton.getCantonById(Cliente.getClienteById(actual.getCliente()).getCanton()).getLeyendaPais() + ")");
-            actual.setTipoMuestra(Cliente.getClienteById(actual.getCliente()).getTipoCliente());
+            actual.setCanton(Cliente.getClienteById(this.idCliente).getCanton());
+            actual.setLeyendaCanton(Canton.getCantonById(Cliente.getClienteById(this.idCliente).getCanton()).getNombre() + " (" + Canton.getCantonById(Cliente.getClienteById(this.idCliente).getCanton()).getLeyendaPais() + ")");
+            actual.setTipoMuestra(Cliente.getClienteById(this.idCliente).getTipoCliente());
             
             if(actual.getTipoMuestra().equals("PLANTECH")){
                 this.renderDatosCliente = true;
@@ -486,15 +563,26 @@ public class MuestraLaboratorioController implements Serializable {
                 this.renderDatosCliente =false;
             }
         }
+        else{
+            listaHacienda = new ArrayList<>();
+            listaSiembraCultivo = new ArrayList<>();
+            this.leyendaLotes = "";
+        }
     }
 
     public void onClienteChangeSelected() {
-        if (selected.getCliente() != null) {
-            listaHacienda = Hacienda.getAllHaciendaByClienteId(selected.getCliente());
+        if (this.idCliente != null) {
+           
+            this.idHacienda = null;
+            this.selected.setIdSiembraCultivo(null);
+            this.leyendaLotes = "";
+            
+            listaHacienda = Hacienda.getAllHaciendaByClienteId(this.idCliente);
+            listaSiembraCultivo = new ArrayList<>();
 
-            selected.setCanton(Cliente.getClienteById(selected.getCliente()).getCanton());
-            selected.setLeyendaCanton(Canton.getCantonById(Cliente.getClienteById(selected.getCliente()).getCanton()).getNombre() + " (" + Canton.getCantonById(Cliente.getClienteById(selected.getCliente()).getCanton()).getLeyendaPais() + ")");
-            selected.setTipoMuestra(Cliente.getClienteById(selected.getCliente()).getTipoCliente());
+            selected.setCanton(Cliente.getClienteById(this.idCliente).getCanton());
+            selected.setLeyendaCanton(Canton.getCantonById(Cliente.getClienteById(this.idCliente).getCanton()).getNombre() + " (" + Canton.getCantonById(Cliente.getClienteById(this.idCliente).getCanton()).getLeyendaPais() + ")");
+            selected.setTipoMuestra(Cliente.getClienteById(this.idCliente).getTipoCliente());
             
             if(selected.getTipoMuestra().equals("PLANTECH")){
                 this.renderDatosCliente = true;
@@ -502,168 +590,180 @@ public class MuestraLaboratorioController implements Serializable {
                 this.renderDatosCliente =false;
             }
             
+        }else{
+            listaHacienda = new ArrayList<>();
+            listaSiembraCultivo = new ArrayList<>();
+            this.leyendaLotes = "";
         }
     }
 
     public void onHaciendaChange() {
-        if (actual.getHacienda() != null) {
-            listaLote = Hacienda.getHaciendaById(actual.getHacienda()).getListadoLotes();
+        if (this.idHacienda != null) {
+           
+            this.actual.setIdSiembraCultivo(null);
+            listaSiembraCultivo = SiembraCultivo.getAllByHacienda(idHacienda);
+            this.leyendaLotes = "";
+            
 
-            if (Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getNombre() != null) {
-                actual.setPersonaContacto(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getNombre() + " (" + Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getNombre() != null) {
-                actual.setPersonaContacto(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getNombre() + " (" + Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getNombre() != null) {
-                actual.setPersonaContacto(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getNombre() + " (" + Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getNombre() != null) {
-                actual.setPersonaContacto(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getNombre() + " (" + Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getCargo() + ")");
+            if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getNombre() != null) {
+                actual.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getNombre() != null) {
+                actual.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getNombre() != null) {
+                actual.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getNombre() != null) {
+                actual.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getCargo() + ")");
             }
 
             String mails = "";
-            if (!Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                int contHac = Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getEmail().size();
+                int contHac = Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().size();
                 for (int j = 0; j < contHac; j++) {
                     
-                    auxmail.append(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(0).getEmail().get(j)).append(";");
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                int contHac = Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getEmail().size();
+                int contHac = Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().size();
                 for (int j = 0; j <contHac ; j++) {
-                    auxmail.append(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(1).getEmail().get(j)).append(";");
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                int contHac =Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getEmail().size();
+                int contHac =Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().size();
                 for (int j = 0; j < contHac; j++) {
-                    auxmail.append(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(2).getEmail().get(j)).append(";");
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                int contHac =Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getEmail().size();
+                int contHac =Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().size();
                 for (int j = 0; j < contHac; j++) {
-                    auxmail.append(Hacienda.getHaciendaById(actual.getHacienda()).getContactos().get(3).getEmail().get(j)).append(";");
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
             actual.setEmailInforme(mails);
+        }else{
+             listaSiembraCultivo = new ArrayList<>();
+             this.leyendaLotes = "";
         }
     }
 
     public void onHaciendaChangeSelected() {
-        if (selected.getHacienda() != null) {           
-            listaLote = Hacienda.getHaciendaById(selected.getHacienda()).getListadoLotes();
-            if (Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getNombre() != null) {
-                selected.setPersonaContacto(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getNombre() + " (" + Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getNombre() != null) {
-                selected.setPersonaContacto(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getNombre() + " (" + Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getNombre() != null) {
-                selected.setPersonaContacto(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getNombre() + " (" + Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getCargo() + ")");
-            } else if (Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getNombre() != null) {
-                selected.setPersonaContacto(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getNombre() + " (" + Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getCargo() + ")");
+        if (this.idHacienda != null) {     
+            
+            this.selected.setIdSiembraCultivo(null);
+            listaSiembraCultivo = SiembraCultivo.getAllByHacienda(idHacienda);
+            this.leyendaLotes = "";
+            
+            if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getNombre() != null) {
+                selected.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getNombre() != null) {
+                selected.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getNombre() != null) {
+                selected.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getCargo() + ")");
+            } else if (Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getNombre() != null) {
+                selected.setPersonaContacto(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getNombre() + " (" + Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getCargo() + ")");
             }
 
             String mails = "";
-            if (!Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                for (int j = 0; j < Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getEmail().size(); j++) {
-                    auxmail.append(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(0).getEmail().get(j)).append(";");
+                for (int j = 0; j < Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().size(); j++) {
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(0).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                for (int j = 0; j < Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getEmail().size(); j++) {
-                    auxmail.append(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(1).getEmail().get(j)).append(";");
+                for (int j = 0; j < Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().size(); j++) {
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(1).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                for (int j = 0; j < Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getEmail().size(); j++) {
-                    auxmail.append(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(2).getEmail().get(j)).append(";");
+                for (int j = 0; j < Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().size(); j++) {
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(2).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
-            if (!Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getEmail().isEmpty()) {
+            if (!Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().isEmpty()) {
                 StringBuilder auxmail = new StringBuilder(75);
-                for (int j = 0; j < Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getEmail().size(); j++) {
-                    auxmail.append(Hacienda.getHaciendaById(selected.getHacienda()).getContactos().get(3).getEmail().get(j)).append(";");
+                for (int j = 0; j < Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().size(); j++) {
+                    auxmail.append(Hacienda.getHaciendaById(this.idHacienda).getContactos().get(3).getEmail().get(j)).append(";");
                 }
                 mails = mails + auxmail.toString();
             }
             selected.setEmailInforme(mails);
 
+        }else{
+             listaSiembraCultivo = new ArrayList<>();
+             this.leyendaLotes = "";
         }
     }
 
+    
+    public void onSiembraCultivoChage(){
+        if(this.actual.getIdSiembraCultivo()!=null){
+           
+            this.actual.setSiembraCultivo(SiembraCultivo.getById(this.actual.getIdSiembraCultivo()));
+            
+            int nn = this.actual.getSiembraCultivo().getListaLotesSiembra().size();
+            for (int i =0; i<nn; i++ ) {
+                leyendaLotes = leyendaLotes.concat(this.actual.getSiembraCultivo().getListaLotesSiembra().get(i).getLeyendaLote());
+            }
+        }else{
+            this.listaSiembraCultivo = new ArrayList<>();
+            this.leyendaLotes = "";
+        }
+    }
     HaciendaLoteCultivoAux getLoteCompleto(MuestraLaboratorio obj){
         HaciendaLoteCultivoAux res = null;
         
-        res = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.getHacienda()).getListadoLotes(), obj.getLote());
+        //res = Hacienda.getHaciendaLoteCultivoByIdLotes(Hacienda.getHaciendaById(obj.getHacienda()).getListadoLotes(), obj.getLote());
         return res;
     }
-    
-    /*EstacionMonitoreo getEstacionMonitoreoCompleto(HaciendaLoteCultivoAux obj, String codEstacion){
-        EstacionMonitoreo res = null;
-        
-        res = Hacienda.getPeriodoMonitoreoAuxByIdEstacionMonitoreo(obj.getListadoMonitoreo(), codEstacion);
-       
-        return res;
-    }*/
-    
+
     HaciendaLoteCultivoAux getEstacionMonitoreoCompleto(Hacienda obj, String codigoMayorEstacion){
         HaciendaLoteCultivoAux res = null;
         
-        res = Hacienda.getPeriodoMonitoreoAuxByIdEstacionCategoriaMayor(obj.getListadoLotes(), codigoMayorEstacion);
+        //res = Hacienda.getPeriodoMonitoreoAuxByIdEstacionCategoriaMayor(obj.getListadoLotes(), codigoMayorEstacion);
        
         return res;
     }
     
     public void onLoteChange() {
-        if (actual.getLote() != null) {
-            actual.setCultivo(getLoteCompleto(actual).getCultivo());
-            actual.setLeyendaCultivo(getLoteCompleto(actual).getLeyendaCultivo());
-            //this.listaEstacionMonitoreo = getLoteCompleto(actual).getListadoMonitoreo();
-            actual.setEstacionMonitoreo(getLoteCompleto(actual).getCodigoMayorEstacion());
-            
-            this.listaEstacionMonitoreo = getLoteCompleto(actual).getListaEstacionMonitoreo();           
-            this.listaPeriodoMonitoreo = getLoteCompleto(actual).getListaPeriodosMonitoreos();
-        }
+//        if (actual.getLote() != null) {
+//            actual.setCultivo(getLoteCompleto(actual).getCultivo());
+//            actual.setLeyendaCultivo(getLoteCompleto(actual).getLeyendaCultivo());          
+//            actual.setEstacionMonitoreo(getLoteCompleto(actual).getCodigoMayorEstacion());
+//            
+//            this.listaEstacionMonitoreo = getLoteCompleto(actual).getListaEstacionMonitoreo();           
+//            this.listaPeriodoMonitoreo = getLoteCompleto(actual).getListaPeriodosMonitoreos();
+//        }
     }
 
     public void onLoteChangeSelected() {
-        if (selected.getLote() != null) {
-            selected.setCultivo(getLoteCompleto(selected).getCultivo());
-            selected.setLeyendaCultivo(getLoteCompleto(selected).getLeyendaCultivo());
-            selected.setEstacionMonitoreo(getLoteCompleto(selected).getCodigoMayorEstacion());
-            //this.listaEstacionMonitoreo = getLoteCompleto(selected).getListadoMonitoreo();
-            
-            this.listaEstacionMonitoreo = getLoteCompleto(actual).getListaEstacionMonitoreo();
-            this.listaPeriodoMonitoreo = getLoteCompleto(actual).getListaPeriodosMonitoreos();
-        }
+//        if (selected.getLote() != null) {
+//            selected.setCultivo(getLoteCompleto(selected).getCultivo());
+//            selected.setLeyendaCultivo(getLoteCompleto(selected).getLeyendaCultivo());
+//            selected.setEstacionMonitoreo(getLoteCompleto(selected).getCodigoMayorEstacion());
+//            //this.listaEstacionMonitoreo = getLoteCompleto(selected).getListadoMonitoreo();
+//            
+//            this.listaEstacionMonitoreo = getLoteCompleto(actual).getListaEstacionMonitoreo();
+//            this.listaPeriodoMonitoreo = getLoteCompleto(actual).getListaPeriodosMonitoreos();
+//        }
     }
     
-    /*
-    public void onEstacionMonitoreoChange(){
-        if(!actual.getEstacionMonitoreo().equals("")){            
-            this.listaPeriodoMonitoreo = getEstacionMonitoreoCompleto(getLoteCompleto(actual), actual.getEstacionMonitoreo()).getListaPeriodosMonitoreos();
-        }
-    }
-    
-    public void onEstacionMonitoreoChangeSelected(){
-        if(!selected.getEstacionMonitoreo().equals("")){            
-            this.listaPeriodoMonitoreo = getEstacionMonitoreoCompleto(getLoteCompleto(selected), selected.getEstacionMonitoreo()).getListaPeriodosMonitoreos();
-        }
-    }
-    */
+
     public void onDepartamentoChange(){
         Calendar fecha = Calendar.getInstance();
         String pre = Departamento.getById(this.actual.getDepartamento()).getAbreviatura();
@@ -693,27 +793,40 @@ public class MuestraLaboratorioController implements Serializable {
 
     public void loadListasSelected() {
 
+        this.renderDatosCliente= false;
         this.listaCliente = Cliente.getAllClientes();
+        this.idCliente = actual.getCliente();
         
-        if(selected.getTipoMuestra().equals("PLANTECH")){
+        this.siembraCultivo = null;
+        this.idHacienda = null;
+        this.listaHacienda = new ArrayList<>();
+        this.listaSiembraCultivo = new ArrayList<>();
+        leyendaLotes = "";
+        
+        if(actual.getTipoMuestra().equals("PLANTECH")){
             this.renderDatosCliente= true;
-            this.listaHacienda = Hacienda.getAllHaciendaByClienteId(selected.getCliente());        
-            this.listaLote = Hacienda.getHaciendaById(selected.getHacienda()).getListadoLotes();
             
-            //this.listaEstacionMonitoreo = getLoteCompleto(selected).getListadoMonitoreo();
-            this.listaEstacionMonitoreo = getLoteCompleto(selected).getListaEstacionMonitoreo();
-            //this.listaPeriodoMonitoreo = getEstacionMonitoreoCompleto(getLoteCompleto(selected). , selected.getEstacionMonitoreo()).getListaPeriodosMonitoreos();
-            this.listaPeriodoMonitoreo = getLoteCompleto(selected).getListaPeriodosMonitoreos();
+            this.siembraCultivo = actual.getSiembraCultivo();
+            this.idHacienda = this.siembraCultivo.getIdHacienda();
+            
+            this.listaHacienda = Hacienda.getAllHaciendaByClienteId(this.idCliente);
+            this.listaSiembraCultivo = SiembraCultivo.getAllByHacienda(idHacienda);
+            this.actual.setSiembraCultivo(SiembraCultivo.getById(this.actual.getIdSiembraCultivo()));            
+            int nn = this.actual.getSiembraCultivo().getListaLotesSiembra().size();
+            for (int i =0; i<nn; i++ ) {
+                leyendaLotes = leyendaLotes.concat(this.actual.getSiembraCultivo().getListaLotesSiembra().get(i).getLeyendaLote());
+            }
+                                             
         }
         
         
         
         
-        this.listadoAnalisisLaboratorioAuxE = selected.getListadoSubanalisisAux();
-        this.listadoAnalisisLaboratorioAuxP = selected.getListadoPaquetesoAux();
+        this.listadoAnalisisLaboratorioAuxE = actual.getListadoSubanalisisAux();
+        this.listadoAnalisisLaboratorioAuxP = actual.getListadoPaquetesoAux();
 
         int tatE = 0;
-        List<Subanalisis> elementosSourceE = Subanalisis.getAllActivosByMatriz(selected.getMatriz());
+        List<Subanalisis> elementosSourceE = Subanalisis.getAllActivosByMatriz(actual.getMatriz());
         List<Subanalisis> elementosTargetE = new ArrayList<Subanalisis>();
         for (int i = 0; i < this.listadoAnalisisLaboratorioAuxE.size(); i++) {
             elementosTargetE.add(this.listadoAnalisisLaboratorioAuxE.get(i));
@@ -724,7 +837,7 @@ public class MuestraLaboratorioController implements Serializable {
         listadoElementos = new DualListModel<Subanalisis>(elementosSourceE, elementosTargetE);
 
         int tatP = 0;
-        List<AnalisisLaboratorio> elementosSourceP = AnalisisLaboratorio.getAllAnalisisActivoByMatriz(selected.getMatriz());
+        List<AnalisisLaboratorio> elementosSourceP = AnalisisLaboratorio.getAllAnalisisActivoByMatriz(actual.getMatriz());
         List<AnalisisLaboratorio> elementosTargetP = new ArrayList<AnalisisLaboratorio>();
         for (int i = 0; i < this.listadoAnalisisLaboratorioAuxP.size(); i++) {
             elementosTargetP.add(this.listadoAnalisisLaboratorioAuxP.get(i));
@@ -741,7 +854,7 @@ public class MuestraLaboratorioController implements Serializable {
         }
 
         Calendar cal = Calendar.getInstance();
-        cal.setTime(selected.getFechaEnvio());
+        cal.setTime(actual.getFechaEnvio());
         cal.add(Calendar.DATE, 3);
         this.fechaIngresoLab = cal.getTime();
 
@@ -749,11 +862,11 @@ public class MuestraLaboratorioController implements Serializable {
         cal.add(Calendar.DATE, this.tat);
         this.fechaRecepcionInf = cal.getTime();
 
-        this.matrizSelected = selected.getMatriz();
+        this.matrizSelected = actual.getMatriz();
 
     }
 
-    public void loadListaLaboratorio(int op) {
+    public void loadListaLaboratorio() {
 
         List<ObjectId> listaAuxId = new ArrayList<>();
        
@@ -807,12 +920,12 @@ public class MuestraLaboratorioController implements Serializable {
                 listadoAnalisisLaboratorioAuxE.add(obj);
             //}
         }
-        
-        if(op==1){
-            save();
-        }else{
-            update();
-        }
+//        
+//        if(op==1){
+//            save();
+//        }else{
+//            update();
+//        }
 
     }
 

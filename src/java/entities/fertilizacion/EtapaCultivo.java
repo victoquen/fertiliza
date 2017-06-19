@@ -8,6 +8,11 @@ package entities.fertilizacion;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
+import static com.mongodb.client.model.Filters.lte;
 import db.MongoManager;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -183,6 +188,31 @@ public class EtapaCultivo implements Serializable{
         return obj;
     }
     
+    public static EtapaCultivo getByDiasVariedad(Integer dias,ObjectId idvar) {
+        EtapaCultivo obj = new EtapaCultivo();
+
+        MongoManager mongo = MongoManager.getInstance();
+
+        FindIterable<Document> iterable = mongo.db.getCollection("edad").find(and(gte("diasInicio",dias),lt("diasFin",dias),eq("variedad",idvar)));
+
+        iterable.forEach(new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+
+                obj.id = (ObjectId) document.get("_id");               
+                obj.nombre = document.get("nombre").toString();  
+                obj.diasInicio = document.getInteger("diasInicio");
+                obj.diasFin = document.getInteger("diasFin");
+                obj.variedad = document.getObjectId("variedad");
+                obj.leyendaVariedad= Variedad.getVariedadById(obj.variedad).nombre;
+                obj.leyendaCultivo = Variedad.getVariedadById(obj.variedad).leyendaCultivo;
+            }            
+
+        });
+
+        return obj;
+    }
+    
     public static List<EtapaCultivo> getAllByVariedad(ObjectId id) {
         List<EtapaCultivo> res = new ArrayList<>();
 
@@ -212,7 +242,7 @@ public class EtapaCultivo implements Serializable{
         List<EtapaCultivo> res = new ArrayList<>();
 
         MongoManager mongo = MongoManager.getInstance();
-        FindIterable<Document> iterable = mongo.db.getCollection("edad").find().sort(new Document("_id", -1));       
+        FindIterable<Document> iterable = mongo.db.getCollection("edad").find().sort(new Document("variedad", 1).append("diasInicio", 1));       
         iterable.forEach(new Block<Document>() {
             @Override
             public void apply(final Document document) {
